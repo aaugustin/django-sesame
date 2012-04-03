@@ -16,13 +16,13 @@ class AuthenticationMiddleware(object):
         if user is None:
             return
 
-        if hasattr(request, 'session'):
-            # If the sessions framework is enabled and the token is valid,
-            # persist the login in session and let django.contrib.auth's
-            # middleware do the rest.
-            if user is not None:
-                login(request, user)
-        else:
-            # If the sessions framework isn't enabled, django.contrib.auth's
-            # middleware isn't either, so we have to create request.user.
+        # If the sessions framework is enabled and the token is valid,
+        # persist the login in session.
+        if hasattr(request, 'session') and user is not None:
+            login(request, user)
+
+        # If the authentication middleware isn't enabled, set request.user.
+        # (This attribute is overwritten by the authentication middleware
+        # if it runs after this one.)
+        if not hasattr(request, 'user'):
             request.user = user if user is not None else AnonymousUser()

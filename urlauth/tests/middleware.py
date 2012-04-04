@@ -1,4 +1,5 @@
 import logging
+from StringIO import StringIO
 
 from django.contrib.auth.models import User
 from django.test import TestCase
@@ -23,7 +24,8 @@ class AuthMiddlewareTestCase(TestCase):
         self.token = ModelBackend().create_token(self.user)
         self.bad_token = self.token.lower()
 
-        self.handler = logging.NullHandler()
+        self.log = StringIO()
+        self.handler = logging.StreamHandler(self.log)
         self.logger = logging.getLogger('urlauth')
         self.logger.addHandler(self.handler)
 

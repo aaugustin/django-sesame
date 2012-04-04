@@ -14,7 +14,7 @@ class TestModelBackend(TestCase):
         self.user = User.objects.create_user(username='john', password='doe')
 
         self.log = StringIO()
-        self.handler = logging.StreamHandler(stream=self.log)
+        self.handler = logging.StreamHandler(self.log)
         self.logger = logging.getLogger('urlauth')
         self.logger.addHandler(self.handler)
         self.logger.setLevel(logging.DEBUG)

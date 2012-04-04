@@ -1,0 +1,5 @@
+*.pyc
+.coverage
+dist
+htmlcov
+MANIFEST

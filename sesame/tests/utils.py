@@ -1,7 +1,7 @@
 from django.contrib.auth.models import User
 from django.test import TestCase
 
-from urlauth.utils import get_parameters, get_query_string
+from sesame.utils import get_parameters, get_query_string
 
 
 class TestUtils(TestCase):

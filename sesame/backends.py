@@ -7,7 +7,7 @@ from django.core import signing
 from django.utils import crypto
 
 
-logger = logging.getLogger('urlauth')
+logger = logging.getLogger('sesame')
 
 
 class UrlAuthBackendMixin(object):
@@ -17,7 +17,7 @@ class UrlAuthBackendMixin(object):
     and call `parse_token(token)` from its `authenticate(**credentials)`.
     """
 
-    signer = signing.Signer(salt='urlauth')
+    signer = signing.Signer(salt='sesame')
 
     def sign(self, data):
         """Create an URL-safe, signed token from `data`."""
@@ -34,7 +34,7 @@ class UrlAuthBackendMixin(object):
         # already, but we hash it again in case it isn't. We use MD5
         # to minimize the length of the token. (Remember, if an attacker
         # obtains the URL, he can already log in. This isn't high security.)
-        h = crypto.pbkdf2(user.password, 'urlauth', 10000, digest=hashlib.md5)
+        h = crypto.pbkdf2(user.password, 'sesame', 10000, digest=hashlib.md5)
         return self.sign(struct.pack('!i', user.pk) + h)
 
     def parse_token(self, token):
@@ -48,7 +48,7 @@ class UrlAuthBackendMixin(object):
         if user is None:
             logger.debug(u"Unknown token: %s", token)
             return
-        h = crypto.pbkdf2(user.password, 'urlauth', 10000, digest=hashlib.md5)
+        h = crypto.pbkdf2(user.password, 'sesame', 10000, digest=hashlib.md5)
         if not crypto.constant_time_compare(data[4:], h):
             logger.debug(u"Expired token: %s", token)
             return

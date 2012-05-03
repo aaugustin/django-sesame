@@ -9,12 +9,12 @@ DATABASES = {
 INSTALLED_APPS = (
     'django.contrib.auth',
     'django.contrib.contenttypes',
-    'urlauth',
+    'sesame',
 )
 
 LOGGING_CONFIG = None
 
-ROOT_URLCONF = 'urlauth.tests.urls'
+ROOT_URLCONF = 'sesame.tests.urls'
 
 SECRET_KEY = 'Anyone who finds an URL will be able to log in. Seriously.'
 

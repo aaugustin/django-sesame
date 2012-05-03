@@ -4,7 +4,7 @@ from StringIO import StringIO
 from django.contrib.auth.models import User
 from django.test import TestCase
 
-from urlauth.backends import ModelBackend
+from sesame.backends import ModelBackend
 
 
 class TestModelBackend(TestCase):
@@ -15,7 +15,7 @@ class TestModelBackend(TestCase):
 
         self.log = StringIO()
         self.handler = logging.StreamHandler(self.log)
-        self.logger = logging.getLogger('urlauth')
+        self.logger = logging.getLogger('sesame')
         self.logger.addHandler(self.handler)
         self.logger.setLevel(logging.DEBUG)
 

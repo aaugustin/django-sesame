@@ -1,11 +1,11 @@
 test:
-	DJANGO_SETTINGS_MODULE=urlauth.tests.settings \
-	django-admin.py test urlauth
+	DJANGO_SETTINGS_MODULE=sesame.tests.settings \
+	django-admin.py test sesame
 
 coverage:
 	coverage erase
-	DJANGO_SETTINGS_MODULE=urlauth.tests.settings \
-	coverage run --branch --source=urlauth `which django-admin.py` test urlauth
+	DJANGO_SETTINGS_MODULE=sesame.tests.settings \
+	coverage run --branch --source=sesame `which django-admin.py` test sesame
 	coverage html
 
 clean:

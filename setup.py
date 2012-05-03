@@ -11,17 +11,17 @@ with open(os.path.join(os.path.dirname(__file__), 'README')) as f:
     long_description = '\n\n'.join(f.read().split('\n\n')[2:8])
 
 distutils.core.setup(
-    name='django-urlauth',
+    name='django-sesame',
     version='0.1',
     author='Aymeric Augustin',
     author_email='aymeric.augustin@m4x.org',
-    url='https://github.com/aaugustin/django-urlauth',
+    url='https://github.com/aaugustin/django-sesame',
     description=description,
     long_description=long_description,
-    download_url='http://pypi.python.org/pypi/django-urlauth',
+    download_url='http://pypi.python.org/pypi/django-sesame',
     packages=[
-        'urlauth',
-        'urlauth.tests',
+        'sesame',
+        'sesame.tests',
     ],
     classifiers=[
         "Development Status :: 3 - Alpha",

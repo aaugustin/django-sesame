@@ -5,13 +5,13 @@ from django.contrib.auth.models import User
 from django.test import TestCase
 from django.test.utils import override_settings
 
-from urlauth.backends import ModelBackend
+from sesame.backends import ModelBackend
 
 
 @override_settings(
     AUTHENTICATION_BACKENDS=(
         'django.contrib.auth.backends.ModelBackend',
-        'urlauth.backends.ModelBackend',
+        'sesame.backends.ModelBackend',
     ),
     TEMPLATE_CONTEXT_PROCESSORS=(
         'django.contrib.auth.context_processors.auth',
@@ -26,7 +26,7 @@ class AuthMiddlewareTestCase(TestCase):
 
         self.log = StringIO()
         self.handler = logging.StreamHandler(self.log)
-        self.logger = logging.getLogger('urlauth')
+        self.logger = logging.getLogger('sesame')
         self.logger.addHandler(self.handler)
 
     def tearDown(self):
@@ -49,7 +49,7 @@ class AuthMiddlewareTestCase(TestCase):
     MIDDLEWARE_CLASSES=(
         'django.contrib.sessions.middleware.SessionMiddleware',
         'django.contrib.auth.middleware.AuthenticationMiddleware',
-        'urlauth.middleware.AuthenticationMiddleware',
+        'sesame.middleware.AuthenticationMiddleware',
     ),
 )
 class TestAfterAuthMiddleware(AuthMiddlewareTestCase):
@@ -59,7 +59,7 @@ class TestAfterAuthMiddleware(AuthMiddlewareTestCase):
 @override_settings(
     MIDDLEWARE_CLASSES=(
         'django.contrib.sessions.middleware.SessionMiddleware',
-        'urlauth.middleware.AuthenticationMiddleware',
+        'sesame.middleware.AuthenticationMiddleware',
         'django.contrib.auth.middleware.AuthenticationMiddleware',
     ),
 )
@@ -70,7 +70,7 @@ class TestBeforeAuthMiddleware(AuthMiddlewareTestCase):
 @override_settings(
     MIDDLEWARE_CLASSES=(
         'django.contrib.sessions.middleware.SessionMiddleware',
-        'urlauth.middleware.AuthenticationMiddleware',
+        'sesame.middleware.AuthenticationMiddleware',
     ),
 )
 class TestWithoutAuthMiddleware(AuthMiddlewareTestCase):
@@ -79,7 +79,7 @@ class TestWithoutAuthMiddleware(AuthMiddlewareTestCase):
 
 @override_settings(
     MIDDLEWARE_CLASSES=(
-        'urlauth.middleware.AuthenticationMiddleware',
+        'sesame.middleware.AuthenticationMiddleware',
     ),
 )
 class TestWithoutSessionMiddleware(AuthMiddlewareTestCase):

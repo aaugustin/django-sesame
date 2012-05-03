@@ -1,2 +1,70 @@
 README
 ######
+
+Introduction
+============
+
+`django-urlauth`_ provides one-click login for your Django project. It uses
+specially crafted URLs containing an authentication token, for example:
+http://example.com/?url_auth_token=AAAAARchl18CIQUlImmbV9q7PZk%3A89AEU34b0JLSrkT8Ty2RPISio5
+
+It's useful if you want to share private content without requiring your visitors
+to remember a username and a password.
+
+django-urlauth requires Django >= 1.4 and ``django.contrib.auth``.
+
+It uses ``django.contrib.session`` when it's available, but it also supports
+stateless authenticated navigation, provided all links in the page include the
+authentication token.
+
+django-urlauth is released under the BSD license, like Django itself.
+
+.. _django-urlauth: https://github.com/aaugustin/django-urlauth
+
+A few words about security
+==========================
+
+**Before using django-urlauth in your project, you should review the following
+advice carefully.**
+
+The major security weakness in django-urlauth is a direct consequence of the
+feature it implements: **whoever obtains an authentication token will be able to
+log in to your website.** URLs end up in countless insecure places: browser
+history, proxy logs, etc. You can't avoid that. So use django-urlauth only for
+mundane things, like photos from your holidays. If a data leak would seriously
+affect you, don't use this software. You have been warned.
+
+Otherwise, a reasonable attempt has been made to provide a secure solution.
+django-urlauth uses Django's signing framework to create signed tokens.
+
+Tokens are linked to the primary key of the ``User`` object and they never
+expire. However changing the user's password invalidates his token. Provided
+your authentication backend uses salted passwords — I hope it does — the token
+is invalidated even if the new password is identical to the old one.
+
+If you want a more advanced logic, like timed expiration, you should subclass
+``urlauth.backends.ModelBackend``.
+
+How to
+======
+
+1.  Add ``urlauth.backends.ModelBackend`` to ``AUTHENTICATION_BACKENDS``::
+
+        AUTHENTICATION_BACKENDS += 'urlauth.backends.ModelBackend',
+
+2.  Add ``urlauth.middleware.AuthenticationMiddleware`` to ``MIDDLEWARE_CLASSES``::
+
+        MIDDLEWARE_CLASSES += 'urlauth.middleware.AuthenticationMiddleware',
+
+3. Generate authentication tokens with ``urlauth.utils.get_query_string(user)``.
+
+That's all!
+
+Utilities
+=========
+
+``urlauth.utils`` provides two simple functions to generate authentication
+tokens. ``get_query_string(user)`` returns a complete query string that you can
+append to any URL to enable one-click login. If you already have a query string,
+``get_parameters(user)`` returns a dictionary of additional GET parameters to
+include.

@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 import hashlib
 import logging
 import struct
@@ -21,11 +23,11 @@ class UrlAuthBackendMixin(object):
 
     def sign(self, data):
         """Create an URL-safe, signed token from `data`."""
-        return self.signer.sign(unicode(signing.b64_encode(data), 'ascii'))
+        return self.signer.sign(signing.b64_encode(data).decode())
 
     def unsign(self, token):
         """Extract the data from a signed `token`."""
-        return signing.b64_decode(self.signer.unsign(token).encode('ascii'))
+        return signing.b64_decode(self.signer.unsign(token).encode())
 
     def create_token(self, user):
         """Create a signed token from an `auth.User`."""
@@ -35,24 +37,24 @@ class UrlAuthBackendMixin(object):
         # to minimize the length of the token. (Remember, if an attacker
         # obtains the URL, he can already log in. This isn't high security.)
         h = crypto.pbkdf2(user.password, 'sesame', 10000, digest=hashlib.md5)
-        return self.sign(struct.pack('!i', user.pk) + h)
+        return self.sign(struct.pack(str('!i'), user.pk) + h)
 
     def parse_token(self, token):
         """Obtain an `auth.User` from a signed token."""
         try:
             data = self.unsign(token)
         except signing.BadSignature:
-            logger.debug(u"Invalid token: %s", token)
+            logger.debug("Invalid token: %s", token)
             return
-        user = self.get_user(*struct.unpack('!i', data[:4]))
+        user = self.get_user(*struct.unpack(str('!i'), data[:4]))
         if user is None:
-            logger.debug(u"Unknown token: %s", token)
+            logger.debug("Unknown token: %s", token)
             return
         h = crypto.pbkdf2(user.password, 'sesame', 10000, digest=hashlib.md5)
         if not crypto.constant_time_compare(data[4:], h):
-            logger.debug(u"Expired token: %s", token)
+            logger.debug("Expired token: %s", token)
             return
-        logger.debug(u"Valid token for user %s: %s", user, token)
+        logger.debug("Valid token for user %s: %s", user, token)
         return user
 
 
@@ -64,7 +66,7 @@ class ModelBackend(UrlAuthBackendMixin, auth_backends.ModelBackend):
         try:
             return self.parse_token(url_auth_token)
         except TypeError:
-            backend = u"%s.%s" % (self.__module__, self.__class__.__name__)
-            logger.exception(u"TypeError in %s, here's the traceback before "
-                             u"Django swallows it:", backend)
+            backend = "%s.%s" % (self.__module__, self.__class__.__name__)
+            logger.exception("TypeError in %s, here's the traceback before "
+                             "Django swallows it:", backend)
             raise

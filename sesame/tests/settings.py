@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 CACHES = {
     'default': {'BACKEND': 'django.core.cache.backends.locmem.LocMemCache'},
 }

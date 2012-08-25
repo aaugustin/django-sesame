@@ -1,5 +1,7 @@
+from __future__ import unicode_literals
+
+import io
 import logging
-from StringIO import StringIO
 
 from django.contrib.auth.models import User
 from django.test import TestCase
@@ -13,7 +15,7 @@ class TestModelBackend(TestCase):
         self.backend = ModelBackend()
         self.user = User.objects.create_user(username='john', password='doe')
 
-        self.log = StringIO()
+        self.log = io.StringIO()
         self.handler = logging.StreamHandler(self.log)
         self.logger = logging.getLogger('sesame')
         self.logger.addHandler(self.handler)
@@ -35,20 +37,20 @@ class TestModelBackend(TestCase):
         token = self.backend.create_token(self.user)
         user = self.backend.parse_token(token)
         self.assertEqual(user, self.user)
-        self.assertIn(u"Valid token for user john", self.get_log())
+        self.assertIn("Valid token for user john", self.get_log())
 
     def test_invalid_token(self):
         token = self.backend.create_token(self.user)
         user = self.backend.parse_token(token.lower())
         self.assertEqual(user, None)
-        self.assertIn(u"Invalid token", self.get_log())
+        self.assertIn("Invalid token", self.get_log())
 
     def test_unknown_token(self):
         token = self.backend.create_token(self.user)
         self.user.delete()
         user = self.backend.parse_token(token)
         self.assertEqual(user, None)
-        self.assertIn(u"Unknown token", self.get_log())
+        self.assertIn("Unknown token", self.get_log())
 
     def test_expired_token(self):
         token = self.backend.create_token(self.user)
@@ -56,7 +58,7 @@ class TestModelBackend(TestCase):
         self.user.save()
         user = self.backend.parse_token(token)
         self.assertEqual(user, None)
-        self.assertIn(u"Expired token", self.get_log())
+        self.assertIn("Expired token", self.get_log())
 
     def test_type_error_is_logged(self):
         def raise_type_error(*args):
@@ -64,4 +66,4 @@ class TestModelBackend(TestCase):
         self.backend.parse_token = raise_type_error
         with self.assertRaises(TypeError):
             self.backend.authenticate(None)
-        self.assertIn(u"TypeError", self.get_log())
+        self.assertIn("TypeError", self.get_log())

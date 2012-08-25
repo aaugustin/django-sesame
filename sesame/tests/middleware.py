@@ -1,5 +1,7 @@
+from __future__ import unicode_literals
+
+import io
 import logging
-from StringIO import StringIO
 
 from django.contrib.auth.models import User
 from django.test import TestCase
@@ -24,7 +26,7 @@ class AuthMiddlewareTestCase(TestCase):
         self.token = ModelBackend().create_token(self.user)
         self.bad_token = self.token.lower()
 
-        self.log = StringIO()
+        self.log = io.StringIO()
         self.handler = logging.StreamHandler(self.log)
         self.logger = logging.getLogger('sesame')
         self.logger.addHandler(self.handler)
@@ -34,15 +36,15 @@ class AuthMiddlewareTestCase(TestCase):
 
     def test_token(self):
         response = self.client.get('/', {'url_auth_token': self.token})
-        self.assertEqual(response.content, 'john')
+        self.assertEqual(response.content, b'john')
 
     def test_bad_token(self):
         response = self.client.get('/', {'url_auth_token': self.bad_token})
-        self.assertEqual(response.content, 'anonymous')
+        self.assertEqual(response.content, b'anonymous')
 
     def test_no_token(self):
         response = self.client.get('/')
-        self.assertEqual(response.content, 'anonymous')
+        self.assertEqual(response.content, b'anonymous')
 
 
 @override_settings(

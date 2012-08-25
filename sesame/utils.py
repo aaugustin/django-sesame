@@ -1,4 +1,9 @@
-import urllib
+from __future__ import unicode_literals
+
+try:
+    from urllib.parse import urlencode
+except ImportError:
+    from urllib import urlencode
 
 from .backends import UrlAuthBackendMixin
 from .middleware import TOKEN_FIELD_NAME
@@ -11,4 +16,4 @@ def get_parameters(user):
 
 def get_query_string(user):
     """Return a complete query string to log in `user`."""
-    return '?' + urllib.urlencode(get_parameters(user))
+    return '?' + urlencode(get_parameters(user))

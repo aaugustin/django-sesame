@@ -1,5 +1,5 @@
-README
-######
+django-sesame
+#############
 
 Introduction
 ============

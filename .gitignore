@@ -1,5 +1,6 @@
 *.pyc
 .coverage
 dist
+docs/_build
 htmlcov
 MANIFEST

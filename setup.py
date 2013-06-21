@@ -12,7 +12,7 @@ with open(os.path.join(os.path.dirname(__file__), 'README')) as f:
 
 distutils.core.setup(
     name='django-sesame',
-    version='0.1',
+    version='1.0',
     author='Aymeric Augustin',
     author_email='aymeric.augustin@m4x.org',
     url='https://github.com/aaugustin/django-sesame',
@@ -24,7 +24,7 @@ distutils.core.setup(
         'sesame.tests',
     ],
     classifiers=[
-        "Development Status :: 4 - Beta",
+        "Development Status :: 5 - Stable",
         "Environment :: Web Environment",
         "Framework :: Django",
         "Intended Audience :: Developers",

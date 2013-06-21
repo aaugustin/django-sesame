@@ -1,5 +1,6 @@
 *.pyc
 .coverage
+.tox
 dist
 docs/_build
 htmlcov

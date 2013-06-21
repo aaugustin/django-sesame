@@ -11,11 +11,13 @@ http://example.com/?url_auth_token=AAAAARchl18CIQUlImmbV9q7PZk%3A89AEU34b0JLSrkT
 It's useful if you want to share private content without requiring your visitors
 to remember a username and a password.
 
-django-sesame requires Django >= 1.4 and ``django.contrib.auth``.
 
-It uses ``django.contrib.session`` when it's available, but it also supports
-stateless authenticated navigation, provided all links in the page include the
-authentication token.
+django-resto requires Python 2.6, 2.7, 3.2 or 3.3. It works with Django 1.4 or
+1.5.
+
+It's tied to ``django.contrib.auth``. It uses ``django.contrib.session`` when
+it's available, but it also supports stateless authenticated navigation,
+provided all links in the page include the authentication token.
 
 django-sesame is released under the BSD license, like Django itself.
 

@@ -7,7 +7,7 @@ os.putenv('COPYFILE_DISABLE', 'true')
 description = ('URL-based authentication, an application that provides '
                'one-click login via specially crafted URLs')
 
-with open(os.path.join(os.path.dirname(__file__), 'README')) as f:
+with open(os.path.join(os.path.dirname(__file__), 'README.rst')) as f:
     long_description = '\n\n'.join(f.read().split('\n\n')[2:8])
 
 distutils.core.setup(

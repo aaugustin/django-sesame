@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 from django.contrib.auth.models import User
 from django.test import TestCase
 
-from sesame.utils import get_parameters, get_query_string
+from .utils import get_parameters, get_query_string
 
 
 class TestUtils(TestCase):

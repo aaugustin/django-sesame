@@ -7,7 +7,7 @@ from django.contrib.auth.models import User
 from django.test import TestCase
 from django.test.utils import override_settings
 
-from sesame.backends import ModelBackend
+from .backends import ModelBackend
 
 
 @override_settings(
@@ -18,8 +18,13 @@ from sesame.backends import ModelBackend
     TEMPLATE_CONTEXT_PROCESSORS=(
         'django.contrib.auth.context_processors.auth',
     ),
+    MIDDLEWARE_CLASSES=(
+        'django.contrib.sessions.middleware.SessionMiddleware',
+        'django.contrib.auth.middleware.AuthenticationMiddleware',
+        'sesame.middleware.AuthenticationMiddleware',
+    ),
 )
-class AuthMiddlewareTestCase(TestCase):
+class TestAfterAuthMiddleware(TestCase):
 
     def setUp(self):
         self.user = User.objects.create_user(username='john', password='doe')
@@ -50,22 +55,11 @@ class AuthMiddlewareTestCase(TestCase):
 @override_settings(
     MIDDLEWARE_CLASSES=(
         'django.contrib.sessions.middleware.SessionMiddleware',
-        'django.contrib.auth.middleware.AuthenticationMiddleware',
-        'sesame.middleware.AuthenticationMiddleware',
-    ),
-)
-class TestAfterAuthMiddleware(AuthMiddlewareTestCase):
-    pass
-
-
-@override_settings(
-    MIDDLEWARE_CLASSES=(
-        'django.contrib.sessions.middleware.SessionMiddleware',
         'sesame.middleware.AuthenticationMiddleware',
         'django.contrib.auth.middleware.AuthenticationMiddleware',
     ),
 )
-class TestBeforeAuthMiddleware(AuthMiddlewareTestCase):
+class TestBeforeAuthMiddleware(TestAfterAuthMiddleware):
     pass
 
 
@@ -75,7 +69,7 @@ class TestBeforeAuthMiddleware(AuthMiddlewareTestCase):
         'sesame.middleware.AuthenticationMiddleware',
     ),
 )
-class TestWithoutAuthMiddleware(AuthMiddlewareTestCase):
+class TestWithoutAuthMiddleware(TestAfterAuthMiddleware):
     pass
 
 
@@ -84,5 +78,5 @@ class TestWithoutAuthMiddleware(AuthMiddlewareTestCase):
         'sesame.middleware.AuthenticationMiddleware',
     ),
 )
-class TestWithoutSessionMiddleware(AuthMiddlewareTestCase):
+class TestWithoutSessionMiddleware(TestAfterAuthMiddleware):
     pass

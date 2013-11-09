@@ -1,12 +1,11 @@
+export PYTHONPATH:=.:$(PYTHONPATH)
+export DJANGO_SETTINGS_MODULE:=sesame.test_settings
+
 test:
-	PYTHONPATH=.:$(PYTHONPATH) \
-	DJANGO_SETTINGS_MODULE=sesame.tests.settings \
-	django-admin.py test sesame --traceback
+	django-admin.py test sesame
 
 coverage:
 	coverage erase
-	PYTHONPATH=.:$(PYTHONPATH) \
-	DJANGO_SETTINGS_MODULE=sesame.tests.settings \
 	coverage run --branch --source=sesame `which django-admin.py` test sesame
 	coverage html
 

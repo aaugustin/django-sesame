@@ -26,7 +26,6 @@ distutils.core.setup(
     download_url='http://pypi.python.org/pypi/django-sesame',
     packages=[
         'sesame',
-        'sesame.tests',
     ],
     classifiers=[
         "Development Status :: 5 - Stable",

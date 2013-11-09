@@ -16,7 +16,7 @@ INSTALLED_APPS = (
 
 LOGGING_CONFIG = None
 
-ROOT_URLCONF = 'sesame.tests.urls'
+ROOT_URLCONF = 'sesame.test_urls'
 
 SECRET_KEY = 'Anyone who finds an URL will be able to log in. Seriously.'
 

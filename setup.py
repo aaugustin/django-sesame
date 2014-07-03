@@ -28,7 +28,7 @@ distutils.core.setup(
         'sesame',
     ],
     classifiers=[
-        "Development Status :: 5 - Stable",
+        "Development Status :: 5 - Production/Stable",
         "Environment :: Web Environment",
         "Framework :: Django",
         "Intended Audience :: Developers",
@@ -41,6 +41,7 @@ distutils.core.setup(
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.2",
         "Programming Language :: Python :: 3.3",
+        "Programming Language :: Python :: 3.4",
     ],
     platforms='all',
     license='BSD'

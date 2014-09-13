@@ -8,11 +8,16 @@ DATABASES = {
     'default': {'ENGINE': 'django.db.backends.sqlite3'},
 }
 
-INSTALLED_APPS = (
+INSTALLED_APPS = [
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'sesame',
-)
+]
+
+MIDDLEWARE_CLASSES = [
+    'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
+]
 
 LOGGING_CONFIG = None
 

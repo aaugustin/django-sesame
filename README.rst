@@ -11,8 +11,10 @@ http://example.com/?url_auth_token=AAAAARchl18CIQUlImmbV9q7PZk%3A89AEU34b0JLSrkT
 It's useful if you want to share private content without requiring your visitors
 to remember a username and a password.
 
-django-sesame works with Django 1.4 or later, and with any supported Python
-version except 2.5.
+django-sesame is tested with:
+
+- Django 1.4 (LTS), 1.6 and 1.7,
+- all supported Python versions (except Python 2.5 for Django 1.4).
 
 It's tied to ``django.contrib.auth``. It uses ``django.contrib.session`` when
 it's available, but it also supports stateless authenticated navigation,

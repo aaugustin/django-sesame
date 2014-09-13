@@ -44,13 +44,15 @@ affect you, don't use this software. You have been warned.
 Otherwise, a reasonable attempt has been made to provide a secure solution.
 django-sesame uses Django's signing framework to create signed tokens.
 
-Tokens are linked to the primary key of the ``User`` object and they never
-expire. However changing the user's password invalidates his token. Provided
-your authentication backend uses salted passwords — I hope it does — the token
-is invalidated even if the new password is identical to the old one.
+Tokens are linked to the primary key and the password of the ``User``.
+Changing the password invalidates the token. Provided your authentication
+backend uses salted passwords — I hope it does — the token is invalidated even
+if the new password is identical to the old one.
 
-If you want a more advanced logic, like timed expiration, you should subclass
-``sesame.backends.ModelBackend``.
+By default, tokens never expire. If you want them to expire after a given
+amount of time, set the ``SESAME_MAX_AGE`` setting to a duration in seconds.
+Then each token will contain the time it was generated at and django-sesame
+will check if it's still valid at each login attempt.
 
 How to
 ======

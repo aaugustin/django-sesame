@@ -4,6 +4,7 @@ import hashlib
 import logging
 import struct
 
+from django.conf import settings
 from django.contrib.auth import backends as auth_backends
 from django.core import signing
 from django.utils import crypto
@@ -19,40 +20,61 @@ class UrlAuthBackendMixin(object):
     and call `parse_token(token)` from its `authenticate(**credentials)`.
     """
 
-    signer = signing.Signer(salt='sesame')
+    salt = getattr(settings, 'SESAME_SALT', 'sesame')
+    digest = getattr(settings, 'SESAME_DIGEST', hashlib.md5)
+    iterations = getattr(settings, 'SESAME_ITERATIONS', 10000)
+
+    max_age = getattr(settings, 'SESAME_MAX_AGE', None)
+
+    @property
+    def signer(self):
+        if self.max_age is None:
+            return signing.Signer(salt=self.salt)
+        else:
+            return signing.TimestampSigner(salt=self.salt)
 
     def sign(self, data):
         """Create an URL-safe, signed token from `data`."""
-        return self.signer.sign(signing.b64_encode(data).decode())
+        data = signing.b64_encode(data).decode()
+        return self.signer.sign(data)
 
     def unsign(self, token):
         """Extract the data from a signed `token`."""
-        return signing.b64_decode(self.signer.unsign(token).encode())
+        if self.max_age is None:
+            data = self.signer.unsign(token)
+        else:
+            data = self.signer.unsign(token, max_age=self.max_age)
+        return signing.b64_decode(data.encode())
 
     def create_token(self, user):
         """Create a signed token from an `auth.User`."""
         # Include a hash derived from the password so changing the password
         # revokes the token. Usually, user.password will be a secure hash
-        # already, but we hash it again in case it isn't. We use MD5
+        # already, but we hash it again in case it isn't. We default to MD5
         # to minimize the length of the token. (Remember, if an attacker
         # obtains the URL, he can already log in. This isn't high security.)
-        h = crypto.pbkdf2(user.password, 'sesame', 10000, digest=hashlib.md5)
+        h = crypto.pbkdf2(
+            user.password, self.salt, self.iterations, digest=self.digest)
         return self.sign(struct.pack(str('!i'), user.pk) + h)
 
     def parse_token(self, token):
         """Obtain an `auth.User` from a signed token."""
         try:
             data = self.unsign(token)
+        except signing.SignatureExpired:
+            logger.debug("Expired token: %s", token)
+            return
         except signing.BadSignature:
-            logger.debug("Invalid token: %s", token)
+            logger.debug("Bad token: %s", token)
             return
         user = self.get_user(*struct.unpack(str('!i'), data[:4]))
         if user is None:
             logger.debug("Unknown token: %s", token)
             return
-        h = crypto.pbkdf2(user.password, 'sesame', 10000, digest=hashlib.md5)
+        h = crypto.pbkdf2(
+            user.password, self.salt, self.iterations, digest=self.digest)
         if not crypto.constant_time_compare(data[4:], h):
-            logger.debug("Expired token: %s", token)
+            logger.debug("Invalid token: %s", token)
             return
         logger.debug("Valid token for user %s: %s", user, token)
         return user

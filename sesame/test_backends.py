@@ -39,11 +39,11 @@ class TestModelBackend(TestCase):
         self.assertEqual(user, self.user)
         self.assertIn("Valid token for user john", self.get_log())
 
-    def test_invalid_token(self):
+    def test_bad_token(self):
         token = self.backend.create_token(self.user)
         user = self.backend.parse_token(token.lower())
         self.assertEqual(user, None)
-        self.assertIn("Invalid token", self.get_log())
+        self.assertIn("Bad token", self.get_log())
 
     def test_unknown_token(self):
         token = self.backend.create_token(self.user)
@@ -52,13 +52,13 @@ class TestModelBackend(TestCase):
         self.assertEqual(user, None)
         self.assertIn("Unknown token", self.get_log())
 
-    def test_expired_token(self):
+    def test_invalid_token(self):
         token = self.backend.create_token(self.user)
         self.user.set_password('hunter2')
         self.user.save()
         user = self.backend.parse_token(token)
         self.assertEqual(user, None)
-        self.assertIn("Expired token", self.get_log())
+        self.assertIn("Invalid token", self.get_log())
 
     def test_type_error_is_logged(self):
         def raise_type_error(*args):
@@ -67,3 +67,18 @@ class TestModelBackend(TestCase):
         with self.assertRaises(TypeError):
             self.backend.authenticate(None)
         self.assertIn("TypeError", self.get_log())
+
+
+class TestModelBackendWithExpiry(TestModelBackend):
+
+    def setUp(self):
+        super(TestModelBackendWithExpiry, self).setUp()
+        self.backend.max_age = 10                   # override class variable
+
+    def test_expired_token(self):
+        self.backend.max_age = -10                  # just for this test
+
+        token = self.backend.create_token(self.user)
+        user = self.backend.parse_token(token)
+        self.assertEqual(user, None)
+        self.assertIn("Expired token", self.get_log())

@@ -14,12 +14,12 @@ INSTALLED_APPS = [
     'sesame',
 ]
 
+LOGGING_CONFIG = None
+
 MIDDLEWARE_CLASSES = [
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
 ]
-
-LOGGING_CONFIG = None
 
 ROOT_URLCONF = 'sesame.test_urls'
 

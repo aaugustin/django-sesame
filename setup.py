@@ -17,7 +17,7 @@ with open(README) as f:
 
 distutils.core.setup(
     name='django-sesame',
-    version='1.0',
+    version='1.1',
     author='Aymeric Augustin',
     author_email='aymeric.augustin@m4x.org',
     url='https://github.com/aaugustin/django-sesame',

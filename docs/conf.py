@@ -40,8 +40,8 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'django-sesame'
-copyright = u'2013, Aymeric Augustin'
+project = 'django-sesame'
+copyright = '2013-2014, Aymeric Augustin'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -183,8 +183,8 @@ latex_elements = {
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
-  ('index', 'django-sesame.tex', u'django-sesame Documentation',
-   u'Aymeric Augustin', 'manual'),
+  ('index', 'django-sesame.tex', 'django-sesame Documentation',
+   'Aymeric Augustin', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
@@ -213,8 +213,8 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ('index', 'django-sesame', u'django-sesame Documentation',
-     [u'Aymeric Augustin'], 1)
+    ('index', 'django-sesame', 'django-sesame Documentation',
+     ['Aymeric Augustin'], 1)
 ]
 
 # If true, show URL addresses after external links.
@@ -227,8 +227,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-  ('index', 'django-sesame', u'django-sesame Documentation',
-   u'Aymeric Augustin', 'django-sesame', 'One line description of project.',
+  ('index', 'django-sesame', 'django-sesame Documentation',
+   'Aymeric Augustin', 'django-sesame', 'One line description of project.',
    'Miscellaneous'),
 ]
 

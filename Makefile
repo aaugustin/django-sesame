@@ -5,9 +5,9 @@ test:
 	django-admin.py test sesame
 
 coverage:
-	coverage erase
-	coverage run --branch --source=sesame `which django-admin.py` test sesame
-	coverage html
+	python -m coverage erase
+	python -m coverage run --branch --source=sesame `which django-admin.py` test sesame
+	python -m coverage html
 
 clean:
 	find . -name '*.pyc' -delete

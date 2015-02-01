@@ -14,7 +14,7 @@ authentication process involving a third-party.
 
 django-sesame is tested with:
 
-- Django 1.4 (LTS), 1.6 and 1.7,
+- Django 1.4 (LTS), 1.7, and 1.8 (LTS),
 - all supported Python versions (except Python 2.5 for Django 1.4).
 
 It requires ``django.contrib.auth``. It uses ``django.contrib.session`` when

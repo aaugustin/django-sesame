@@ -6,7 +6,7 @@ Introduction
 
 `django-sesame`_ provides one-click login for your Django project. It uses
 specially crafted URLs containing an authentication token, for example:
-http://example.com/?url_auth_token=AAAAARchl18CIQUlImmbV9q7PZk%3A89AEU34b0JLSrkT8Ty2RPISio5
+https://example.com/?url_auth_token=AAAAARchl18CIQUlImmbV9q7PZk%3A89AEU34b0JLSrkT8Ty2RPISio5
 
 It's useful if you want to share private content without requiring your
 visitors to remember a username and a password or to go through an
@@ -22,7 +22,7 @@ It uses ``django.contrib.session`` when it's available.
 
 Technically, django-sesame can provide stateless authenticated navigation
 without ``django.contrib.sessions``, provided all internal links include the
-authentication token. But that increases the security issues explained below.
+authentication token, but that increases the security issues explained below.
 
 django-sesame is released under the BSD license, like Django itself.
 
@@ -35,19 +35,21 @@ A few words about security
 advice carefully.**
 
 The major security weakness in django-sesame is a direct consequence of the
-feature it implements: **whoever obtains an authentication token will be able to
-log in to your website.** URLs end up in countless insecure places: browser
-history, proxy logs, etc. You can't avoid that. So use django-sesame only for
-mundane things, like photos from your holidays. If a data leak would seriously
-affect you, don't use this software. You have been warned.
+feature it implements: **whoever obtains an authentication token will be able
+to log in to your website.** URLs end up in countless insecure places: emails,
+referer headers, proxy logs, browser history, etc. You can't avoid that. So
+use django-sesame only for mundane things.
+
+**If a data leak would affect you in non-trivial ways, don't use this library.
+You have been warned.**
 
 Otherwise, a reasonable attempt has been made to provide a secure solution.
 django-sesame uses Django's signing framework to create signed tokens.
 
-Tokens are linked to the primary key and the password of the ``User``.
-Changing the password invalidates the token. Provided your authentication
-backend uses salted passwords — I hope it does — the token is invalidated even
-if the new password is identical to the old one.
+Tokens are tied to the primary key and the password of the corresponding user.
+Changing the password invalidates the token. When the authentication backend
+uses salted passwords — that's been the default in Django for a long time —
+the token is invalidated even if the new password is identical to the old one.
 
 By default, tokens never expire. If you want them to expire after a given
 amount of time, set the ``SESAME_MAX_AGE`` setting to a duration in seconds.
@@ -59,24 +61,31 @@ How to
 
 1.  Add ``sesame.backends.ModelBackend`` to ``AUTHENTICATION_BACKENDS``::
 
-        AUTHENTICATION_BACKENDS += 'sesame.backends.ModelBackend',
+        AUTHENTICATION_BACKENDS += ['sesame.backends.ModelBackend']
 
-2.  Add ``sesame.middleware.AuthenticationMiddleware`` to ``MIDDLEWARE_CLASSES``::
+2.  Add ``sesame.middleware.AuthenticationMiddleware`` to ``MIDDLEWARE``::
 
-        MIDDLEWARE_CLASSES += 'sesame.middleware.AuthenticationMiddleware',
+        MIDDLEWARE += ['sesame.middleware.AuthenticationMiddleware']
 
-3. Generate authentication tokens with ``sesame.utils.get_query_string(user)``.
+    NB: in Django < 1.10, that setting was called ``MIDDLEWARE_CLASSES``.
+
+3. Generate authentication tokens with ``sesame.get_query_string(user)``.
 
 That's all!
 
-Utilities
-=========
+Generating URLs
+===============
 
-The ``sesame.utils`` module provides two functions to generate authentication
-tokens.
+django-sesame provides two functions to generate authenticated URLs.
 
-1. ``get_query_string(user)`` returns a complete query string that you can
-append to any URL to enable one-click login.
+1. ``sesame.utils.get_query_string(user)`` returns a complete query string
+   that you can append to any URL to enable one-click login.
 
-2. ``get_parameters(user)`` returns a dictionary of GET parameters to add to
-the query string, if you're already building one.
+2. ``sesame.utils.get_parameters(user)`` returns a dictionary of GET
+   parameters to add to the query string, if you're already building one.
+
+Share resulting URLs with your users while ensuring adequate confidentiality.
+
+By default, the URL parameter is called ``url_auth_token``. You can set the
+``SESAME_TOKEN_NAME`` setting to a shorter name that doesn't conflict with
+query string parameters used by your application.

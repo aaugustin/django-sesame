@@ -1,10 +1,11 @@
-import distutils.core
-import os
+import os.path
+
+import setuptools
 
 # Avoid polluting the .tar.gz with ._* files under Mac OS X
 os.putenv('COPYFILE_DISABLE', 'true')
 
-# Prevent distutils from complaining that a standard file wasn't found
+# Prevent setuptools from complaining that a standard file wasn't found
 README = os.path.join(os.path.dirname(__file__), 'README')
 if not os.path.exists(README):
     os.symlink(README + '.rst', README)
@@ -15,7 +16,7 @@ description = ('URL-based authentication, an application that provides '
 with open(README) as f:
     long_description = '\n\n'.join(f.read().split('\n\n')[2:8])
 
-distutils.core.setup(
+setuptools.setup(
     name='django-sesame',
     version='1.1',
     author='Aymeric Augustin',

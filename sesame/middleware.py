@@ -1,5 +1,6 @@
 from __future__ import unicode_literals
 
+from django.conf import settings
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.models import AnonymousUser
 
@@ -9,7 +10,7 @@ except ImportError:
     MiddlewareMixin = object
 
 
-TOKEN_FIELD_NAME = 'url_auth_token'
+TOKEN_NAME = getattr(settings, 'SESAME_TOKEN_NAME', 'url_auth_token')
 
 
 class AuthenticationMiddleware(MiddlewareMixin):
@@ -19,7 +20,7 @@ class AuthenticationMiddleware(MiddlewareMixin):
         Log user in if if `request` contains a valid login token.
 
         """
-        token = request.GET.get(TOKEN_FIELD_NAME)
+        token = request.GET.get(TOKEN_NAME)
         if token is None:
             return
         user = authenticate(url_auth_token=token)

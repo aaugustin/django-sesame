@@ -18,7 +18,7 @@ with open(README) as f:
 
 setuptools.setup(
     name='django-sesame',
-    version='1.1',
+    version='1.2',
     author='Aymeric Augustin',
     author_email='aymeric.augustin@m4x.org',
     url='https://github.com/aaugustin/django-sesame',

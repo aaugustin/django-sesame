@@ -12,7 +12,7 @@ coverage:
 clean:
 	find . -name '*.pyc' -delete
 	find . -name __pycache__ -delete
-	rm -rf .coverage *.egg-info dist docs/_build htmlcov MANIFEST
+	rm -rf *.egg-info .coverage build dist docs/_build htmlcov MANIFEST
 
 flake8:
 	flake8 sesame

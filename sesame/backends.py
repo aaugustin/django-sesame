@@ -14,12 +14,13 @@ logger = logging.getLogger('sesame')
 
 
 class UrlAuthBackendMixin(object):
-    """Tools to authenticate against a token containing a signed user id.
+    """
+    Tools to authenticate against a token containing a signed user id.
 
     Mix this class in an authentication backend providing `get_user(user_id)`,
     and call `parse_token(token)` from its `authenticate(**credentials)`.
-    """
 
+    """
     salt = getattr(settings, 'SESAME_SALT', 'sesame')
     digest = getattr(settings, 'SESAME_DIGEST', hashlib.md5)
     iterations = getattr(settings, 'SESAME_ITERATIONS', 10000)
@@ -34,12 +35,18 @@ class UrlAuthBackendMixin(object):
             return signing.TimestampSigner(salt=self.salt)
 
     def sign(self, data):
-        """Create an URL-safe, signed token from `data`."""
+        """
+        Create an URL-safe, signed token from `data`.
+
+        """
         data = signing.b64_encode(data).decode()
         return self.signer.sign(data)
 
     def unsign(self, token):
-        """Extract the data from a signed `token`."""
+        """
+        Extract the data from a signed `token`.
+
+        """
         if self.max_age is None:
             data = self.signer.unsign(token)
         else:
@@ -47,7 +54,10 @@ class UrlAuthBackendMixin(object):
         return signing.b64_decode(data.encode())
 
     def create_token(self, user):
-        """Create a signed token from an `auth.User`."""
+        """
+        Create a signed token from a user.
+
+        """
         # Include a hash derived from the password so changing the password
         # revokes the token. Usually, user.password will be a secure hash
         # already, but we hash it again in case it isn't. We default to MD5
@@ -58,7 +68,10 @@ class UrlAuthBackendMixin(object):
         return self.sign(struct.pack(str('!i'), user.pk) + h)
 
     def parse_token(self, token):
-        """Obtain an `auth.User` from a signed token."""
+        """
+        Obtain a user from a signed token.
+
+        """
         try:
             data = self.unsign(token)
         except signing.SignatureExpired:
@@ -81,10 +94,15 @@ class UrlAuthBackendMixin(object):
 
 
 class ModelBackend(UrlAuthBackendMixin, auth_backends.ModelBackend):
-    """Authenticates against a token containing a signed user id."""
+    """
+    Authenticates against a token containing a signed user id.
 
+    """
     def authenticate(self, url_auth_token=None):
-        """Check the token and return an `auth.User`."""
+        """
+        Check the token and return the corresponding user.
+
+        """
         try:
             return self.parse_token(url_auth_token)
         except TypeError:

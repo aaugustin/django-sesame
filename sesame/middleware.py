@@ -10,7 +10,10 @@ TOKEN_FIELD_NAME = 'url_auth_token'
 class AuthenticationMiddleware(object):
 
     def process_request(self, request):
-        """Log user in if if `request` contains a valid login token."""
+        """
+        Log user in if if `request` contains a valid login token.
+
+        """
         token = request.GET.get(TOKEN_FIELD_NAME)
         if token is None:
             return

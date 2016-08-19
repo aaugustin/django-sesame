@@ -3,11 +3,16 @@ from __future__ import unicode_literals
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.models import AnonymousUser
 
+try:
+    from django.utils.deprecation import MiddlewareMixin
+except ImportError:
+    MiddlewareMixin = object
+
 
 TOKEN_FIELD_NAME = 'url_auth_token'
 
 
-class AuthenticationMiddleware(object):
+class AuthenticationMiddleware(MiddlewareMixin):
 
     def process_request(self, request):
         """

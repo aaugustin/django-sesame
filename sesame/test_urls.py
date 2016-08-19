@@ -1,11 +1,10 @@
 from __future__ import unicode_literals
 
-from django.conf.urls import patterns
+from django.conf.urls import url
 from django.http import HttpResponse
-from django.template import RequestContext, Template
+from django.template import engines
 
-
-template = Template(
+template = engines['django'].from_string(
     '{% if user.is_authenticated %}{{ user }}'
     '{% elif user.is_anonymous %}anonymous'
     '{% else %}no user'
@@ -14,8 +13,10 @@ template = Template(
 
 
 def show_user(request):
-    context = RequestContext(request)
-    return HttpResponse(template.render(context), content_type='text/plain')
+    content = template.render(request=request)
+    return HttpResponse(content, content_type='text/plain')
 
 
-urlpatterns = patterns('', (r'^', show_user))
+urlpatterns = [
+    url(r'^', show_user),
+]

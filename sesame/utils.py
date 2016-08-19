@@ -1,12 +1,12 @@
 from __future__ import unicode_literals
 
+from .backends import UrlAuthBackendMixin
+from .middleware import TOKEN_FIELD_NAME
+
 try:
     from urllib.parse import urlencode
 except ImportError:
     from urllib import urlencode
-
-from .backends import UrlAuthBackendMixin
-from .middleware import TOKEN_FIELD_NAME
 
 
 def get_parameters(user):

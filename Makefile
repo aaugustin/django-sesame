@@ -13,3 +13,9 @@ clean:
 	find . -name '*.pyc' -delete
 	find . -name __pycache__ -delete
 	rm -rf .coverage dist docs/_build htmlcov MANIFEST
+
+flake8:
+	flake8 sesame
+
+isort:
+	isort --check-only --recursive sesame

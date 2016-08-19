@@ -11,18 +11,25 @@ from .backends import ModelBackend
 
 
 @override_settings(
-    AUTHENTICATION_BACKENDS=(
+    AUTHENTICATION_BACKENDS=[
         'django.contrib.auth.backends.ModelBackend',
         'sesame.backends.ModelBackend',
-    ),
-    TEMPLATE_CONTEXT_PROCESSORS=(
-        'django.contrib.auth.context_processors.auth',
-    ),
-    MIDDLEWARE_CLASSES=(
+    ],
+    MIDDLEWARE_CLASSES=[
         'django.contrib.sessions.middleware.SessionMiddleware',
         'django.contrib.auth.middleware.AuthenticationMiddleware',
         'sesame.middleware.AuthenticationMiddleware',
-    ),
+    ],
+    TEMPLATES=[
+        {
+            'BACKEND': 'django.template.backends.django.DjangoTemplates',
+            'OPTIONS': {
+                'context_processors': [
+                    'django.contrib.auth.context_processors.auth',
+                ],
+            },
+        },
+    ],
 )
 class TestAfterAuthMiddleware(TestCase):
 
@@ -53,30 +60,30 @@ class TestAfterAuthMiddleware(TestCase):
 
 
 @override_settings(
-    MIDDLEWARE_CLASSES=(
+    MIDDLEWARE_CLASSES=[
         'django.contrib.sessions.middleware.SessionMiddleware',
         'sesame.middleware.AuthenticationMiddleware',
         'django.contrib.auth.middleware.AuthenticationMiddleware',
-    ),
+    ],
 )
 class TestBeforeAuthMiddleware(TestAfterAuthMiddleware):
     pass
 
 
 @override_settings(
-    MIDDLEWARE_CLASSES=(
+    MIDDLEWARE_CLASSES=[
         'django.contrib.sessions.middleware.SessionMiddleware',
         'sesame.middleware.AuthenticationMiddleware',
-    ),
+    ],
 )
 class TestWithoutAuthMiddleware(TestAfterAuthMiddleware):
     pass
 
 
 @override_settings(
-    MIDDLEWARE_CLASSES=(
+    MIDDLEWARE_CLASSES=[
         'sesame.middleware.AuthenticationMiddleware',
-    ),
+    ],
 )
 class TestWithoutSessionMiddleware(TestAfterAuthMiddleware):
     pass

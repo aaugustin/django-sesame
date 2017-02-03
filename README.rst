@@ -69,7 +69,7 @@ How to
 
     NB: in Django < 1.10, that setting was called ``MIDDLEWARE_CLASSES``.
 
-3. Generate authentication tokens with ``sesame.get_query_string(user)``.
+3. Generate authentication tokens with ``sesame.utils.get_query_string(user)``.
 
 That's all!
 

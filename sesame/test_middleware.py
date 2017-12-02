@@ -15,7 +15,7 @@ from .backends import ModelBackend
         'django.contrib.auth.backends.ModelBackend',
         'sesame.backends.ModelBackend',
     ],
-    MIDDLEWARE_CLASSES=[
+    MIDDLEWARE=[
         'django.contrib.sessions.middleware.SessionMiddleware',
         'django.contrib.auth.middleware.AuthenticationMiddleware',
         'sesame.middleware.AuthenticationMiddleware',
@@ -60,7 +60,7 @@ class TestAfterAuthMiddleware(TestCase):
 
 
 @override_settings(
-    MIDDLEWARE_CLASSES=[
+    MIDDLEWARE=[
         'django.contrib.sessions.middleware.SessionMiddleware',
         'sesame.middleware.AuthenticationMiddleware',
         'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -71,7 +71,7 @@ class TestBeforeAuthMiddleware(TestAfterAuthMiddleware):
 
 
 @override_settings(
-    MIDDLEWARE_CLASSES=[
+    MIDDLEWARE=[
         'django.contrib.sessions.middleware.SessionMiddleware',
         'sesame.middleware.AuthenticationMiddleware',
     ],
@@ -81,7 +81,7 @@ class TestWithoutAuthMiddleware(TestAfterAuthMiddleware):
 
 
 @override_settings(
-    MIDDLEWARE_CLASSES=[
+    MIDDLEWARE=[
         'sesame.middleware.AuthenticationMiddleware',
     ],
 )

@@ -16,7 +16,7 @@ INSTALLED_APPS = [
 
 LOGGING_CONFIG = None
 
-MIDDLEWARE_CLASSES = [
+MIDDLEWARE = [
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
 ]

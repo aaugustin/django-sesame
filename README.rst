@@ -14,7 +14,7 @@ authentication process involving a third-party.
 
 django-sesame is tested with:
 
-- Django 1.8 (LTS), 1.9 and 1.10.
+- Django 1.11 (LTS) and 2.0.
 - all supported Python versions.
 
 It requires ``django.contrib.auth``. It's compatible with custom user models.
@@ -66,8 +66,6 @@ How to
 2.  Add ``sesame.middleware.AuthenticationMiddleware`` to ``MIDDLEWARE``::
 
         MIDDLEWARE += ['sesame.middleware.AuthenticationMiddleware']
-
-    NB: in Django < 1.10, that setting was called ``MIDDLEWARE_CLASSES``.
 
 3. Generate authentication tokens with ``sesame.get_query_string(user)``.
 

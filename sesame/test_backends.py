@@ -30,7 +30,7 @@ class TestModelBackend(TestCase):
 
     def test_authenticate(self):
         token = self.backend.create_token(self.user)
-        user = self.backend.authenticate(url_auth_token=token)
+        user = self.backend.authenticate(request=None, url_auth_token=token)
         self.assertEqual(user, self.user)
 
     def test_token(self):
@@ -65,7 +65,7 @@ class TestModelBackend(TestCase):
             raise TypeError
         self.backend.parse_token = raise_type_error
         with self.assertRaises(TypeError):
-            self.backend.authenticate(None)
+            self.backend.authenticate(request=None, url_auth_token=None)
         self.assertIn("TypeError", self.get_log())
 
 

@@ -67,7 +67,7 @@ How to
 
         MIDDLEWARE += ['sesame.middleware.AuthenticationMiddleware']
 
-3. Generate authentication tokens with ``sesame.get_query_string(user)``.
+3. Generate authentication tokens with ``sesame.utils.get_query_string(user)``.
 
 That's all!
 

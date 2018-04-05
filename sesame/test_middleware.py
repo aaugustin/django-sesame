@@ -49,6 +49,13 @@ class TestAfterAuthMiddleware(TestCase):
     def test_token(self):
         response = self.client.get('/', {'url_auth_token': self.token})
         self.assertEqual(response.content, b'john')
+        self.assertRedirects(response, '/')
+
+    def test_token_with_path(self):
+        params = {'bar': 42, 'url_auth_token': self.token}
+        response = self.client.get('/foo', params)
+        self.assertEqual(response.content, b'john')
+        self.assertRedirects(response, '/foo?bar=42')
 
     def test_bad_token(self):
         response = self.client.get('/', {'url_auth_token': self.bad_token})
@@ -86,4 +93,14 @@ class TestWithoutAuthMiddleware(TestAfterAuthMiddleware):
     ],
 )
 class TestWithoutSessionMiddleware(TestAfterAuthMiddleware):
-    pass
+
+    def test_token(self):
+        response = self.client.get('/', {'url_auth_token': self.token})
+        self.assertEqual(response.content, b'john')
+        self.assertEqual(response.status_code, 200)
+
+    def test_token_with_path(self):
+        params = {'bar': 42, 'url_auth_token': self.token}
+        response = self.client.get('/foo', params)
+        self.assertEqual(response.content, b'john')
+        self.assertEqual(response.status_code, 200)

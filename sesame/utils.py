@@ -1,7 +1,7 @@
 from __future__ import unicode_literals
 
 from .backends import UrlAuthBackendMixin
-from .compat import urlencode
+from .compatibility import urlencode
 from .middleware import TOKEN_NAME
 
 

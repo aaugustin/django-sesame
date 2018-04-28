@@ -1,8 +1,8 @@
 from __future__ import unicode_literals
 
 from .backends import UrlAuthBackendMixin
-from .middleware import TOKEN_NAME
 from .compat import urlencode
+from .middleware import TOKEN_NAME
 
 
 def get_parameters(user):

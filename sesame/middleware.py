@@ -7,7 +7,6 @@ from django.shortcuts import redirect
 
 from .compat import urlencode
 
-
 TOKEN_NAME = getattr(settings, 'SESAME_TOKEN_NAME', 'url_auth_token')
 
 

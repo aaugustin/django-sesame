@@ -29,22 +29,18 @@ class AuthenticationMiddleware:
 
         """
         token = request.GET.get(TOKEN_NAME)
-        if token is None:
-            return
-
-        user = authenticate(url_auth_token=token)
-        if user is None:
-            return
+        user = None if token is None else authenticate(url_auth_token=token)
 
         # If the sessions framework is enabled and the token is valid,
         # persist the login in session.
         if hasattr(request, 'session') and user is not None:
             login(request, user)
-            # When the login is persisted in the session, we can get rid of
-            # the token in the URL by redirecting to the same URL with the
-            # token removed. We only do this for GET requests because
-            # redirecting POST requests doesn't work well in general.
-            if request.method == 'GET':
+            # Once we persist the login in the session, if the authentication
+            # middleware is enabled, it will set request.user in future
+            # requests. We can get rid of the token in the URL by redirecting
+            # to the same URL with the token removed. We only do this for GET
+            # requests because redirecting POST requests doesn't work well.
+            if hasattr(request, 'user') and request.method == 'GET':
                 return self.get_redirect(request)
 
         # If the authentication middleware isn't enabled, set request.user.

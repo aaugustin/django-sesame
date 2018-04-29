@@ -18,11 +18,6 @@ django-sesame is tested with:
 - all supported Python versions.
 
 It requires ``django.contrib.auth``. It's compatible with custom user models.
-It uses ``django.contrib.session`` when it's available.
-
-Technically, django-sesame can provide stateless authenticated navigation
-without ``django.contrib.sessions``, provided all internal links include the
-authentication token, but that increases the security issues explained below.
 
 django-sesame is released under the BSD license, like Django itself.
 
@@ -67,6 +62,9 @@ How to
 
         MIDDLEWARE += ['sesame.middleware.AuthenticationMiddleware']
 
+    The best position for ``sesame.middleware.AuthenticationMiddleware`` is
+    just after ``django.contrib.auth.middleware.AuthenticationMiddleware``.
+
 3. Generate authentication tokens with ``sesame.utils.get_query_string(user)``.
 
 That's all!
@@ -87,3 +85,15 @@ Share resulting URLs with your users while ensuring adequate confidentiality.
 By default, the URL parameter is called ``url_auth_token``. You can set the
 ``SESAME_TOKEN_NAME`` setting to a shorter name that doesn't conflict with
 query string parameters used by your application.
+
+Stateless authentication
+========================
+
+Technically, django-sesame can provide stateless authenticated navigation
+without ``django.contrib.sessions``, provided all internal links include the
+authentication token, but that increases the security issues explained above.
+
+If ``django.contrib.sessions.middleware.SessionMiddleware`` and
+``django.contrib.auth.middleware.AuthenticationMiddleware`` aren't enabled,
+``sesame.middleware.AuthenticationMiddleware`` sets ``request.user`` to the
+currently logged-in user or ``AnonymousUser()``.

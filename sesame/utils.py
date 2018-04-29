@@ -1,12 +1,8 @@
 from __future__ import unicode_literals
 
 from .backends import UrlAuthBackendMixin
+from .compatibility import urlencode
 from .middleware import TOKEN_NAME
-
-try:
-    from urllib.parse import urlencode
-except ImportError:
-    from urllib import urlencode
 
 
 def get_parameters(user):

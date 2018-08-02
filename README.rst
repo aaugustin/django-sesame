@@ -14,7 +14,7 @@ authentication process involving a third-party.
 
 django-sesame is tested with:
 
-- Django 1.11 (LTS) and 2.0.
+- Django 1.11 (LTS), 2.0 and 2.1;
 - all supported Python versions.
 
 It requires ``django.contrib.auth``. It's compatible with custom user models.

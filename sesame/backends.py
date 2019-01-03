@@ -2,12 +2,13 @@ from __future__ import unicode_literals
 
 import hashlib
 import logging
-import struct
 
 from django.conf import settings
 from django.contrib.auth import backends as auth_backends
 from django.core import signing
 from django.utils import crypto
+
+from .pk_packers import IntPkPacker
 
 logger = logging.getLogger('sesame')
 
@@ -23,6 +24,7 @@ class UrlAuthBackendMixin(object):
     salt = getattr(settings, 'SESAME_SALT', 'sesame')
     digest = getattr(settings, 'SESAME_DIGEST', hashlib.md5)
     iterations = getattr(settings, 'SESAME_ITERATIONS', 10000)
+    pk_packer = getattr(settings, 'SESAME_USER_PK_PACKER', IntPkPacker)
 
     max_age = getattr(settings, 'SESAME_MAX_AGE', None)
 
@@ -64,7 +66,7 @@ class UrlAuthBackendMixin(object):
         # obtains the URL, he can already log in. This isn't high security.)
         h = crypto.pbkdf2(
             user.password, self.salt, self.iterations, digest=self.digest)
-        return self.sign(struct.pack(str('!i'), user.pk) + h)
+        return self.sign(self.pk_packer().pack(user_pk=user.pk) + h)
 
     def parse_token(self, token):
         """
@@ -79,13 +81,15 @@ class UrlAuthBackendMixin(object):
         except signing.BadSignature:
             logger.debug("Bad token: %s", token)
             return
-        user = self.get_user(*struct.unpack(str('!i'), data[:4]))
+        pk_packer = self.pk_packer()
+        user_pk = pk_packer.parse(data[:pk_packer.PACKED_SIZE])
+        user = self.get_user(user_pk)
         if user is None:
             logger.debug("Unknown token: %s", token)
             return
         h = crypto.pbkdf2(
             user.password, self.salt, self.iterations, digest=self.digest)
-        if not crypto.constant_time_compare(data[4:], h):
+        if not crypto.constant_time_compare(data[pk_packer.PACKED_SIZE:], h):
             logger.debug("Invalid token: %s", token)
             return
         logger.debug("Valid token for user %s: %s", user, token)

@@ -25,6 +25,7 @@ class UrlAuthBackendMixin(object):
     iterations = getattr(settings, 'SESAME_ITERATIONS', 10000)
 
     max_age = getattr(settings, 'SESAME_MAX_AGE', None)
+    one_time = getattr(settings, 'SESAME_ONE_TIME', False)
 
     @property
     def signer(self):
@@ -52,6 +53,21 @@ class UrlAuthBackendMixin(object):
             data = self.signer.unsign(token, max_age=self.max_age)
         return signing.b64_decode(data.encode())
 
+    def get_hash_value(self, user):
+        """
+        Gets the value to hash - either the password or password and last
+        login for one time tokens
+        """
+        if self.one_time:
+            if user.last_login is None:
+                last_login = ''
+            else:
+                last_login = user.last_login.replace(
+                    microsecond=0, tzinfo=None)
+            return "%s%s" % (user.password, last_login)
+        else:
+            return user.password
+
     def create_token(self, user):
         """
         Create a signed token from a user.
@@ -63,7 +79,11 @@ class UrlAuthBackendMixin(object):
         # to minimize the length of the token. (Remember, if an attacker
         # obtains the URL, he can already log in. This isn't high security.)
         h = crypto.pbkdf2(
-            user.password, self.salt, self.iterations, digest=self.digest)
+            self.get_hash_value(user),
+            self.salt,
+            self.iterations,
+            digest=self.digest,
+            )
         return self.sign(struct.pack(str('!i'), user.pk) + h)
 
     def parse_token(self, token):
@@ -84,7 +104,11 @@ class UrlAuthBackendMixin(object):
             logger.debug("Unknown token: %s", token)
             return
         h = crypto.pbkdf2(
-            user.password, self.salt, self.iterations, digest=self.digest)
+            self.get_hash_value(user),
+            self.salt,
+            self.iterations,
+            digest=self.digest,
+            )
         if not crypto.constant_time_compare(data[4:], h):
             logger.debug("Invalid token: %s", token)
             return

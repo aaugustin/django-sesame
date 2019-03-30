@@ -2,9 +2,11 @@ from __future__ import unicode_literals
 
 import io
 import logging
+from datetime import timedelta
 
 from django.contrib.auth.models import User
 from django.test import TestCase
+from django.utils import timezone
 
 from .backends import ModelBackend
 
@@ -82,3 +84,40 @@ class TestModelBackendWithExpiry(TestModelBackend):
         user = self.backend.parse_token(token)
         self.assertEqual(user, None)
         self.assertIn("Expired token", self.get_log())
+
+
+class TestModelBackendWithOneTime(TestModelBackend):
+
+    def setUp(self):
+        super(TestModelBackendWithOneTime, self).setUp()
+        self.login_user = User.objects.create_user(
+            username='jane',
+            password='doe',
+            last_login=timezone.now() - timedelta(1),
+            )
+        self.backend.one_time = True                # override class variable
+
+    def test_authenticate(self):
+        token = self.backend.create_token(self.login_user)
+        user = self.backend.authenticate(request=None, url_auth_token=token)
+        self.assertEqual(user, self.login_user)
+
+    def test_token(self):
+        token = self.backend.create_token(self.login_user)
+        user = self.backend.parse_token(token)
+        self.assertEqual(user, self.login_user)
+        self.assertIn("Valid token for user jane", self.get_log())
+
+    def test_token_last_login_none(self):
+        token = self.backend.create_token(self.user)
+        user = self.backend.parse_token(token)
+        self.assertEqual(user, self.user)
+        self.assertIn("Valid token for user john", self.get_log())
+
+    def test_invalid_token(self):
+        token = self.backend.create_token(self.user)
+        self.user.last_login = timezone.now()
+        self.user.save()
+        user = self.backend.parse_token(token)
+        self.assertEqual(user, None)
+        self.assertIn("Invalid token", self.get_log())

@@ -1,8 +1,8 @@
 from __future__ import unicode_literals
 
+import datetime
 import io
 import logging
-from datetime import timedelta
 
 from django.contrib.auth.models import User
 from django.test import TestCase
@@ -93,8 +93,8 @@ class TestModelBackendWithOneTime(TestModelBackend):
         self.login_user = User.objects.create_user(
             username='jane',
             password='doe',
-            last_login=timezone.now() - timedelta(1),
-            )
+            last_login=timezone.now() - datetime.timedelta(1),
+        )
         self.backend.one_time = True                # override class variable
 
     def test_authenticate(self):

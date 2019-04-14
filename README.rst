@@ -46,10 +46,17 @@ Changing the password invalidates the token. When the authentication backend
 uses salted passwords — that's been the default in Django for a long time —
 the token is invalidated even if the new password is identical to the old one.
 
-By default, tokens never expire. If you want them to expire after a given
-amount of time, set the ``SESAME_MAX_AGE`` setting to a duration in seconds.
-Then each token will contain the time it was generated at and django-sesame
-will check if it's still valid at each login attempt.
+By default, tokens never expire.
+
+If you want tokens to expire after a given amount of time, set the
+``SESAME_MAX_AGE`` setting to a duration in seconds. Then each token will
+contain the time it was generated at and django-sesame will check if it's
+still valid at each login attempt.
+
+If you want tokens to be usable only once, set the ``SESAME_ONE_TIME`` setting
+to ``True``. In that case tokens are only valid if the last login date hasn't
+changed since they were generated. Since logging in changes the last login
+date, this creates one-time tokens.
 
 How to
 ======

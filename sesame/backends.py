@@ -2,12 +2,15 @@ from __future__ import unicode_literals
 
 import hashlib
 import logging
-import struct
 
 from django.conf import settings
 from django.contrib.auth import backends as auth_backends
+from django.contrib.auth import get_user_model
 from django.core import signing
 from django.utils import crypto
+from django.utils.functional import cached_property
+
+from . import packers
 
 logger = logging.getLogger('sesame')
 
@@ -16,8 +19,8 @@ class UrlAuthBackendMixin(object):
     """
     Tools to authenticate against a token containing a signed user id.
 
-    Mix this class in an authentication backend providing `get_user(user_id)`,
-    and call `parse_token(token)` from its `authenticate(**credentials)`.
+    Mix this class in an auth backend providing ``get_user(user_id)`` and call
+    ``parse_token(token)`` from its ``authenticate(**credentials)``.
 
     """
     salt = getattr(settings, 'SESAME_SALT', 'sesame')
@@ -27,7 +30,7 @@ class UrlAuthBackendMixin(object):
     max_age = getattr(settings, 'SESAME_MAX_AGE', None)
     one_time = getattr(settings, 'SESAME_ONE_TIME', False)
 
-    @property
+    @cached_property
     def signer(self):
         if self.max_age is None:
             return signing.Signer(salt=self.salt)
@@ -36,7 +39,7 @@ class UrlAuthBackendMixin(object):
 
     def sign(self, data):
         """
-        Create an URL-safe, signed token from `data`.
+        Create an URL-safe, signed token from ``data``.
 
         """
         data = signing.b64_encode(data).decode()
@@ -44,7 +47,7 @@ class UrlAuthBackendMixin(object):
 
     def unsign(self, token):
         """
-        Extract the data from a signed `token`.
+        Extract the data from a signed ``token``.
 
         """
         if self.max_age is None:
@@ -52,6 +55,16 @@ class UrlAuthBackendMixin(object):
         else:
             data = self.signer.unsign(token, max_age=self.max_age)
         return signing.b64_decode(data.encode())
+
+    @cached_property
+    def packer(self):
+        pk_type = get_user_model()._meta.pk.get_internal_type()
+        try:
+            Packer = packers.PACKERS[pk_type]
+        except KeyError:
+            raise NotImplementedError(
+                pk_type + " primary keys aren't supported at this time")
+        return Packer()
 
     def get_revocation_key(self, user):
         """
@@ -84,7 +97,7 @@ class UrlAuthBackendMixin(object):
             self.iterations,
             digest=self.digest,
         )
-        return self.sign(struct.pack(str('!i'), user.pk) + h)
+        return self.sign(self.packer.pack_pk(user.pk) + h)
 
     def parse_token(self, token):
         """
@@ -99,7 +112,8 @@ class UrlAuthBackendMixin(object):
         except signing.BadSignature:
             logger.debug("Bad token: %s", token)
             return
-        user = self.get_user(*struct.unpack(str('!i'), data[:4]))
+        user_pk, data = self.packer.unpack_pk(data)
+        user = self.get_user(user_pk)
         if user is None:
             logger.debug("Unknown token: %s", token)
             return
@@ -109,7 +123,7 @@ class UrlAuthBackendMixin(object):
             self.iterations,
             digest=self.digest,
         )
-        if not crypto.constant_time_compare(data[4:], h):
+        if not crypto.constant_time_compare(data, h):
             logger.debug("Invalid token: %s", token)
             return
         logger.debug("Valid token for user %s: %s", user, token)

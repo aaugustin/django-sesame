@@ -17,7 +17,9 @@ django-sesame is tested with:
 - Django 1.11 (LTS), 2.1 and 2.2;
 - all supported Python versions.
 
-It requires ``django.contrib.auth``. It's compatible with custom user models.
+It requires ``django.contrib.auth``. It's compatible with custom user models,
+provided they have an integer or UUID primary keys. (Additional types could be
+supported if there's a use case.)
 
 django-sesame is released under the BSD license, like Django itself.
 

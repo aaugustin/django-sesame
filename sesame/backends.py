@@ -25,6 +25,7 @@ class UrlAuthBackendMixin(object):
     iterations = getattr(settings, 'SESAME_ITERATIONS', 10000)
 
     max_age = getattr(settings, 'SESAME_MAX_AGE', None)
+    one_time = getattr(settings, 'SESAME_ONE_TIME', False)
 
     @property
     def signer(self):
@@ -52,18 +53,37 @@ class UrlAuthBackendMixin(object):
             data = self.signer.unsign(token, max_age=self.max_age)
         return signing.b64_decode(data.encode())
 
+    def get_revocation_key(self, user):
+        """
+        When the value returned by this method changes, this revocates tokens.
+
+        It always includes the password so that changing the password revokes
+        existing tokens.
+
+        In addition, for one-time tokens, it also contains the last login
+        datetime so that logging in revokes existing tokens.
+
+        """
+        value = user.password
+        if self.one_time:
+            value += str(user.last_login)
+        return value
+
     def create_token(self, user):
         """
         Create a signed token from a user.
 
         """
-        # Include a hash derived from the password so changing the password
-        # revokes the token. Usually, user.password will be a secure hash
-        # already, but we hash it again in case it isn't. We default to MD5
-        # to minimize the length of the token. (Remember, if an attacker
-        # obtains the URL, he can already log in. This isn't high security.)
+        # The password is expected to be a secure hash but we hash it again
+        # for additional safety. We default to MD5 to minimize the length of
+        # the token. (Remember, if an attacker obtains the URL, he can already
+        # log in. This isn't high security.)
         h = crypto.pbkdf2(
-            user.password, self.salt, self.iterations, digest=self.digest)
+            self.get_revocation_key(user),
+            self.salt,
+            self.iterations,
+            digest=self.digest,
+        )
         return self.sign(struct.pack(str('!i'), user.pk) + h)
 
     def parse_token(self, token):
@@ -84,7 +104,11 @@ class UrlAuthBackendMixin(object):
             logger.debug("Unknown token: %s", token)
             return
         h = crypto.pbkdf2(
-            user.password, self.salt, self.iterations, digest=self.digest)
+            self.get_revocation_key(user),
+            self.salt,
+            self.iterations,
+            digest=self.digest,
+        )
         if not crypto.constant_time_compare(data[4:], h):
             logger.debug("Invalid token: %s", token)
             return

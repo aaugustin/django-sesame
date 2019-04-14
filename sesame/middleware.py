@@ -39,8 +39,14 @@ class AuthenticationMiddleware:
             # middleware is enabled, it will set request.user in future
             # requests. We can get rid of the token in the URL by redirecting
             # to the same URL with the token removed. We only do this for GET
-            # requests because redirecting POST requests doesn't work well.
-            if hasattr(request, 'user') and request.method == 'GET':
+            # requests because redirecting POST requests doesn't work well. We
+            # don't do this on Safari because it triggers the over-zealous
+            # "Protection Against First Party Bounce Trackers" of ITP 2.0.
+            if (
+                hasattr(request, 'user') and
+                request.method == 'GET' and
+                not self.is_safari(request)
+            ):
                 return self.get_redirect(request)
 
         # If the authentication middleware isn't enabled, set request.user.
@@ -49,7 +55,19 @@ class AuthenticationMiddleware:
         if not hasattr(request, 'user'):
             request.user = user if user is not None else AnonymousUser()
 
-    def get_redirect(self, request):
+    @staticmethod
+    def is_safari(request):
+        try:
+            from ua_parser import user_agent_parser
+        except ImportError:                                 # pragma: no cover
+            return None
+        else:
+            user_agent = request.META.get('HTTP_USER_AGENT', '')
+            browser = user_agent_parser.ParseUserAgent(user_agent)['family']
+            return browser == 'Safari'
+
+    @staticmethod
+    def get_redirect(request):
         """
         Create a HTTP redirect response that removes the token from the URL.
 

@@ -2,14 +2,26 @@ from __future__ import unicode_literals
 
 import io
 import logging
+import unittest
 
 from django.contrib.auth import get_user
 from django.contrib.auth.models import AnonymousUser, User
 from django.test import TestCase
 from django.test.utils import override_settings
 
+try:
+    import ua_parser
+except ImportError:
+    ua_parser = None
+
 from .backends import ModelBackend
 from .compatibility import urlencode
+
+SAFARI_USER_AGENT = (
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_4) "
+    "AppleWebKit/605.1.15 (KHTML, like Gecko) "
+    "Version/12.1 Safari/605.1.15"
+)
 
 
 @override_settings(
@@ -81,6 +93,13 @@ class TestMiddleware(TestCase):
     def test_token_in_POST_request(self):
         response = self.client.post(
             '/?' + urlencode({'url_auth_token': self.token}))
+        self.assertUserLoggedIn(response)
+
+    @unittest.skipIf(ua_parser is None, "test requires ua-parser")
+    def test_token_in_Safari_request(self):
+        response = self.client.get(
+            '/', {'url_auth_token': self.token},
+            HTTP_USER_AGENT=SAFARI_USER_AGENT)
         self.assertUserLoggedIn(response)
 
     def test_bad_token(self):

@@ -4,8 +4,8 @@ import datetime
 import io
 import logging
 
-from django.contrib.auth.models import User
-from django.test import TestCase
+from django.contrib.auth import get_user_model
+from django.test import TestCase, override_settings
 from django.utils import timezone
 
 from .backends import ModelBackend
@@ -15,7 +15,9 @@ class TestModelBackend(TestCase):
 
     def setUp(self):
         self.backend = ModelBackend()
-        self.user = User.objects.create_user(username='john', password='doe')
+
+        User = get_user_model()
+        self.user = User.objects.create(username='john')
 
         self.log = io.StringIO()
         self.handler = logging.StreamHandler(self.log)
@@ -90,6 +92,8 @@ class TestModelBackendWithOneTime(TestModelBackend):
 
     def setUp(self):
         super(TestModelBackendWithOneTime, self).setUp()
+
+        User = get_user_model()
         self.login_user = User.objects.create_user(
             username='jane',
             password='doe',
@@ -121,3 +125,28 @@ class TestModelBackendWithOneTime(TestModelBackend):
         user = self.backend.parse_token(token)
         self.assertEqual(user, None)
         self.assertIn("Invalid token", self.get_log())
+
+
+@override_settings(AUTH_USER_MODEL='test_app.UUIDUser')
+class TestModelBackendWithUUIDPrimaryKey(TestModelBackend):
+
+    pass
+
+
+@override_settings(AUTH_USER_MODEL='test_app.CharUser')
+class TestModelBackendWithUnsupportedPrimaryKey(TestCase):
+
+    def setUp(self):
+        self.backend = ModelBackend()
+
+        User = get_user_model()
+        self.user = User.objects.create(username='john')
+
+    def test_authenticate(self):
+        with self.assertRaises(NotImplementedError) as exc:
+            self.backend.create_token(self.user)
+
+        self.assertEqual(
+            str(exc.exception),
+            "CharField primary keys aren't supported at this time",
+        )

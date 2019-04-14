@@ -12,6 +12,7 @@ INSTALLED_APPS = [
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'sesame',
+    'sesame.test_app',
 ]
 
 LOGGING_CONFIG = None

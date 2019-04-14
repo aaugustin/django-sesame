@@ -63,18 +63,23 @@ date, this creates one-time tokens.
 How to
 ======
 
-1.  Add ``sesame.backends.ModelBackend`` to ``AUTHENTICATION_BACKENDS``::
+1. Install django-sesame and ua-parser::
+
+        $ pip install django-sesame
+        $ pip install ua-parser  # optional, see "Safari issues" below
+
+2. Add ``sesame.backends.ModelBackend`` to ``AUTHENTICATION_BACKENDS``::
 
         AUTHENTICATION_BACKENDS += ['sesame.backends.ModelBackend']
 
-2.  Add ``sesame.middleware.AuthenticationMiddleware`` to ``MIDDLEWARE``::
+3. Add ``sesame.middleware.AuthenticationMiddleware`` to ``MIDDLEWARE``::
 
         MIDDLEWARE += ['sesame.middleware.AuthenticationMiddleware']
 
     The best position for ``sesame.middleware.AuthenticationMiddleware`` is
     just after ``django.contrib.auth.middleware.AuthenticationMiddleware``.
 
-3. Generate authentication tokens with ``sesame.utils.get_query_string(user)``.
+4. Generate authentication tokens with ``sesame.utils.get_query_string(user)``.
 
 That's all!
 
@@ -94,6 +99,19 @@ Share resulting URLs with your users while ensuring adequate confidentiality.
 By default, the URL parameter is called ``url_auth_token``. You can set the
 ``SESAME_TOKEN_NAME`` setting to a shorter name that doesn't conflict with
 query string parameters used by your application.
+
+Safari issues
+=============
+
+django-sesame removes the token from the URL with a HTTP 302 Redirect after
+authenticating a user successfully. Unfortunately, in some scenarios, this
+triggers Safari's "Protection Against First Party Bounce Trackers". In that
+case, Safari clears cookies and the user is logged out.
+
+To avoid this problem, django-sesame doesn't perform the redirect when it
+detects that the browser is Safari. This relies on the ua-parser package,
+which is an optional dependency. If it isn't installed, django-sesame always
+redirects.
 
 Stateless authentication
 ========================

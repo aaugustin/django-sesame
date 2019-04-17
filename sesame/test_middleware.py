@@ -9,13 +9,14 @@ from django.contrib.auth.models import AnonymousUser, User
 from django.test import TestCase
 from django.test.utils import override_settings
 
+from .backends import ModelBackend
+from .compatibility import urlencode
+
 try:
     import ua_parser
 except ImportError:
     ua_parser = None
 
-from .backends import ModelBackend
-from .compatibility import urlencode
 
 SAFARI_USER_AGENT = (
     "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_4) "

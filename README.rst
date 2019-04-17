@@ -60,6 +60,14 @@ to ``True``. In that case tokens are only valid if the last login date hasn't
 changed since they were generated. Since logging in changes the last login
 date, this creates one-time tokens.
 
+If you don't want tokens to be invalidated by password changes, set the
+``SESAME_INVALIDATE_ON_PASSWORD_CHANGE`` setting to ``False``. **This is
+strongly discouraged because there is no way to invalidate tokens.** You
+should set a ``SESAME_MAX_AGE`` to a short value to minimize risks. This
+option may be useful for generating tokens during a signup process, when
+you don't know if the token will be used before or after initializing the
+password.
+
 How to
 ======
 

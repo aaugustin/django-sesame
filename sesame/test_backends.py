@@ -5,6 +5,7 @@ import io
 import logging
 
 from django.contrib.auth import get_user_model
+from django.core.exceptions import ImproperlyConfigured
 from django.test import TestCase, override_settings
 from django.utils import timezone
 
@@ -37,7 +38,7 @@ class TestModelBackend(TestCase):
         user = self.backend.authenticate(request=None, url_auth_token=token)
         self.assertEqual(user, self.user)
 
-    def test_token(self):
+    def test_valid_token(self):
         token = self.backend.create_token(self.user)
         user = self.backend.parse_token(token)
         self.assertEqual(user, self.user)
@@ -56,7 +57,7 @@ class TestModelBackend(TestCase):
         self.assertEqual(user, None)
         self.assertIn("Unknown token", self.get_log())
 
-    def test_invalid_token(self):
+    def test_password_change(self):
         token = self.backend.create_token(self.user)
         self.user.set_password('hunter2')
         self.user.save()
@@ -73,21 +74,18 @@ class TestModelBackend(TestCase):
         self.assertIn("TypeError", self.get_log())
 
 
+@override_settings(SESAME_MAX_AGE=10)
 class TestModelBackendWithExpiry(TestModelBackend):
 
-    def setUp(self):
-        super(TestModelBackendWithExpiry, self).setUp()
-        self.backend.max_age = 10                   # override class variable
-
+    @override_settings(SESAME_MAX_AGE=-10)
     def test_expired_token(self):
-        self.backend.max_age = -10                  # just for this test
-
         token = self.backend.create_token(self.user)
         user = self.backend.parse_token(token)
         self.assertEqual(user, None)
         self.assertIn("Expired token", self.get_log())
 
 
+@override_settings(SESAME_ONE_TIME=True)
 class TestModelBackendWithOneTime(TestModelBackend):
 
     def setUp(self):
@@ -99,14 +97,13 @@ class TestModelBackendWithOneTime(TestModelBackend):
             password='doe',
             last_login=timezone.now() - datetime.timedelta(1),
         )
-        self.backend.one_time = True                # override class variable
 
     def test_authenticate(self):
         token = self.backend.create_token(self.login_user)
         user = self.backend.authenticate(request=None, url_auth_token=token)
         self.assertEqual(user, self.login_user)
 
-    def test_token(self):
+    def test_valid_token(self):
         token = self.backend.create_token(self.login_user)
         user = self.backend.parse_token(token)
         self.assertEqual(user, self.login_user)
@@ -118,13 +115,38 @@ class TestModelBackendWithOneTime(TestModelBackend):
         self.assertEqual(user, self.user)
         self.assertIn("Valid token for user john", self.get_log())
 
-    def test_invalid_token(self):
+    def test_password_change(self):
         token = self.backend.create_token(self.user)
         self.user.last_login = timezone.now()
         self.user.save()
         user = self.backend.parse_token(token)
         self.assertEqual(user, None)
         self.assertIn("Invalid token", self.get_log())
+
+
+@override_settings(
+    SESAME_INVALIDATE_ON_PASSWORD_CHANGE=False,
+    SESAME_MAX_AGE=3600,
+)
+class TestModelBackendWithoutInvalidateOnPasswordChange(TestModelBackend):
+
+    def test_password_change(self):
+        token = self.backend.create_token(self.user)
+        self.user.set_password('hunter2')
+        self.user.save()
+        user = self.backend.parse_token(token)
+        self.assertEqual(user, self.user)
+        self.assertIn("Valid token for user john", self.get_log())
+
+    def test_insecure_configuration(self):
+        with override_settings(SESAME_MAX_AGE=None):
+            with self.assertRaises(ImproperlyConfigured) as exc:
+                ModelBackend()
+        self.assertEqual(
+            str(exc.exception),
+            "Insecure configuration: set SESAME_MAX_AGE to a low value "
+            "or set SESAME_INVALIDATE_ON_PASSWORD_CHANGE to True",
+        )
 
 
 @override_settings(AUTH_USER_MODEL='test_app.UUIDUser')

@@ -7,6 +7,7 @@ from django.conf import settings
 from django.contrib.auth import backends as auth_backends
 from django.contrib.auth import get_user_model
 from django.core import signing
+from django.core.exceptions import ImproperlyConfigured
 from django.utils import crypto
 from django.utils.functional import cached_property
 
@@ -29,6 +30,15 @@ class UrlAuthBackendMixin(object):
 
     max_age = getattr(settings, 'SESAME_MAX_AGE', None)
     one_time = getattr(settings, 'SESAME_ONE_TIME', False)
+    invalidate_on_password_change = getattr(
+        settings, 'SESAME_INVALIDATE_ON_PASSWORD_CHANGE', True)
+
+    def __init__(self, *args, **kwargs):
+        if self.max_age is None and not self.invalidate_on_password_change:
+            raise ImproperlyConfigured(
+                "Insecure configuration: set SESAME_MAX_AGE to a low value "
+                "or set SESAME_INVALIDATE_ON_PASSWORD_CHANGE to True")
+        super(UrlAuthBackendMixin, self).__init__(*args, **kwargs)
 
     @cached_property
     def signer(self):
@@ -77,7 +87,9 @@ class UrlAuthBackendMixin(object):
         datetime so that logging in revokes existing tokens.
 
         """
-        value = user.password
+        value = ''
+        if self.invalidate_on_password_change:
+            value += user.password
         if self.one_time:
             value += str(user.last_login)
         return value

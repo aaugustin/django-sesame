@@ -124,6 +124,11 @@ class UrlAuthBackendMixin(object):
         except signing.BadSignature:
             logger.debug("Bad token: %s", token)
             return
+        except Exception:
+            logger.exception(
+                "Valid signature but unexpected token - if you changed "
+                "django-sesame settings, you must regenerate tokens")
+            return
         user_pk, data = self.packer.unpack_pk(data)
         user = self.get_user(user_pk)
         if user is None:

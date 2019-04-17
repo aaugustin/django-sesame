@@ -84,6 +84,13 @@ class TestModelBackendWithExpiry(TestModelBackend):
         self.assertEqual(user, None)
         self.assertIn("Expired token", self.get_log())
 
+    def test_token_without_timestamp(self):
+        with override_settings(SESAME_MAX_AGE=None):
+            token = ModelBackend().create_token(self.user)
+        user = self.backend.parse_token(token)
+        self.assertEqual(user, None)
+        self.assertIn("Valid signature but unexpected token", self.get_log())
+
 
 @override_settings(SESAME_ONE_TIME=True)
 class TestModelBackendWithOneTime(TestModelBackend):

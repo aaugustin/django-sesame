@@ -14,7 +14,7 @@ from .compatibility import urlencode
 
 try:
     import ua_parser
-except ImportError:
+except ImportError:                                         # pragma: no cover
     ua_parser = None
 
 

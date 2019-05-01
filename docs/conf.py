@@ -42,7 +42,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'django-sesame'
-copyright = '2013-2014, Aymeric Augustin'
+copyright = '2012-2019, Aymeric Augustin'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the

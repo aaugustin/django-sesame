@@ -18,7 +18,10 @@ class TestModelBackend(TestCase):
         self.backend = ModelBackend()
 
         User = get_user_model()
-        self.user = User.objects.create(username='john')
+        self.user = User.objects.create(
+            username='john',
+            last_login=timezone.now() - datetime.timedelta(3600),
+        )
 
         self.log = io.StringIO()
         self.handler = logging.StreamHandler(self.log)
@@ -95,36 +98,17 @@ class TestModelBackendWithExpiry(TestModelBackend):
 @override_settings(SESAME_ONE_TIME=True)
 class TestModelBackendWithOneTime(TestModelBackend):
 
-    def setUp(self):
-        super(TestModelBackendWithOneTime, self).setUp()
-
-        User = get_user_model()
-        self.login_user = User.objects.create_user(
-            username='jane',
-            password='doe',
-            last_login=timezone.now() - datetime.timedelta(1),
-        )
-
-    def test_authenticate(self):
-        token = self.backend.create_token(self.login_user)
-        user = self.backend.authenticate(request=None, url_auth_token=token)
-        self.assertEqual(user, self.login_user)
-
-    def test_valid_token(self):
-        token = self.backend.create_token(self.login_user)
-        user = self.backend.parse_token(token)
-        self.assertEqual(user, self.login_user)
-        self.assertIn("Valid token for user jane", self.get_log())
-
-    def test_token_last_login_none(self):
+    def test_no_last_login(self):
+        self.user.last_login = None
+        self.user.save()
         token = self.backend.create_token(self.user)
         user = self.backend.parse_token(token)
         self.assertEqual(user, self.user)
         self.assertIn("Valid token for user john", self.get_log())
 
-    def test_password_change(self):
+    def test_last_login_change(self):
         token = self.backend.create_token(self.user)
-        self.user.last_login = timezone.now()
+        self.user.last_login = timezone.now() - datetime.timedelta(1800)
         self.user.save()
         user = self.backend.parse_token(token)
         self.assertEqual(user, None)

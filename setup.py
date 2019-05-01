@@ -15,7 +15,7 @@ with codecs.open(os.path.join(root_dir, 'README.rst'), encoding='utf-8') as f:
 
 setuptools.setup(
     name='django-sesame',
-    version='1.4',
+    version='1.5',
     description=description,
     long_description=long_description,
     url='https://github.com/aaugustin/django-sesame',

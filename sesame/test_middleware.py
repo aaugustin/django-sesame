@@ -26,10 +26,6 @@ SAFARI_USER_AGENT = (
 
 
 @override_settings(
-    AUTHENTICATION_BACKENDS=[
-        'django.contrib.auth.backends.ModelBackend',
-        'sesame.backends.ModelBackend',
-    ],
     MIDDLEWARE=[
         'django.contrib.sessions.middleware.SessionMiddleware',
         'django.contrib.auth.middleware.AuthenticationMiddleware',

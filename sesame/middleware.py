@@ -1,13 +1,11 @@
 from __future__ import unicode_literals
 
-from django.conf import settings
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import login
 from django.contrib.auth.models import AnonymousUser
 from django.shortcuts import redirect
 
 from .compatibility import urlencode
-
-TOKEN_NAME = getattr(settings, 'SESAME_TOKEN_NAME', 'url_auth_token')
+from .utils import TOKEN_NAME, get_user
 
 
 class AuthenticationMiddleware:
@@ -28,8 +26,7 @@ class AuthenticationMiddleware:
         after a successful login when sessions are enabled, else ``None``.
 
         """
-        token = request.GET.get(TOKEN_NAME)
-        user = None if token is None else authenticate(url_auth_token=token)
+        user = get_user(request)
 
         # If the sessions framework is enabled and the token is valid,
         # persist the login in session.

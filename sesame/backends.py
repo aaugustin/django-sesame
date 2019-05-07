@@ -146,12 +146,6 @@ class UrlAuthBackendMixin(object):
         logger.debug("Valid token for user %s: %s", user, token)
         return user
 
-
-class ModelBackend(UrlAuthBackendMixin, auth_backends.ModelBackend):
-    """
-    Authenticates against a token containing a signed user id.
-
-    """
     def authenticate(self, request, url_auth_token=None):
         """
         Check the token and return the corresponding user.
@@ -164,3 +158,10 @@ class ModelBackend(UrlAuthBackendMixin, auth_backends.ModelBackend):
             logger.exception("TypeError in %s, here's the traceback before "
                              "Django swallows it:", backend)
             raise
+
+
+class ModelBackend(UrlAuthBackendMixin, auth_backends.ModelBackend):
+    """
+    Authenticates against a token containing a signed user id.
+
+    """

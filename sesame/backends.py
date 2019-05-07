@@ -132,7 +132,7 @@ class UrlAuthBackendMixin(object):
         user_pk, data = self.packer.unpack_pk(data)
         user = self.get_user(user_pk)
         if user is None:
-            logger.debug("Unknown token: %s", token)
+            logger.debug("Unknown or inactive user: %s", user_pk)
             return
         h = crypto.pbkdf2(
             self.get_revocation_key(user),

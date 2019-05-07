@@ -137,6 +137,9 @@ should set ``SESAME_MAX_AGE`` to a short value to minimize risks. This option
 may be useful for generating tokens during a signup process, when you don't
 know if the token will be used before or after initializing the password.
 
+Finally, if the ``is_active`` attribute of a user is set to ``False``,
+django-sesame rejects authentication tokens for this user.
+
 Per-view authentication
 =======================
 

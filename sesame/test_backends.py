@@ -53,12 +53,20 @@ class TestModelBackend(TestCase):
         self.assertEqual(user, None)
         self.assertIn("Bad token", self.get_log())
 
-    def test_unknown_token(self):
+    def test_unknown_user(self):
         token = self.backend.create_token(self.user)
         self.user.delete()
         user = self.backend.parse_token(token)
         self.assertEqual(user, None)
-        self.assertIn("Unknown token", self.get_log())
+        self.assertIn("Unknown or inactive user", self.get_log())
+
+    def test_inactive_user(self):
+        self.user.is_active = False
+        self.user.save()
+        token = self.backend.create_token(self.user)
+        user = self.backend.parse_token(token)
+        self.assertEqual(user, None)
+        self.assertIn("Unknown or inactive user", self.get_log())
 
     def test_password_change(self):
         token = self.backend.create_token(self.user)

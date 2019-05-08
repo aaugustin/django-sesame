@@ -13,14 +13,12 @@ from .backends import ModelBackend
 
 
 class TestModelBackend(TestCase):
-
     def setUp(self):
         self.backend = ModelBackend()
 
         User = get_user_model()
         self.user = User.objects.create(
-            username='john',
-            last_login=timezone.now() - datetime.timedelta(3600),
+            username='john', last_login=timezone.now() - datetime.timedelta(3600)
         )
 
         self.log = io.StringIO()
@@ -79,6 +77,7 @@ class TestModelBackend(TestCase):
     def test_type_error_is_logged(self):
         def raise_type_error(*args):
             raise TypeError
+
         self.backend.parse_token = raise_type_error
         with self.assertRaises(TypeError):
             self.backend.authenticate(request=None, url_auth_token=None)
@@ -87,7 +86,6 @@ class TestModelBackend(TestCase):
 
 @override_settings(SESAME_MAX_AGE=10)
 class TestModelBackendWithExpiry(TestModelBackend):
-
     @override_settings(SESAME_MAX_AGE=-10)
     def test_expired_token(self):
         token = self.backend.create_token(self.user)
@@ -105,7 +103,6 @@ class TestModelBackendWithExpiry(TestModelBackend):
 
 @override_settings(SESAME_ONE_TIME=True)
 class TestModelBackendWithOneTime(TestModelBackend):
-
     def test_no_last_login(self):
         self.user.last_login = None
         self.user.save()
@@ -123,12 +120,8 @@ class TestModelBackendWithOneTime(TestModelBackend):
         self.assertIn("Invalid token", self.get_log())
 
 
-@override_settings(
-    SESAME_INVALIDATE_ON_PASSWORD_CHANGE=False,
-    SESAME_MAX_AGE=3600,
-)
+@override_settings(SESAME_INVALIDATE_ON_PASSWORD_CHANGE=False, SESAME_MAX_AGE=3600)
 class TestModelBackendWithoutInvalidateOnPasswordChange(TestModelBackend):
-
     def test_password_change(self):
         token = self.backend.create_token(self.user)
         self.user.set_password('hunter2')
@@ -156,7 +149,6 @@ class TestModelBackendWithUUIDPrimaryKey(TestModelBackend):
 
 @override_settings(AUTH_USER_MODEL='test_app.CharUser')
 class TestModelBackendWithUnsupportedPrimaryKey(TestCase):
-
     def setUp(self):
         self.backend = ModelBackend()
 
@@ -168,6 +160,5 @@ class TestModelBackendWithUnsupportedPrimaryKey(TestCase):
             self.backend.create_token(self.user)
 
         self.assertEqual(
-            str(exc.exception),
-            "CharField primary keys aren't supported at this time",
+            str(exc.exception), "CharField primary keys aren't supported at this time"
         )

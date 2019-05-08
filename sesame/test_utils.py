@@ -7,7 +7,6 @@ from .utils import get_parameters, get_query_string, get_user
 
 
 class TestUtils(TestCase):
-
     def setUp(self):
         self.user = User.objects.create_user(username='john', password='doe')
 

@@ -28,7 +28,6 @@ class BasePacker(object):
 
 
 class IntPacker(object):
-
     @staticmethod
     def pack_pk(user_pk):
         return struct.pack(str('!i'), user_pk)
@@ -39,7 +38,6 @@ class IntPacker(object):
 
 
 class UUIDPacker(object):
-
     @staticmethod
     def pack_pk(user_pk):
         return user_pk.bytes
@@ -49,8 +47,4 @@ class UUIDPacker(object):
         return uuid.UUID(bytes=data[:16]), data[16:]
 
 
-PACKERS = {
-    'AutoField': IntPacker,
-    'IntegerField': IntPacker,
-    'UUIDField': UUIDPacker,
-}
+PACKERS = {'AutoField': IntPacker, 'IntegerField': IntPacker, 'UUIDField': UUIDPacker}

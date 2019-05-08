@@ -24,6 +24,7 @@ class UrlAuthBackendMixin(object):
     ``parse_token(token)`` from its ``authenticate(**credentials)``.
 
     """
+
     salt = getattr(settings, 'SESAME_SALT', 'sesame')
     digest = getattr(settings, 'SESAME_DIGEST', hashlib.md5)
     iterations = getattr(settings, 'SESAME_ITERATIONS', 10000)
@@ -31,13 +32,15 @@ class UrlAuthBackendMixin(object):
     max_age = getattr(settings, 'SESAME_MAX_AGE', None)
     one_time = getattr(settings, 'SESAME_ONE_TIME', False)
     invalidate_on_password_change = getattr(
-        settings, 'SESAME_INVALIDATE_ON_PASSWORD_CHANGE', True)
+        settings, 'SESAME_INVALIDATE_ON_PASSWORD_CHANGE', True
+    )
 
     def __init__(self, *args, **kwargs):
         if self.max_age is None and not self.invalidate_on_password_change:
             raise ImproperlyConfigured(
                 "Insecure configuration: set SESAME_MAX_AGE to a low value "
-                "or set SESAME_INVALIDATE_ON_PASSWORD_CHANGE to True")
+                "or set SESAME_INVALIDATE_ON_PASSWORD_CHANGE to True"
+            )
         super(UrlAuthBackendMixin, self).__init__(*args, **kwargs)
 
     @cached_property
@@ -73,7 +76,8 @@ class UrlAuthBackendMixin(object):
             Packer = packers.PACKERS[pk_type]
         except KeyError:
             raise NotImplementedError(
-                pk_type + " primary keys aren't supported at this time")
+                pk_type + " primary keys aren't supported at this time"
+            )
         return Packer()
 
     def get_revocation_key(self, user):
@@ -127,7 +131,8 @@ class UrlAuthBackendMixin(object):
         except Exception:
             logger.exception(
                 "Valid signature but unexpected token - if you changed "
-                "django-sesame settings, you must regenerate tokens")
+                "django-sesame settings, you must regenerate tokens"
+            )
             return
         user_pk, data = self.packer.unpack_pk(data)
         user = self.get_user(user_pk)
@@ -155,8 +160,10 @@ class UrlAuthBackendMixin(object):
             return self.parse_token(url_auth_token)
         except TypeError:
             backend = "%s.%s" % (self.__module__, self.__class__.__name__)
-            logger.exception("TypeError in %s, here's the traceback before "
-                             "Django swallows it:", backend)
+            logger.exception(
+                "TypeError in %s, here's the traceback before Django swallows it:",
+                backend,
+            )
             raise
 
 

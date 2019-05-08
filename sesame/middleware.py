@@ -9,7 +9,6 @@ from .utils import TOKEN_NAME, get_user
 
 
 class AuthenticationMiddleware:
-
     def __init__(self, get_response):
         self.get_response = get_response
 
@@ -40,9 +39,9 @@ class AuthenticationMiddleware:
             # don't do this on Safari because it triggers the over-zealous
             # "Protection Against First Party Bounce Trackers" of ITP 2.0.
             if (
-                hasattr(request, 'user') and
-                request.method == 'GET' and
-                not self.is_safari(request)
+                hasattr(request, 'user')
+                and request.method == 'GET'
+                and not self.is_safari(request)
             ):
                 return self.get_redirect(request)
 
@@ -56,7 +55,7 @@ class AuthenticationMiddleware:
     def is_safari(request):
         try:
             from ua_parser import user_agent_parser
-        except ImportError:                                 # pragma: no cover
+        except ImportError:  # pragma: no cover
             return None
         else:
             user_agent = request.META.get('HTTP_USER_AGENT', '')

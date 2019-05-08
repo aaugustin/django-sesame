@@ -5,13 +5,9 @@ AUTHENTICATION_BACKENDS = [
     'sesame.backends.ModelBackend',
 ]
 
-CACHES = {
-    'default': {'BACKEND': 'django.core.cache.backends.locmem.LocMemCache'},
-}
+CACHES = {'default': {'BACKEND': 'django.core.cache.backends.locmem.LocMemCache'}}
 
-DATABASES = {
-    'default': {'ENGINE': 'django.db.backends.sqlite3'},
-}
+DATABASES = {'default': {'ENGINE': 'django.db.backends.sqlite3'}}
 
 INSTALLED_APPS = [
     'django.contrib.auth',
@@ -33,8 +29,4 @@ SECRET_KEY = 'Anyone who finds an URL will be able to log in. Seriously.'
 
 SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
 
-TEMPLATES = [
-    {
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-    },
-]
+TEMPLATES = [{'BACKEND': 'django.template.backends.django.DjangoTemplates'}]

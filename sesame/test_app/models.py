@@ -11,10 +11,10 @@ class UUIDUser(auth_models.AbstractBaseUser):
     is_active = models.BooleanField(default=True)
     username = models.CharField(max_length=32, unique=True)
 
-    USERNAME_FIELD = 'username'
+    USERNAME_FIELD = "username"
 
 
 class CharUser(auth_models.AbstractBaseUser):
     username = models.CharField(max_length=32, primary_key=True)
 
-    USERNAME_FIELD = 'username'
+    USERNAME_FIELD = "username"

@@ -13,7 +13,7 @@ from django.utils.functional import cached_property
 
 from . import packers
 
-logger = logging.getLogger('sesame')
+logger = logging.getLogger("sesame")
 
 
 class UrlAuthBackendMixin(object):
@@ -25,14 +25,14 @@ class UrlAuthBackendMixin(object):
 
     """
 
-    salt = getattr(settings, 'SESAME_SALT', 'sesame')
-    digest = getattr(settings, 'SESAME_DIGEST', hashlib.md5)
-    iterations = getattr(settings, 'SESAME_ITERATIONS', 10000)
+    salt = getattr(settings, "SESAME_SALT", "sesame")
+    digest = getattr(settings, "SESAME_DIGEST", hashlib.md5)
+    iterations = getattr(settings, "SESAME_ITERATIONS", 10000)
 
-    max_age = getattr(settings, 'SESAME_MAX_AGE', None)
-    one_time = getattr(settings, 'SESAME_ONE_TIME', False)
+    max_age = getattr(settings, "SESAME_MAX_AGE", None)
+    one_time = getattr(settings, "SESAME_ONE_TIME", False)
     invalidate_on_password_change = getattr(
-        settings, 'SESAME_INVALIDATE_ON_PASSWORD_CHANGE', True
+        settings, "SESAME_INVALIDATE_ON_PASSWORD_CHANGE", True
     )
 
     def __init__(self, *args, **kwargs):
@@ -91,7 +91,7 @@ class UrlAuthBackendMixin(object):
         datetime so that logging in revokes existing tokens.
 
         """
-        value = ''
+        value = ""
         if self.invalidate_on_password_change:
             value += user.password
         if self.one_time:

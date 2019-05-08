@@ -27,28 +27,28 @@ SAFARI_USER_AGENT = (
 
 @override_settings(
     MIDDLEWARE=[
-        'django.contrib.sessions.middleware.SessionMiddleware',
-        'django.contrib.auth.middleware.AuthenticationMiddleware',
-        'sesame.middleware.AuthenticationMiddleware',
+        "django.contrib.sessions.middleware.SessionMiddleware",
+        "django.contrib.auth.middleware.AuthenticationMiddleware",
+        "sesame.middleware.AuthenticationMiddleware",
     ],
     TEMPLATES=[
         {
-            'BACKEND': 'django.template.backends.django.DjangoTemplates',
-            'OPTIONS': {
-                'context_processors': ['django.contrib.auth.context_processors.auth']
+            "BACKEND": "django.template.backends.django.DjangoTemplates",
+            "OPTIONS": {
+                "context_processors": ["django.contrib.auth.context_processors.auth"]
             },
         }
     ],
 )
 class TestMiddleware(TestCase):
     def setUp(self):
-        self.user = User.objects.create_user(username='john', password='doe')
+        self.user = User.objects.create_user(username="john", password="doe")
         self.token = ModelBackend().create_token(self.user)
         self.bad_token = self.token.lower()
 
         self.log = io.StringIO()
         self.handler = logging.StreamHandler(self.log)
-        self.logger = logging.getLogger('sesame')
+        self.logger = logging.getLogger("sesame")
         self.logger.addHandler(self.handler)
 
     def tearDown(self):
@@ -73,40 +73,40 @@ class TestMiddleware(TestCase):
         self.assertIsInstance(get_user(request), AnonymousUser)
         self.assertIsInstance(request.user, AnonymousUser)
 
-        self.assertContains(response, 'anonymous')
+        self.assertContains(response, "anonymous")
 
     def test_token(self):
-        response = self.client.get('/', {'url_auth_token': self.token})
-        self.assertUserLoggedIn(response, redirect_url='/')
+        response = self.client.get("/", {"url_auth_token": self.token})
+        self.assertUserLoggedIn(response, redirect_url="/")
 
     def test_token_with_path_and_param(self):
-        response = self.client.get('/foo', {'url_auth_token': self.token, 'bar': 42})
-        self.assertUserLoggedIn(response, redirect_url='/foo?bar=42')
+        response = self.client.get("/foo", {"url_auth_token": self.token, "bar": 42})
+        self.assertUserLoggedIn(response, redirect_url="/foo?bar=42")
 
     def test_token_in_POST_request(self):
-        response = self.client.post('/?' + urlencode({'url_auth_token': self.token}))
+        response = self.client.post("/?" + urlencode({"url_auth_token": self.token}))
         self.assertUserLoggedIn(response)
 
     @unittest.skipIf(ua_parser is None, "test requires ua-parser")
     def test_token_in_Safari_request(self):
         response = self.client.get(
-            '/', {'url_auth_token': self.token}, HTTP_USER_AGENT=SAFARI_USER_AGENT
+            "/", {"url_auth_token": self.token}, HTTP_USER_AGENT=SAFARI_USER_AGENT
         )
         self.assertUserLoggedIn(response)
 
     def test_bad_token(self):
-        response = self.client.get('/', {'url_auth_token': self.bad_token})
+        response = self.client.get("/", {"url_auth_token": self.bad_token})
         self.assertUserNotLoggedIn(response)
 
     def test_no_token(self):
-        response = self.client.get('/')
+        response = self.client.get("/")
         self.assertUserNotLoggedIn(response)
 
 
 @override_settings(
     MIDDLEWARE=[
-        'django.contrib.sessions.middleware.SessionMiddleware',
-        'sesame.middleware.AuthenticationMiddleware',
+        "django.contrib.sessions.middleware.SessionMiddleware",
+        "sesame.middleware.AuthenticationMiddleware",
     ]
 )
 class TestWithoutAuthMiddleware(TestMiddleware):
@@ -118,9 +118,9 @@ class TestWithoutAuthMiddleware(TestMiddleware):
 
 @override_settings(
     MIDDLEWARE=[
-        'django.contrib.sessions.middleware.SessionMiddleware',
-        'sesame.middleware.AuthenticationMiddleware',
-        'django.contrib.auth.middleware.AuthenticationMiddleware',
+        "django.contrib.sessions.middleware.SessionMiddleware",
+        "sesame.middleware.AuthenticationMiddleware",
+        "django.contrib.auth.middleware.AuthenticationMiddleware",
     ]
 )
 class TestBeforeAuthMiddleware(TestMiddleware):
@@ -132,7 +132,7 @@ class TestBeforeAuthMiddleware(TestMiddleware):
     redirect_enabled = False
 
 
-@override_settings(MIDDLEWARE=['sesame.middleware.AuthenticationMiddleware'])
+@override_settings(MIDDLEWARE=["sesame.middleware.AuthenticationMiddleware"])
 class TestWithoutSessionMiddleware(TestMiddleware):
     def assertUserLoggedIn(self, response, redirect_url=None):
         self.assertEqual(response.wsgi_request.user, self.user)
@@ -140,4 +140,4 @@ class TestWithoutSessionMiddleware(TestMiddleware):
 
     def assertUserNotLoggedIn(self, response):
         self.assertIsInstance(response.wsgi_request.user, AnonymousUser)
-        self.assertContains(response, 'anonymous')
+        self.assertContains(response, "anonymous")

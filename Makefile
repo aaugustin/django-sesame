@@ -3,7 +3,7 @@ export DJANGO_SETTINGS_MODULE:=sesame.test_settings
 
 style:
 	isort --recursive sesame
-	black -S sesame
+	black sesame
 	flake8 sesame
 
 test:

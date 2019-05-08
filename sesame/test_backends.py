@@ -18,12 +18,12 @@ class TestModelBackend(TestCase):
 
         User = get_user_model()
         self.user = User.objects.create(
-            username='john', last_login=timezone.now() - datetime.timedelta(3600)
+            username="john", last_login=timezone.now() - datetime.timedelta(3600)
         )
 
         self.log = io.StringIO()
         self.handler = logging.StreamHandler(self.log)
-        self.logger = logging.getLogger('sesame')
+        self.logger = logging.getLogger("sesame")
         self.logger.addHandler(self.handler)
         self.logger.setLevel(logging.DEBUG)
 
@@ -68,7 +68,7 @@ class TestModelBackend(TestCase):
 
     def test_password_change(self):
         token = self.backend.create_token(self.user)
-        self.user.set_password('hunter2')
+        self.user.set_password("hunter2")
         self.user.save()
         user = self.backend.parse_token(token)
         self.assertEqual(user, None)
@@ -124,7 +124,7 @@ class TestModelBackendWithOneTime(TestModelBackend):
 class TestModelBackendWithoutInvalidateOnPasswordChange(TestModelBackend):
     def test_password_change(self):
         token = self.backend.create_token(self.user)
-        self.user.set_password('hunter2')
+        self.user.set_password("hunter2")
         self.user.save()
         user = self.backend.parse_token(token)
         self.assertEqual(user, self.user)
@@ -141,19 +141,19 @@ class TestModelBackendWithoutInvalidateOnPasswordChange(TestModelBackend):
         )
 
 
-@override_settings(AUTH_USER_MODEL='test_app.UUIDUser')
+@override_settings(AUTH_USER_MODEL="test_app.UUIDUser")
 class TestModelBackendWithUUIDPrimaryKey(TestModelBackend):
 
     pass
 
 
-@override_settings(AUTH_USER_MODEL='test_app.CharUser')
+@override_settings(AUTH_USER_MODEL="test_app.CharUser")
 class TestModelBackendWithUnsupportedPrimaryKey(TestCase):
     def setUp(self):
         self.backend = ModelBackend()
 
         User = get_user_model()
-        self.user = User.objects.create(username='john')
+        self.user = User.objects.create(username="john")
 
     def test_authenticate(self):
         with self.assertRaises(NotImplementedError) as exc:

@@ -6,7 +6,7 @@ from django.contrib.auth import authenticate
 from .backends import UrlAuthBackendMixin
 from .compatibility import urlencode
 
-TOKEN_NAME = getattr(settings, 'SESAME_TOKEN_NAME', 'url_auth_token')
+TOKEN_NAME = getattr(settings, "SESAME_TOKEN_NAME", "url_auth_token")
 
 
 def get_parameters(user):
@@ -22,7 +22,7 @@ def get_query_string(user):
     Return a complete query string to log in `user`.
 
     """
-    return '?' + urlencode(get_parameters(user))
+    return "?" + urlencode(get_parameters(user))
 
 
 def get_user(request):

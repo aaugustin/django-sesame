@@ -29,7 +29,7 @@ class AuthenticationMiddleware:
 
         # If the sessions framework is enabled and the token is valid,
         # persist the login in session.
-        if hasattr(request, 'session') and user is not None:
+        if hasattr(request, "session") and user is not None:
             login(request, user)
             # Once we persist the login in the session, if the authentication
             # middleware is enabled, it will set request.user in future
@@ -39,8 +39,8 @@ class AuthenticationMiddleware:
             # don't do this on Safari because it triggers the over-zealous
             # "Protection Against First Party Bounce Trackers" of ITP 2.0.
             if (
-                hasattr(request, 'user')
-                and request.method == 'GET'
+                hasattr(request, "user")
+                and request.method == "GET"
                 and not self.is_safari(request)
             ):
                 return self.get_redirect(request)
@@ -48,7 +48,7 @@ class AuthenticationMiddleware:
         # If the authentication middleware isn't enabled, set request.user.
         # (This attribute is overwritten by the authentication middleware
         # if it runs after this one.)
-        if not hasattr(request, 'user'):
+        if not hasattr(request, "user"):
             request.user = user if user is not None else AnonymousUser()
 
     @staticmethod
@@ -58,9 +58,9 @@ class AuthenticationMiddleware:
         except ImportError:  # pragma: no cover
             return None
         else:
-            user_agent = request.META.get('HTTP_USER_AGENT', '')
-            browser = user_agent_parser.ParseUserAgent(user_agent)['family']
-            return browser == 'Safari'
+            user_agent = request.META.get("HTTP_USER_AGENT", "")
+            browser = user_agent_parser.ParseUserAgent(user_agent)["family"]
+            return browser == "Safari"
 
     @staticmethod
     def get_redirect(request):
@@ -72,5 +72,5 @@ class AuthenticationMiddleware:
         params.pop(TOKEN_NAME)
         url = request.path
         if params:
-            url += '?' + urlencode(params)
+            url += "?" + urlencode(params)
         return redirect(url)

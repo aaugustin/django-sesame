@@ -11,7 +11,7 @@ test:
 
 coverage:
 	coverage erase
-	coverage run --branch --source=sesame `which django-admin` test sesame
+	coverage run `which django-admin` test sesame
 	coverage html
 
 clean:

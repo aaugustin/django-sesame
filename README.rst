@@ -1,5 +1,5 @@
 .. image:: logo/horizontal.svg
-   :width: 360px
+   :width: 400px
    :alt: django-sesame
 
 `django-sesame`_ provides frictionless authentication with "Magic Links" for

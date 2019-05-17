@@ -24,6 +24,12 @@ SAFARI_USER_AGENT = (
     "Version/12.1 Safari/605.1.15"
 )
 
+CHROME_IOS_USER_AGENT = (
+    "Mozilla/5.0 (iPhone; CPU iPhone OS 10_3 like Mac OS X) "
+    "AppleWebKit/602.1.50 (KHTML, like Gecko) "
+    "CriOS/56.0.2924.75 Mobile/14E5239e Safari/602.1"
+)
+
 
 @override_settings(
     MIDDLEWARE=[
@@ -91,6 +97,13 @@ class TestMiddleware(TestCase):
     def test_token_in_Safari_request(self):
         response = self.client.get(
             "/", {"url_auth_token": self.token}, HTTP_USER_AGENT=SAFARI_USER_AGENT
+        )
+        self.assertUserLoggedIn(response)
+
+    @unittest.skipIf(ua_parser is None, "test requires ua-parser")
+    def test_token_in_iOS_request(self):
+        response = self.client.get(
+            "/", {"url_auth_token": self.token}, HTTP_USER_AGENT=CHROME_IOS_USER_AGENT
         )
         self.assertUserLoggedIn(response)
 

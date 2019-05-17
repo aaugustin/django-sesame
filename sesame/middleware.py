@@ -59,8 +59,11 @@ class AuthenticationMiddleware:
             return None
         else:
             user_agent = request.META.get("HTTP_USER_AGENT", "")
-            browser = user_agent_parser.ParseUserAgent(user_agent)["family"]
-            return browser == "Safari"
+            parsed_ua = user_agent_parser.Parse(user_agent)
+            return (
+                parsed_ua["user_agent"]["family"] == "Safari"
+                or parsed_ua["os"]["family"] == "iOS"
+            )
 
     @staticmethod
     def get_redirect(request):

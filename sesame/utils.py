@@ -36,4 +36,4 @@ def get_user(request):
     if url_auth_token is None:
         return None
 
-    return authenticate(url_auth_token=url_auth_token)
+    return authenticate(request, url_auth_token=url_auth_token)

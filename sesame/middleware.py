@@ -25,7 +25,7 @@ class AuthenticationMiddleware:
         after a successful login when sessions are enabled, else ``None``.
 
         """
-        user = get_user(request)
+        user = get_user(request, update_last_login=False)
 
         # If django.contrib.sessions is enabled and the token is valid,
         # persist the login in session.

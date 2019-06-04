@@ -65,9 +65,14 @@ django-sesame is tested with:
 - Django 1.11 (LTS), 2.1 and 2.2;
 - all supported Python versions.
 
-It builds upon ``django.contrib.auth``. It supports custom user models,
-provided they have an integer or UUID primary keys. Additional types could be
-supported if there's a use case.
+It builds upon ``django.contrib.auth``.
+
+It supports custom user models, provided:
+
+- They have an integer or UUID primary key — other types could be added
+  if there's a use case;
+- They have ``password`` and ``last_login`` fields — most custom user models
+  inherit them from ``AbstractBaseUser``.
 
 django-sesame is released under the BSD license, like Django itself.
 
@@ -167,13 +172,28 @@ in a view as follows::
             raise PermissionDenied
         return HttpResponse("Hello {}!".format(user))
 
-Or you can call the ``authenticate`` function from ``django.contrib.auth``
-to verify an authentication token. The ``sesame.backends.ModelBackend``
-authentication backend expects an ``url_auth_token`` argument::
+When ``SESAME_ONE_TIME`` is enabled, ``get_user()`` updates the user's last
+login date in order to invalidate the token. When ``SESAME_ONE_TIME`` isn't
+enabled, it doesn't, because making a database write for every call to
+``get_user()`` could degrade performance. You can override this behavior with
+the ``update_last_login`` keyword argument::
+
+    get_user(request, update_last_login=True)   # update last_login
+    get_user(request, update_last_login=False)  # don't update last_login
+
+``get_user()`` is a thin wrapper around the low-level ``authenticate()``
+function from ``django.contrib.auth``. If you use ``authenticate()`` to verify
+an authentication token, the ``sesame.backends.ModelBackend`` authentication
+backend expects an ``url_auth_token`` argument::
 
     from django.contrib.auth import authenticate
 
     user = authenticate(url_auth_token=...)
+
+If you rely on ``authenticate()``, you must update ``user.last_login`` to
+ensure one-time tokens are invalidated. Indeed, in ``django.contrib.auth``,
+``authenticate()`` is a low-level function and the higher-level ``login()``
+function is responsible for updating ``user.last_login``.
 
 Safari issues
 =============

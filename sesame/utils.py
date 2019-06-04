@@ -2,6 +2,7 @@ from __future__ import unicode_literals
 
 from django.conf import settings
 from django.contrib.auth import authenticate
+from django.utils import timezone
 
 from .backends import UrlAuthBackendMixin
 from .compatibility import urlencode
@@ -25,15 +26,27 @@ def get_query_string(user):
     return "?" + urlencode(get_parameters(user))
 
 
-def get_user(request):
+def get_user(request, update_last_login=None):
     """
     Authenticate a user based on the token found in the URL.
 
-    Return None if no valid token is found.
+    If a valid token is found, update the last login date and return the user.
+
+    Else, return None.
 
     """
     url_auth_token = request.GET.get(TOKEN_NAME)
     if url_auth_token is None:
         return None
 
-    return authenticate(request, url_auth_token=url_auth_token)
+    user = authenticate(request, url_auth_token=url_auth_token)
+    if user is None:
+        return None
+
+    if update_last_login is None:
+        update_last_login = getattr(settings, "SESAME_ONE_TIME", False)
+    if update_last_login:
+        user.last_login = timezone.now()
+        user.save(update_fields=["last_login"])
+
+    return user

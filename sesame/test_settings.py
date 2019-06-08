@@ -23,6 +23,8 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
 ]
 
+PASSWORD_HASHERS = ["django.contrib.auth.hashers.SHA1PasswordHasher"]
+
 ROOT_URLCONF = "sesame.test_urls"
 
 SECRET_KEY = "Anyone who finds an URL will be able to log in. Seriously."

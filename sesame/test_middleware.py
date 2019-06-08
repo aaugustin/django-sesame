@@ -91,6 +91,23 @@ class TestMiddleware(TestCase):
         response = self.client.get("/", self.get_params())
         self.assertUserLoggedIn(response, redirect_url="/")
 
+    def test_reuse_token(self):
+        params = self.get_params()
+        response = self.client.get("/", params)
+        self.assertUserLoggedIn(response, redirect_url="/")
+        self.client.logout()
+        response = self.client.get("/", params)
+        self.assertUserLoggedIn(response, redirect_url="/")
+
+    @override_settings(SESAME_ONE_TIME=True)
+    def test_reuse_one_time_token(self):
+        params = self.get_params()
+        response = self.client.get("/", params)
+        self.assertUserLoggedIn(response, redirect_url="/")
+        self.client.logout()
+        response = self.client.get("/", params)
+        self.assertUserNotLoggedIn(response)
+
     # one query to get the user matching the token
     # one query to update their last login date
     NUM_QUERIES = 2

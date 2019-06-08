@@ -49,8 +49,6 @@ CHROME_IOS_USER_AGENT = (
 class TestMiddleware(TestCase):
     def setUp(self):
         self.user = User.objects.create_user(username="john", password="doe")
-        self.token = ModelBackend().create_token(self.user)
-        self.bad_token = self.token.lower()
 
         self.log = io.StringIO()
         self.handler = logging.StreamHandler(self.log)
@@ -81,43 +79,63 @@ class TestMiddleware(TestCase):
 
         self.assertContains(response, "anonymous")
 
+    def get_params(self):
+        return {"url_auth_token": ModelBackend().create_token(self.user)}
+
     def test_token(self):
-        response = self.client.get("/", {"url_auth_token": self.token})
+        response = self.client.get("/", self.get_params())
+        self.assertUserLoggedIn(response, redirect_url="/")
+
+    @override_settings(SESAME_ONE_TIME=True)
+    def test_one_time_token(self):
+        response = self.client.get("/", self.get_params())
         self.assertUserLoggedIn(response, redirect_url="/")
 
     # one query to get the user matching the token
     # one query to update their last login date
     NUM_QUERIES = 2
 
-    def test_num_queries(self):
+    def test_token_num_queries(self):
         with self.assertNumQueries(self.NUM_QUERIES):
-            response = self.client.get("/", {"url_auth_token": self.token})
+            response = self.client.get("/", self.get_params())
+        self.assertUserLoggedIn(response, redirect_url="/")
+
+    ONE_TIME_NUM_QUERIES = 2
+
+    @override_settings(SESAME_ONE_TIME=True)
+    def test_one_time_token_num_queries(self):
+        with self.assertNumQueries(self.ONE_TIME_NUM_QUERIES):
+            response = self.client.get("/", self.get_params())
         self.assertUserLoggedIn(response, redirect_url="/")
 
     def test_token_with_path_and_param(self):
-        response = self.client.get("/foo", {"url_auth_token": self.token, "bar": 42})
+        params = self.get_params()
+        params["bar"] = 42
+        response = self.client.get("/foo", params)
         self.assertUserLoggedIn(response, redirect_url="/foo?bar=42")
 
     def test_token_in_POST_request(self):
-        response = self.client.post("/?" + urlencode({"url_auth_token": self.token}))
+        response = self.client.post("/?" + urlencode(self.get_params()))
         self.assertUserLoggedIn(response)
 
     @unittest.skipIf(ua_parser is None, "test requires ua-parser")
     def test_token_in_Safari_request(self):
         response = self.client.get(
-            "/", {"url_auth_token": self.token}, HTTP_USER_AGENT=SAFARI_USER_AGENT
+            "/", self.get_params(), HTTP_USER_AGENT=SAFARI_USER_AGENT
         )
         self.assertUserLoggedIn(response)
 
     @unittest.skipIf(ua_parser is None, "test requires ua-parser")
     def test_token_in_iOS_request(self):
         response = self.client.get(
-            "/", {"url_auth_token": self.token}, HTTP_USER_AGENT=CHROME_IOS_USER_AGENT
+            "/", self.get_params(), HTTP_USER_AGENT=CHROME_IOS_USER_AGENT
         )
         self.assertUserLoggedIn(response)
 
     def test_bad_token(self):
-        response = self.client.get("/", {"url_auth_token": self.bad_token})
+        params = self.get_params()
+        params["url_auth_token"] = params["url_auth_token"].lower()
+        response = self.client.get("/", params)
         self.assertUserNotLoggedIn(response)
 
     def test_no_token(self):
@@ -157,6 +175,7 @@ class TestBeforeAuthMiddleware(TestMiddleware):
     # ``request.user`` attribute set by the sesame middleware via
     # ``login(request, user)``, which causes a duplicate query.
     NUM_QUERIES = TestMiddleware.NUM_QUERIES + 1
+    ONE_TIME_NUM_QUERIES = TestMiddleware.ONE_TIME_NUM_QUERIES + 1
 
 
 @override_settings(MIDDLEWARE=["sesame.middleware.AuthenticationMiddleware"])
@@ -169,5 +188,6 @@ class TestWithoutSessionMiddleware(TestMiddleware):
         self.assertIsInstance(response.wsgi_request.user, AnonymousUser)
         self.assertContains(response, "anonymous")
 
-    # last login date isn't updated when the session middleware isn't enabled
+    # The last login date isn't updated when the session middleware isn't
+    # enabled, except for one-time tokens.
     NUM_QUERIES = TestMiddleware.NUM_QUERIES - 1

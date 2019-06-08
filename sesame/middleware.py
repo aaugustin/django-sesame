@@ -27,7 +27,7 @@ class AuthenticationMiddleware:
         """
         user = get_user(request)
 
-        # If the sessions framework is enabled and the token is valid,
+        # If django.contrib.sessions is enabled and the token is valid,
         # persist the login in session.
         if hasattr(request, "session") and user is not None:
             login(request, user)
@@ -45,9 +45,7 @@ class AuthenticationMiddleware:
             ):
                 return self.get_redirect(request)
 
-        # If the authentication middleware isn't enabled, set request.user.
-        # (This attribute is overwritten by the authentication middleware
-        # if it runs after this one.)
+        # If django.contrib.auth isn't enabled, set request.user.
         if not hasattr(request, "user"):
             request.user = user if user is not None else AnonymousUser()
 

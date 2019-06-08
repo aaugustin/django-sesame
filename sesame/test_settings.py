@@ -1,8 +1,11 @@
 from __future__ import unicode_literals
 
+# Include the sesame backend first to avoid bogus database queries caused by
+# https://code.djangoproject.com/ticket/30556 and simplify assertNumQueries.
+
 AUTHENTICATION_BACKENDS = [
-    "django.contrib.auth.backends.ModelBackend",
     "sesame.backends.ModelBackend",
+    "django.contrib.auth.backends.ModelBackend",
 ]
 
 CACHES = {"default": {"BACKEND": "django.core.cache.backends.locmem.LocMemCache"}}

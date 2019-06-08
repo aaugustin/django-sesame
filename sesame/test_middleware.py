@@ -85,6 +85,15 @@ class TestMiddleware(TestCase):
         response = self.client.get("/", {"url_auth_token": self.token})
         self.assertUserLoggedIn(response, redirect_url="/")
 
+    # one query to get the user matching the token
+    # one query to update their last login date
+    NUM_QUERIES = 2
+
+    def test_num_queries(self):
+        with self.assertNumQueries(self.NUM_QUERIES):
+            response = self.client.get("/", {"url_auth_token": self.token})
+        self.assertUserLoggedIn(response, redirect_url="/")
+
     def test_token_with_path_and_param(self):
         response = self.client.get("/foo", {"url_auth_token": self.token, "bar": 42})
         self.assertUserLoggedIn(response, redirect_url="/foo?bar=42")
@@ -144,6 +153,11 @@ class TestBeforeAuthMiddleware(TestMiddleware):
     # django.contrib.auth isn't enabled.
     redirect_enabled = False
 
+    # Furthermore, the django.contrib.auth middleware overrides the
+    # ``request.user`` attribute set by the sesame middleware via
+    # ``login(request, user)``, which causes a duplicate query.
+    NUM_QUERIES = TestMiddleware.NUM_QUERIES + 1
+
 
 @override_settings(MIDDLEWARE=["sesame.middleware.AuthenticationMiddleware"])
 class TestWithoutSessionMiddleware(TestMiddleware):
@@ -154,3 +168,6 @@ class TestWithoutSessionMiddleware(TestMiddleware):
     def assertUserNotLoggedIn(self, response):
         self.assertIsInstance(response.wsgi_request.user, AnonymousUser)
         self.assertContains(response, "anonymous")
+
+    # last login date isn't updated when the session middleware isn't enabled
+    NUM_QUERIES = TestMiddleware.NUM_QUERIES - 1

@@ -219,3 +219,55 @@ If ``django.contrib.sessions.middleware.SessionMiddleware`` and
 ``django.contrib.auth.middleware.AuthenticationMiddleware`` aren't enabled,
 ``sesame.middleware.AuthenticationMiddleware`` sets ``request.user`` to the
 currently logged-in user or ``AnonymousUser()``.
+
+Changelog
+=========
+
+1.7
+---
+
+* Fixed invalidation of one-time tokens in ``get_user()``.
+
+1.6
+---
+
+* Fixed detection of Safari on iOS.
+
+1.5
+---
+
+* Added support for single use tokens with the ``SESAME_ONE_TIME`` setting.
+* Added support for not invalidating tokens on password change with the
+  ``SESAME_INVALIDATE_ON_PASSWORD_CHANGE`` setting.
+* Added compatibility with custom user models where the primary key is a UUID.
+* Added the ``get_user()`` function to obtain a user instance from a request.
+* Improved error message for pre-existing tokens when changing the
+  ``SESAME_MAX_AGE`` setting.
+* Fixed authentication on Safari by disabling the redirect which triggers ITP.
+
+1.4
+---
+
+* Added a redirect to the same URL with the query string parameter removed.
+
+1.3
+---
+
+* Added compatibility with Django ≥ 2.0.
+
+1.2
+---
+
+* Added the ability to rename the query string parameter with the
+  ``SESAME_TOKEN_NAME`` setting.
+* Added compatibility with Django ≥ 1.8.
+
+1.1
+---
+
+* Added support for expiring tokens with the ``SESAME_MAX_AGE`` setting.
+
+1.0
+---
+
+* Initial release.

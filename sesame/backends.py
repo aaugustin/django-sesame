@@ -151,7 +151,7 @@ class UrlAuthBackendMixin(object):
         logger.debug("Valid token for user %s: %s", user, token)
         return user
 
-    def authenticate(self, request, url_auth_token=None):
+    def authenticate(self, request, url_auth_token):
         """
         Check the token and return the corresponding user.
 

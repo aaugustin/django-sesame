@@ -156,15 +156,7 @@ class UrlAuthBackendMixin(object):
         Check the token and return the corresponding user.
 
         """
-        try:
-            return self.parse_token(url_auth_token)
-        except TypeError:
-            backend = "%s.%s" % (self.__module__, self.__class__.__name__)
-            logger.exception(
-                "TypeError in %s, here's the traceback before Django swallows it:",
-                backend,
-            )
-            raise
+        return self.parse_token(url_auth_token)
 
 
 class ModelBackend(UrlAuthBackendMixin, auth_backends.ModelBackend):

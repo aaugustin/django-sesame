@@ -38,7 +38,10 @@ def get_user(request, update_last_login=None):
     url_auth_token = request.GET.get(TOKEN_NAME)
     if url_auth_token is None:
         return None
-
+    
+    if user.is_active == False:
+        return None
+    
     user = authenticate(request, url_auth_token=url_auth_token)
     if user is None:
         return None

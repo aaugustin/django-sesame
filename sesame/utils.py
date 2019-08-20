@@ -42,7 +42,10 @@ def get_user(request, update_last_login=None):
     user = authenticate(request, url_auth_token=url_auth_token)
     if user is None:
         return None
-
+    
+    if user.is_active == False:
+        return None
+    
     if update_last_login is None:
         update_last_login = getattr(settings, "SESAME_ONE_TIME", False)
     if update_last_login:

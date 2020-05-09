@@ -187,6 +187,11 @@ class TestModelBackendWithUUIDPrimaryKey(TestModelBackend):
     pass
 
 
+@override_settings(AUTH_USER_MODEL="test_app.BigAutoFieldUser")
+class TestModelBackendWithBigAutoFieldPrimaryKey(TestModelBackend):
+
+    pass
+
 @override_settings(AUTH_USER_MODEL="test_app.CharUser")
 class TestModelBackendWithUnsupportedPrimaryKey(TestCase):
     def setUp(self):

@@ -18,3 +18,11 @@ class CharUser(auth_models.AbstractBaseUser):
     username = models.CharField(max_length=32, primary_key=True)
 
     USERNAME_FIELD = "username"
+
+
+class BigAutoFieldUser(auth_models.AbstractBaseUser):
+    id = models.BigAutoField(primary_key=True)
+    is_active = models.BooleanField(default=True)
+    username = models.CharField(max_length=32, unique=True)
+
+    USERNAME_FIELD = "username"

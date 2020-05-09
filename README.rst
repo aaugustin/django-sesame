@@ -69,7 +69,7 @@ It builds upon ``django.contrib.auth``.
 
 It supports custom user models, provided:
 
-- They have an integer or UUID primary key — other types could be added
+- They have an integer, big integer or UUID primary key — other types could be added
   if there's a use case;
 - They have ``password`` and ``last_login`` fields — most custom user models
   inherit them from ``AbstractBaseUser``.

@@ -170,6 +170,12 @@ class TestModelBackendWithoutInvalidateOnPasswordChange(TestModelBackend):
         )
 
 
+@override_settings(AUTH_USER_MODEL="test_app.BigAutoUser")
+class TestModelBackendWithBigAutoPrimaryKey(TestModelBackend):
+
+    pass
+
+
 @override_settings(AUTH_USER_MODEL="test_app.UUIDUser")
 class TestModelBackendWithUUIDPrimaryKey(TestModelBackend):
 

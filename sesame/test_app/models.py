@@ -24,3 +24,10 @@ class BooleanUser(auth_models.AbstractBaseUser):
     username = models.BooleanField(primary_key=True)  # pathological!
 
     USERNAME_FIELD = "username"
+
+
+class StrUser(auth_models.AbstractBaseUser):
+    username = models.CharField(primary_key=True, max_length=24)
+    is_active = models.BooleanField(default=True)
+
+    USERNAME_FIELD = "username"

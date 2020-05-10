@@ -17,3 +17,5 @@ def reset_sesame_settings(**kwargs):
         UABM.invalidate_on_password_change = getattr(
             settings, "SESAME_INVALIDATE_ON_PASSWORD_CHANGE", True
         )
+    elif kwargs["setting"] == "SESAME_PACKER":
+        UABM.packer_path = getattr(settings, "SESAME_PACKER", None)

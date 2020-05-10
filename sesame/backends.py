@@ -8,6 +8,7 @@ from django.core import signing
 from django.core.exceptions import ImproperlyConfigured
 from django.utils import crypto
 from django.utils.functional import cached_property
+from django.utils.module_loading import import_string
 
 from . import packers
 
@@ -32,6 +33,8 @@ class UrlAuthBackendMixin:
     invalidate_on_password_change = getattr(
         settings, "SESAME_INVALIDATE_ON_PASSWORD_CHANGE", True
     )
+
+    packer_path = getattr(settings, "SESAME_PACKER", None)
 
     def __init__(self, *args, **kwargs):
         if self.max_age is None and not self.invalidate_on_password_change:
@@ -69,11 +72,14 @@ class UrlAuthBackendMixin:
 
     @cached_property
     def packer(self):
-        pk_type = get_user_model()._meta.pk.get_internal_type()
-        try:
-            Packer = packers.PACKERS[pk_type]
-        except KeyError:
-            raise NotImplementedError(pk_type + " primary keys aren't supported")
+        if self.packer_path is None:
+            pk_type = get_user_model()._meta.pk.get_internal_type()
+            try:
+                Packer = packers.PACKERS[pk_type]
+            except KeyError:
+                raise NotImplementedError(pk_type + " primary keys aren't supported")
+        else:
+            Packer = import_string(self.packer_path)
         return Packer()
 
     def get_revocation_key(self, user):

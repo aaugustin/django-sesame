@@ -9,17 +9,12 @@ from django.test import TestCase, override_settings
 from django.utils import timezone
 
 from .backends import ModelBackend
+from .packers import BasePacker
 
 
-class TestModelBackend(TestCase):
+class CaptureLogMixin:
     def setUp(self):
-        self.backend = ModelBackend()
-
-        User = get_user_model()
-        self.user = User.objects.create(
-            username="john", last_login=timezone.now() - datetime.timedelta(3600)
-        )
-
+        super().setUp()
         self.log = io.StringIO()
         self.handler = logging.StreamHandler(self.log)
         self.logger = logging.getLogger("sesame")
@@ -32,6 +27,21 @@ class TestModelBackend(TestCase):
 
     def tearDown(self):
         self.logger.removeHandler(self.handler)
+        super().tearDown()
+
+
+class TestModelBackend(CaptureLogMixin, TestCase):
+
+    username = "john"
+
+    def setUp(self):
+        super().setUp()
+        self.backend = ModelBackend()
+        User = get_user_model()
+        self.user = User.objects.create(
+            username=self.username,
+            last_login=timezone.now() - datetime.timedelta(3600),
+        )
 
     def test_authenticate(self):
         token = self.backend.create_token(self.user)
@@ -42,7 +52,7 @@ class TestModelBackend(TestCase):
         token = self.backend.create_token(self.user)
         user = self.backend.parse_token(token)
         self.assertEqual(user, self.user)
-        self.assertIn("Valid token for user john", self.get_log())
+        self.assertIn("Valid token for user %s" % self.username, self.get_log())
 
     def test_bad_token(self):
         token = self.backend.create_token(self.user)
@@ -73,45 +83,6 @@ class TestModelBackend(TestCase):
         self.assertEqual(user, None)
         self.assertIn("Invalid token", self.get_log())
 
-    def test_naive_token_hijacking_fails(self):
-        # Tokens contain the PK of the user, the hash of the revocation key,
-        # and a signature. The revocation key may be identical for two users:
-        # - if SESAME_INVALIDATE_ON_PASSWORD_CHANGE is False or if they don't
-        #   have a password;
-        # - if SESAME_ONE_TIME is False or if they have the same last_login.
-        similar_user = type(self.user).objects.create(
-            username="jane", last_login=self.user.last_login
-        )
-
-        token1 = self.backend.create_token(self.user)
-        token2 = self.backend.create_token(similar_user)
-        self.backend.unsign(token1)
-        self.backend.unsign(token2)
-
-        # Check that the test scenario produces identical revocation keys.
-        # This test depends on the implementation of django.core.signing;
-        # however, the format of tokens must be stable to keep them valid.
-        data1, sig1 = token1.split(self.backend.signer.sep, 1)
-        data2, sig2 = token2.split(self.backend.signer.sep, 1)
-        bin_data1 = signing.b64_decode(data1.encode())
-        bin_data2 = signing.b64_decode(data2.encode())
-        pk1 = self.backend.packer.pack_pk(self.user.pk)
-        pk2 = self.backend.packer.pack_pk(similar_user.pk)
-        self.assertEqual(bin_data1[: len(pk1)], pk1)
-        self.assertEqual(bin_data2[: len(pk2)], pk2)
-        key1 = bin_data1[len(pk1) :]
-        key2 = bin_data2[len(pk2) :]
-        self.assertEqual(key1, key2)
-
-        # Check that changing just the PK doesn't allow hijacking the other
-        # user's account -- because the PK is included in the signature.
-        bin_data = pk2 + key1
-        data = signing.b64_encode(bin_data).decode()
-        token = data + sig1
-        user = self.backend.parse_token(token)
-        self.assertEqual(user, None)
-        self.assertIn("Bad token", self.get_log())
-
 
 @override_settings(SESAME_MAX_AGE=10)
 class TestModelBackendWithExpiry(TestModelBackend):
@@ -138,7 +109,7 @@ class TestModelBackendWithOneTime(TestModelBackend):
         token = self.backend.create_token(self.user)
         user = self.backend.parse_token(token)
         self.assertEqual(user, self.user)
-        self.assertIn("Valid token for user john", self.get_log())
+        self.assertIn("Valid token for user %s" % self.username, self.get_log())
 
     def test_last_login_change(self):
         token = self.backend.create_token(self.user)
@@ -157,7 +128,7 @@ class TestModelBackendWithoutInvalidateOnPasswordChange(TestModelBackend):
         self.user.save()
         user = self.backend.parse_token(token)
         self.assertEqual(user, self.user)
-        self.assertIn("Valid token for user john", self.get_log())
+        self.assertIn("Valid token for user %s" % self.username, self.get_log())
 
     def test_insecure_configuration(self):
         with override_settings(SESAME_MAX_AGE=None):
@@ -182,6 +153,35 @@ class TestModelBackendWithUUIDPrimaryKey(TestModelBackend):
     pass
 
 
+class Packer(BasePacker):
+    """
+    Verbatim copy of the example in the README.
+
+    """
+
+    @staticmethod
+    def pack_pk(user_pk):
+        assert len(user_pk) == 24
+        return bytes.fromhex(user_pk)
+
+    @staticmethod
+    def unpack_pk(data):
+        return data[:12].hex(), data[12:]
+
+
+@override_settings(
+    AUTH_USER_MODEL="test_app.StrUser", SESAME_PACKER="sesame.test_backends.Packer",
+)
+class TestModelBackendWithCustomPacker(TestModelBackend):
+
+    username = "abcdef012345abcdef567890"
+
+    def test_custom_packer_is_used(self):
+        token = self.backend.create_token(self.user)
+        # base64.b64encode(bytes.fromhex(username)).decode() == "q83vASNFq83vVniQ"
+        self.assertEqual(token[:16], "q83vASNFq83vVniQ")
+
+
 @override_settings(AUTH_USER_MODEL="test_app.BooleanUser")
 class TestModelBackendWithUnsupportedPrimaryKey(TestCase):
     def setUp(self):
@@ -197,3 +197,49 @@ class TestModelBackendWithUnsupportedPrimaryKey(TestCase):
         self.assertEqual(
             str(exc.exception), "BooleanField primary keys aren't supported",
         )
+
+
+class TestMisc(CaptureLogMixin, TestCase):
+    def setUp(self):
+        super().setUp()
+        self.backend = ModelBackend()
+
+    def test_naive_token_hijacking_fails(self):
+        # Tokens contain the PK of the user, the hash of the revocation key,
+        # and a signature. The revocation key may be identical for two users:
+        # - if SESAME_INVALIDATE_ON_PASSWORD_CHANGE is False or if they don't
+        #   have a password;
+        # - if SESAME_ONE_TIME is False or if they have the same last_login.
+        User = get_user_model()
+        last_login = timezone.now() - datetime.timedelta(3600)
+        user_1 = User.objects.create(username="john", last_login=last_login,)
+        user_2 = User.objects.create(username="jane", last_login=last_login,)
+
+        token1 = self.backend.create_token(user_1)
+        token2 = self.backend.create_token(user_2)
+        self.backend.unsign(token1)
+        self.backend.unsign(token2)
+
+        # Check that the test scenario produces identical revocation keys.
+        # This test depends on the implementation of django.core.signing;
+        # however, the format of tokens must be stable to keep them valid.
+        data1, sig1 = token1.split(self.backend.signer.sep, 1)
+        data2, sig2 = token2.split(self.backend.signer.sep, 1)
+        bin_data1 = signing.b64_decode(data1.encode())
+        bin_data2 = signing.b64_decode(data2.encode())
+        pk1 = self.backend.packer.pack_pk(user_1.pk)
+        pk2 = self.backend.packer.pack_pk(user_2.pk)
+        self.assertEqual(bin_data1[: len(pk1)], pk1)
+        self.assertEqual(bin_data2[: len(pk2)], pk2)
+        key1 = bin_data1[len(pk1) :]
+        key2 = bin_data2[len(pk2) :]
+        self.assertEqual(key1, key2)
+
+        # Check that changing just the PK doesn't allow hijacking the other
+        # user's account -- because the PK is included in the signature.
+        bin_data = pk2 + key1
+        data = signing.b64_encode(bin_data).decode()
+        token = data + sig1
+        user = self.backend.parse_token(token)
+        self.assertEqual(user, None)
+        self.assertIn("Bad token", self.get_log())

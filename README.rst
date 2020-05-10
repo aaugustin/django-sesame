@@ -129,7 +129,10 @@ still valid at each login attempt.
 If you want tokens to be usable only once, set the ``SESAME_ONE_TIME`` setting
 to ``True``. In that case tokens are only valid if the last login date hasn't
 changed since they were generated. Since logging in changes the last login
-date, such tokens are usable at most once.
+date, such tokens are usable at most once. If you're intending to send links
+by email, be aware that some email providers scan links for security reasons,
+which consumes single-use tokens prematurely. Tokens with a short expiry are
+more reliable.
 
 If you don't want tokens to be invalidated by password changes, set the
 ``SESAME_INVALIDATE_ON_PASSWORD_CHANGE`` setting to ``False``. **This is

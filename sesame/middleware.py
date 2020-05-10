@@ -1,10 +1,9 @@
-from __future__ import unicode_literals
+from urllib.parse import urlencode
 
 from django.contrib.auth import login
 from django.contrib.auth.models import AnonymousUser
 from django.shortcuts import redirect
 
-from .compatibility import urlencode
 from .utils import TOKEN_NAME, get_user
 
 

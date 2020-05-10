@@ -1,5 +1,3 @@
-from __future__ import unicode_literals
-
 import uuid
 
 from django.contrib.auth import models as auth_models

@@ -1,10 +1,8 @@
-from __future__ import unicode_literals
-
 import struct
 import uuid
 
 
-class BasePacker(object):
+class BasePacker:
     """
     Abstract base class for packers.
 
@@ -27,7 +25,7 @@ class BasePacker(object):
         """
 
 
-class IntPacker(object):
+class IntPacker:
     @staticmethod
     def pack_pk(user_pk):
         return struct.pack(str("!i"), user_pk)
@@ -37,7 +35,7 @@ class IntPacker(object):
         return struct.unpack(str("!i"), data[:4])[0], data[4:]
 
 
-class UUIDPacker(object):
+class UUIDPacker:
     @staticmethod
     def pack_pk(user_pk):
         return user_pk.bytes

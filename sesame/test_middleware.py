@@ -1,8 +1,7 @@
-from __future__ import unicode_literals
-
 import io
 import logging
 import unittest
+from urllib.parse import urlencode
 
 from django.contrib.auth import get_user
 from django.contrib.auth.models import AnonymousUser, User
@@ -10,7 +9,6 @@ from django.test import TestCase
 from django.test.utils import override_settings
 
 from .backends import ModelBackend
-from .compatibility import urlencode
 
 try:
     import ua_parser

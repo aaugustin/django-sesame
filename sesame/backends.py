@@ -1,5 +1,3 @@
-from __future__ import unicode_literals
-
 import hashlib
 import logging
 
@@ -16,7 +14,7 @@ from . import packers
 logger = logging.getLogger("sesame")
 
 
-class UrlAuthBackendMixin(object):
+class UrlAuthBackendMixin:
     """
     Tools to authenticate against a token containing a signed user id.
 

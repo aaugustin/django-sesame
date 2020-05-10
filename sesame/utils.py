@@ -1,11 +1,10 @@
-from __future__ import unicode_literals
+from urllib.parse import urlencode
 
 from django.conf import settings
 from django.contrib.auth import authenticate
 from django.utils import timezone
 
 from .backends import UrlAuthBackendMixin
-from .compatibility import urlencode
 
 TOKEN_NAME = getattr(settings, "SESAME_TOKEN_NAME", "url_auth_token")
 

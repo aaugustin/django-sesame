@@ -226,6 +226,8 @@ Changelog
 1.8
 ---
 
+* Added compatibility with custom user models where the primary key is a
+  ``BigAutoField`` or a ``SmallAutoField``, as well as other integer fields.
 * Added compatibility with Django ≥ 3.0.
 
 1.7
@@ -244,7 +246,8 @@ Changelog
 * Added support for single use tokens with the ``SESAME_ONE_TIME`` setting.
 * Added support for not invalidating tokens on password change with the
   ``SESAME_INVALIDATE_ON_PASSWORD_CHANGE`` setting.
-* Added compatibility with custom user models where the primary key is a UUID.
+* Added compatibility with custom user models where the primary key is a
+  ``UUIDField``.
 * Added the ``get_user()`` function to obtain a user instance from a request.
 * Improved error message for pre-existing tokens when changing the
   ``SESAME_MAX_AGE`` setting.

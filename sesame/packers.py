@@ -1,6 +1,18 @@
 import struct
 import uuid
 
+__all__ = [
+    "BasePacker",
+    "ShortPacker",
+    "UnsignedShortPacker",
+    "LongPacker",
+    "UnsignedLongPacker",
+    "LongLongPacker",
+    "UnsignedLongLongPacker",
+    "UUIDPacker",
+    "PACKERS",
+]
+
 
 class BasePacker:
     """
@@ -25,17 +37,56 @@ class BasePacker:
         """
 
 
-class IntPacker:
-    @staticmethod
-    def pack_pk(user_pk):
-        return struct.pack(str("!i"), user_pk)
-
-    @staticmethod
-    def unpack_pk(data):
-        return struct.unpack(str("!i"), data[:4])[0], data[4:]
+class StructPackerMeta(type):
+    def __new__(cls, name, bases, namespace, **kwds):
+        namespace["size"] = struct.calcsize(namespace["fmt"])
+        return super().__new__(cls, name, bases, namespace, **kwds)
 
 
-class UUIDPacker:
+class StructPacker(BasePacker, metaclass=StructPackerMeta):
+    fmt = ""
+
+    @classmethod
+    def pack_pk(cls, user_pk):
+        return struct.pack(cls.fmt, user_pk)
+
+    @classmethod
+    def unpack_pk(cls, data):
+        (user_pk,) = struct.unpack(cls.fmt, data[: cls.size])
+        return user_pk, data[cls.size :]
+
+
+class ShortPacker(StructPacker):
+    fmt = "!h"
+
+
+class UnsignedShortPacker(StructPacker):
+    fmt = "!H"
+
+
+class LongPacker(StructPacker):
+    fmt = "!l"
+
+
+IntPacker = LongPacker  # for backwards-compatibility
+
+
+class UnsignedLongPacker(StructPacker):
+    fmt = "!L"
+
+
+UnsignedIntPacker = UnsignedLongPacker  # for consistency
+
+
+class LongLongPacker(StructPacker):
+    fmt = "!q"
+
+
+class UnsignedLongLongPacker(StructPacker):
+    fmt = "!Q"
+
+
+class UUIDPacker(BasePacker):
     @staticmethod
     def pack_pk(user_pk):
         return user_pk.bytes
@@ -45,4 +96,19 @@ class UUIDPacker:
         return uuid.UUID(bytes=data[:16]), data[16:]
 
 
-PACKERS = {"AutoField": IntPacker, "IntegerField": IntPacker, "UUIDField": UUIDPacker}
+PACKERS = {
+    # 2 bytes
+    "SmallAutoField": ShortPacker,
+    "SmallIntegerField": ShortPacker,
+    "PositiveSmallIntegerField": UnsignedShortPacker,
+    # 4 bytes
+    "AutoField": LongPacker,
+    "IntegerField": LongPacker,
+    "PositiveIntegerField": UnsignedLongPacker,
+    # 8 bytes
+    "BigAutoField": LongLongPacker,
+    "BigIntegerField": LongLongPacker,
+    "PositiveBigIntegerField": UnsignedLongLongPacker,
+    # 16 bytes
+    "UUIDField": UUIDPacker,
+}

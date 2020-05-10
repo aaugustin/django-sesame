@@ -20,7 +20,7 @@ class UUIDUser(auth_models.AbstractBaseUser):
     USERNAME_FIELD = "username"
 
 
-class CharUser(auth_models.AbstractBaseUser):
-    username = models.CharField(max_length=32, primary_key=True)
+class BooleanUser(auth_models.AbstractBaseUser):
+    username = models.BooleanField(primary_key=True)  # pathological!
 
     USERNAME_FIELD = "username"

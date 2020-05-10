@@ -182,18 +182,18 @@ class TestModelBackendWithUUIDPrimaryKey(TestModelBackend):
     pass
 
 
-@override_settings(AUTH_USER_MODEL="test_app.CharUser")
+@override_settings(AUTH_USER_MODEL="test_app.BooleanUser")
 class TestModelBackendWithUnsupportedPrimaryKey(TestCase):
     def setUp(self):
         self.backend = ModelBackend()
 
         User = get_user_model()
-        self.user = User.objects.create(username="john")
+        self.user = User.objects.create(username=True)
 
     def test_authenticate(self):
         with self.assertRaises(NotImplementedError) as exc:
             self.backend.create_token(self.user)
 
         self.assertEqual(
-            str(exc.exception), "CharField primary keys aren't supported at this time"
+            str(exc.exception), "BooleanField primary keys aren't supported",
         )

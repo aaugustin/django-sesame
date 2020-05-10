@@ -73,9 +73,7 @@ class UrlAuthBackendMixin:
         try:
             Packer = packers.PACKERS[pk_type]
         except KeyError:
-            raise NotImplementedError(
-                pk_type + " primary keys aren't supported at this time"
-            )
+            raise NotImplementedError(pk_type + " primary keys aren't supported")
         return Packer()
 
     def get_revocation_key(self, user):

@@ -96,6 +96,48 @@ class UUIDPacker(BasePacker):
         return uuid.UUID(bytes=data[:16]), data[16:]
 
 
+class BytesPacker(BasePacker):
+    """
+    Generic packer for bytestrings, from 0 to 255 bytes.
+
+    In many cases, primary keys stored as bytes are likely to be fixed-length,
+    which doesn't require a variable length encoding scheme.
+
+    """
+
+    @staticmethod
+    def pack_pk(user_pk):
+        length = len(user_pk)
+        if length > 255:
+            raise ValueError("Primary key is too large (%d bytes)" % length)
+        return bytes([length]) + user_pk
+
+    @staticmethod
+    def unpack_pk(data):
+        length = data[0]
+        return data[1 : length + 1], data[length + 1 :]
+
+
+class StrPacker(BytesPacker):
+    """
+    Generic packer for strings, from 0 to 255 UTF-8 encoded bytes.
+
+    """
+
+    @staticmethod
+    def pack_pk(user_pk):
+        user_pk = user_pk.encode()
+        length = len(user_pk)
+        if length > 255:
+            raise ValueError("Primary key is too large (%d UTF-8 bytes)" % length)
+        return bytes([length]) + user_pk
+
+    @staticmethod
+    def unpack_pk(data):
+        length = data[0]
+        return data[1 : length + 1].decode(), data[length + 1 :]
+
+
 PACKERS = {
     # 2 bytes
     "SmallAutoField": ShortPacker,
@@ -111,4 +153,8 @@ PACKERS = {
     "PositiveBigIntegerField": UnsignedLongLongPacker,
     # 16 bytes
     "UUIDField": UUIDPacker,
+    # Variable length
+    "BinaryField": BytesPacker,
+    "CharField": StrPacker,
+    "TextField": StrPacker,
 }

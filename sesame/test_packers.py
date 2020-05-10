@@ -2,9 +2,11 @@ import unittest
 import uuid
 
 from .packers import (
+    BytesPacker,
     LongLongPacker,
     LongPacker,
     ShortPacker,
+    StrPacker,
     UnsignedLongLongPacker,
     UnsignedLongPacker,
     UnsignedShortPacker,
@@ -38,6 +40,12 @@ class TestPackers(unittest.TestCase):
         (UnsignedLongLongPacker, 1, 7 * b"\x00" + b"\x01"),
         (UnsignedLongLongPacker, 18446744073709551615, 8 * b"\xff"),
         (UUIDPacker, random_uuid, random_uuid.bytes),
+        (BytesPacker, b"", b"\x00"),
+        (BytesPacker, random_uuid.bytes, b"\x10" + random_uuid.bytes),
+        (BytesPacker, 255 * b"\xff", 256 * b"\xff"),
+        (StrPacker, "", b"\x00"),
+        (StrPacker, "marie-noëlle", b"\x0dmarie-no\xc3\xablle"),
+        (StrPacker, 51 * "👍 ", b"\xff" + 51 * b"\xf0\x9f\x91\x8d "),
     ]
 
     def test_pack_pk(self):
@@ -50,3 +58,14 @@ class TestPackers(unittest.TestCase):
         for Packer, user_pk, data in self.cases:
             with self.subTest(Packer=Packer, user_pk=user_pk):
                 self.assertEqual(Packer().unpack_pk(data + rest), (user_pk, rest))
+
+    error_cases = [
+        (BytesPacker, 256 * b"\xff", ValueError),
+        (StrPacker, 64 * "👍", ValueError),
+    ]
+
+    def test_pack_pk_error(self):
+        for Packer, user_pk, exception in self.error_cases:
+            with self.subTest(Packer=Packer, user_pk=user_pk):
+                with self.assertRaises(exception):
+                    Packer().pack_pk(user_pk)

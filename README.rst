@@ -67,12 +67,9 @@ django-sesame is tested with:
 
 It builds upon ``django.contrib.auth``.
 
-It supports custom user models, provided:
-
-- They have an integer or UUID primary key — other types could be added
-  if there's a use case;
-- They have ``password`` and ``last_login`` fields — most custom user models
-  inherit them from ``AbstractBaseUser``.
+It supports custom user models, provided they have ``password`` and
+``last_login`` fields. Most custom user models inherit these fields from
+``AbstractBaseUser``.
 
 django-sesame is released under the BSD license, like Django itself.
 
@@ -226,8 +223,9 @@ Changelog
 1.8
 ---
 
-* Added compatibility with custom user models where the primary key is a
-  ``BigAutoField`` or a ``SmallAutoField``, as well as other integer fields.
+* Added compatibility with custom user models with most types of primary keys,
+  including ``BigAutoField``, ``SmallAutoField``, other integer fields,
+  ``CharField`` and ``BinaryField``.
 * Added compatibility with Django ≥ 3.0.
 
 1.7

@@ -62,7 +62,7 @@ Requirements
 
 django-sesame is tested with:
 
-- Django 1.11 (LTS), 2.1, 2.2 (LTS) and 3.0;
+- Django 2.2 (LTS) and 3.0;
 - all supported Python versions.
 
 It builds upon ``django.contrib.auth``.
@@ -222,6 +222,11 @@ currently logged-in user or ``AnonymousUser()``.
 
 Changelog
 =========
+
+1.8
+---
+
+* Added compatibility with Django ≥ 3.0.
 
 1.7
 ---

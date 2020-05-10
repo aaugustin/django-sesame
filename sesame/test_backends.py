@@ -75,15 +75,6 @@ class TestModelBackend(TestCase):
         self.assertEqual(user, None)
         self.assertIn("Invalid token", self.get_log())
 
-    def test_type_error_is_logged(self):
-        def raise_type_error(*args):
-            raise TypeError
-
-        self.backend.parse_token = raise_type_error
-        with self.assertRaises(TypeError):
-            self.backend.authenticate(request=None, url_auth_token=None)
-        self.assertIn("TypeError", self.get_log())
-
     def test_naive_token_hijacking_fails(self):
         # Tokens contain the PK of the user, the hash of the revocation key,
         # and a signature. The revocation key may be identical for two users:

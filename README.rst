@@ -24,19 +24,30 @@ Known use cases for django-sesame include:
    If you're doing this, you should define a small ``SESAME_MAX_AGE``, perhaps
    10 minutes.
 
-2. Authenticated links, typically if you're generating an export or a report
-   and emailing a link to access it. An authenticated link will work even if
-   the user isn't logged in on the device where they're opening it.
+2. Authenticated links, typically if you're generating a report offline, then
+   emailing a link to access it when it's ready. An authenticated link works
+   even if the user isn't logged in on the device where they're opening it.
 
    Likewise, you should configure an appropriate ``SESAME_MAX_AGE``, probably
    no more than a few days.
 
-3. Non-critical private websites, for example for a family or club site,
+   Since emails may be forwarded, authenticated links shouldn't log the user
+   in. They should only allow access to specific views, as described in
+   "Per-view authentication" below.
+
+3. Sharing links, which are a variant of authenticated links. When a user
+   shares content with a guest, you can create a phantom account for the guest
+   and generate an authenticated link tied to that account.
+
+   Email forwarding is even more likely in this context. If you're doing this,
+   make sure authenticated links don't log the user in.
+
+4. Non-critical private websites, for example for a family or club site,
    where users don't expect to manage a personal account with a password.
    Authorized users can bookmark personalized authenticated URLs.
 
-   Here you can rely on the default settings because that's the original use
-   case for which django-sesame was built.
+   Here you can rely on the default settings because that's the original —
+   and, admittedly, niche — use case for which django-sesame was built.
 
 (In)security
 ============

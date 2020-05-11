@@ -13,7 +13,7 @@ long_description = (root_dir / "README.rst").read_text(encoding="utf-8")
 
 setuptools.setup(
     name="django-sesame",
-    version="1.7",
+    version="1.8",
     description=description,
     long_description=long_description,
     url="https://github.com/aaugustin/django-sesame",

@@ -94,17 +94,21 @@ Getting started
 
 2. Add ``sesame.backends.ModelBackend`` to ``AUTHENTICATION_BACKENDS``::
 
-    AUTHENTICATION_BACKENDS += ['sesame.backends.ModelBackend']
+    AUTHENTICATION_BACKENDS += ["sesame.backends.ModelBackend"]
 
 3. Add ``sesame.middleware.AuthenticationMiddleware`` to ``MIDDLEWARE``::
 
-    MIDDLEWARE += ['sesame.middleware.AuthenticationMiddleware']
+    MIDDLEWARE += ["sesame.middleware.AuthenticationMiddleware"]
 
    The best position for ``sesame.middleware.AuthenticationMiddleware`` is
    just after ``django.contrib.auth.middleware.AuthenticationMiddleware``.
 
 4. (Optional) For better security, set ``SESAME_SALT`` to a random string with
-   at least 16 bytes of entropy. You can generate one in a Python shell with::
+   at least 16 bytes of entropy::
+
+    SESAME_SALT = "..."
+
+   You can generate such a random string in a Python shell with::
 
     >>> from django.utils.crypto import get_random_string
     >>> get_random_string(22)

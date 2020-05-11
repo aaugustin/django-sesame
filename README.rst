@@ -22,7 +22,7 @@ Known use cases for django-sesame include:
    deployed by Slack.
 
    If you're doing this, you should define a small ``SESAME_MAX_AGE``, perhaps
-   10 minutes, and consider enabling ``SESAME_ONE_TIME``.
+   10 minutes.
 
 2. Authenticated links, typically if you're generating an export or a report
    and emailing a link to access it. An authenticated link will work even if

@@ -233,10 +233,10 @@ updating ``user.last_login``.
 Safari issues
 =============
 
-django-sesame removes the token from the URL with a HTTP 302 Redirect after
-authenticating a user successfully. Unfortunately, in some scenarios, this
-triggers Safari's "Protection Against First Party Bounce Trackers". In that
-case, Safari clears cookies and the user is logged out.
+The django-sesame middleware removes the token from the URL with a HTTP 302
+Redirect after authenticating a user successfully. Unfortunately, in some
+scenarios, this triggers Safari's "Protection Against First Party Bounce
+Trackers". In that case, Safari clears cookies and the user is logged out.
 
 To avoid this problem, django-sesame doesn't perform the redirect when it
 detects that the browser is Safari. This relies on the ua-parser package,

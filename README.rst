@@ -215,18 +215,20 @@ the ``update_last_login`` keyword argument::
     get_user(request, update_last_login=False)  # never update last_login
 
 ``get_user()`` is a thin wrapper around the low-level ``authenticate()``
-function from ``django.contrib.auth``. If you use ``authenticate()`` to verify
-an authentication token, the ``sesame.backends.ModelBackend`` authentication
-backend expects an ``url_auth_token`` argument::
+function from ``django.contrib.auth``. It's also possible to verify an
+authentication token directly with  ``authenticate()``. To do so, the
+``sesame.backends.ModelBackend`` authentication backend expects an
+``url_auth_token`` argument::
 
     from django.contrib.auth import authenticate
 
     user = authenticate(url_auth_token=...)
 
-If you rely on ``authenticate()``, you must update ``user.last_login`` to
-ensure one-time tokens are invalidated. Indeed, in ``django.contrib.auth``,
-``authenticate()`` is a low-level function and the higher-level ``login()``
-function is responsible for updating ``user.last_login``.
+If you decide to use ``authenticate()`` instead of ``get_user()``, you must
+update ``user.last_login`` to invalidate one-time tokens. Indeed, in
+``django.contrib.auth``, ``authenticate()`` is a low-level function. The
+caller, usually the higher-level ``login()`` function, is responsible for
+updating ``user.last_login``.
 
 Safari issues
 =============

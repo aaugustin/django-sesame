@@ -1,5 +1,5 @@
 export PYTHONPATH:=.:$(PYTHONPATH)
-export DJANGO_SETTINGS_MODULE:=sesame.test_settings
+export DJANGO_SETTINGS_MODULE:=sesame.test_project.settings
 
 style:
 	isort --recursive sesame

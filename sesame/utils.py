@@ -1,12 +1,10 @@
 from urllib.parse import urlencode
 
-from django.conf import settings
 from django.contrib.auth import authenticate
 from django.utils import timezone
 
+from . import settings
 from .backends import UrlAuthBackendMixin
-
-TOKEN_NAME = getattr(settings, "SESAME_TOKEN_NAME", "url_auth_token")
 
 
 def get_parameters(user):
@@ -14,7 +12,7 @@ def get_parameters(user):
     Return GET parameters to log in `user`.
 
     """
-    return {TOKEN_NAME: UrlAuthBackendMixin().create_token(user)}
+    return {settings.TOKEN_NAME: UrlAuthBackendMixin().create_token(user)}
 
 
 def get_query_string(user):
@@ -34,7 +32,7 @@ def get_user(request, update_last_login=None):
     Else, return None.
 
     """
-    url_auth_token = request.GET.get(TOKEN_NAME)
+    url_auth_token = request.GET.get(settings.TOKEN_NAME)
     if url_auth_token is None:
         return None
 
@@ -43,7 +41,7 @@ def get_user(request, update_last_login=None):
         return None
 
     if update_last_login is None:
-        update_last_login = getattr(settings, "SESAME_ONE_TIME", False)
+        update_last_login = settings.ONE_TIME
     if update_last_login:
         user.last_login = timezone.now()
         user.save(update_fields=["last_login"])

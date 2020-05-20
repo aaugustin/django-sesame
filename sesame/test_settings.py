@@ -1,35 +1,23 @@
-# Include the sesame backend first to avoid bogus database queries caused by
-# https://code.djangoproject.com/ticket/30556 and simplify assertNumQueries.
+from django.core.exceptions import ImproperlyConfigured
+from django.core.signals import setting_changed
+from django.dispatch import receiver
+from django.test import TestCase, override_settings
 
-AUTHENTICATION_BACKENDS = [
-    "sesame.backends.ModelBackend",
-    "django.contrib.auth.backends.ModelBackend",
-]
+from . import settings
 
-CACHES = {"default": {"BACKEND": "django.core.cache.backends.locmem.LocMemCache"}}
 
-DATABASES = {"default": {"ENGINE": "django.db.backends.sqlite3"}}
+@receiver(setting_changed)
+def reset_sesame_settings(**kwargs):
+    settings.load()
 
-INSTALLED_APPS = [
-    "django.contrib.auth",
-    "django.contrib.contenttypes",
-    "sesame",
-    "sesame.test_app",
-]
 
-LOGGING_CONFIG = None
-
-MIDDLEWARE = [
-    "django.contrib.sessions.middleware.SessionMiddleware",
-    "django.contrib.auth.middleware.AuthenticationMiddleware",
-]
-
-PASSWORD_HASHERS = ["django.contrib.auth.hashers.SHA1PasswordHasher"]
-
-ROOT_URLCONF = "sesame.test_urls"
-
-SECRET_KEY = "Anyone who finds an URL will be able to log in. Seriously."
-
-SESSION_ENGINE = "django.contrib.sessions.backends.cache"
-
-TEMPLATES = [{"BACKEND": "django.template.backends.django.DjangoTemplates"}]
+class TestSettings(TestCase):
+    @override_settings(SESAME_INVALIDATE_ON_PASSWORD_CHANGE=False, SESAME_MAX_AGE=None)
+    def test_insecure_configuration(self):
+        with self.assertRaises(ImproperlyConfigured) as exc:
+            settings.check()
+        self.assertEqual(
+            str(exc.exception),
+            "Insecure configuration: set SESAME_MAX_AGE to a low value "
+            "or set SESAME_INVALIDATE_ON_PASSWORD_CHANGE to True",
+        )

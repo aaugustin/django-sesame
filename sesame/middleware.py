@@ -4,7 +4,8 @@ from django.contrib.auth import login
 from django.contrib.auth.models import AnonymousUser
 from django.shortcuts import redirect
 
-from .utils import TOKEN_NAME, get_user
+from . import settings
+from .utils import get_user
 
 
 class AuthenticationMiddleware:
@@ -75,7 +76,7 @@ class AuthenticationMiddleware:
 
         """
         params = request.GET.copy()
-        params.pop(TOKEN_NAME)
+        params.pop(settings.TOKEN_NAME)
         url = request.path
         if params:
             url += "?" + urlencode(params)

@@ -4,7 +4,6 @@ import logging
 
 from django.contrib.auth import get_user_model
 from django.core import signing
-from django.core.exceptions import ImproperlyConfigured
 from django.test import TestCase, override_settings
 from django.utils import timezone
 
@@ -129,16 +128,6 @@ class TestModelBackendWithoutInvalidateOnPasswordChange(TestModelBackend):
         user = self.backend.parse_token(token)
         self.assertEqual(user, self.user)
         self.assertIn("Valid token for user %s" % self.username, self.get_log())
-
-    def test_insecure_configuration(self):
-        with override_settings(SESAME_MAX_AGE=None):
-            with self.assertRaises(ImproperlyConfigured) as exc:
-                ModelBackend()
-        self.assertEqual(
-            str(exc.exception),
-            "Insecure configuration: set SESAME_MAX_AGE to a low value "
-            "or set SESAME_INVALIDATE_ON_PASSWORD_CHANGE to True",
-        )
 
 
 @override_settings(AUTH_USER_MODEL="test_app.BigAutoUser")

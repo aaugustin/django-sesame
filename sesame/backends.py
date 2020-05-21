@@ -75,24 +75,22 @@ class UrlAuthBackendMixin:
             value += user.password
         if settings.ONE_TIME:
             value += str(user.last_login)
-        return value
+        # The password is expected to be a secure hash but we hash it again
+        # for additional safety. We default to MD5 to minimize the length of
+        # the token. (Remember, if an attacker obtains the URL, he can already
+        # log in. This isn't high security.)
+        return crypto.pbkdf2(
+            value, settings.SALT, settings.ITERATIONS, digest=settings.DIGEST,
+        )
 
     def create_token(self, user):
         """
         Create a signed token from a user.
 
         """
-        # The password is expected to be a secure hash but we hash it again
-        # for additional safety. We default to MD5 to minimize the length of
-        # the token. (Remember, if an attacker obtains the URL, he can already
-        # log in. This isn't high security.)
-        h = crypto.pbkdf2(
-            self.get_revocation_key(user),
-            settings.SALT,
-            settings.ITERATIONS,
-            digest=settings.DIGEST,
-        )
-        return self.sign(self.packer.pack_pk(user.pk) + h)
+        pk = self.packer.pack_pk(user.pk)
+        key = self.get_revocation_key(user)
+        return self.sign(pk + key)
 
     def parse_token(self, token):
         """
@@ -118,13 +116,7 @@ class UrlAuthBackendMixin:
         if user is None:
             logger.debug("Unknown or inactive user: %s", user_pk)
             return
-        h = crypto.pbkdf2(
-            self.get_revocation_key(user),
-            settings.SALT,
-            settings.ITERATIONS,
-            digest=settings.DIGEST,
-        )
-        if not crypto.constant_time_compare(data, h):
+        if not crypto.constant_time_compare(data, self.get_revocation_key(user)):
             logger.debug("Invalid token: %s", token)
             return
         logger.debug("Valid token for user %s: %s", user, token)

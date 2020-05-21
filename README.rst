@@ -103,17 +103,7 @@ Getting started
    The best position for ``sesame.middleware.AuthenticationMiddleware`` is
    just after ``django.contrib.auth.middleware.AuthenticationMiddleware``.
 
-4. (Optional) For better security, set ``SESAME_SALT`` to a random string with
-   at least 16 bytes of entropy::
-
-    SESAME_SALT = "..."
-
-   You can generate such a random string in a Python shell with::
-
-    >>> from django.utils.crypto import get_random_string
-    >>> get_random_string(22)
-
-5. Generate authentication tokens with ``sesame.utils.get_query_string(user)``.
+4. Generate authentication tokens with ``sesame.utils.get_query_string(user)``.
 
 That's all!
 

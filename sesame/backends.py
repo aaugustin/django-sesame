@@ -111,15 +111,18 @@ class UrlAuthBackendMixin:
                 "django-sesame settings, you must regenerate tokens"
             )
             return
-        user_pk, data = self.packer.unpack_pk(data)
-        user = self.get_user(user_pk)
+
+        pk, key = self.packer.unpack_pk(data)
+
+        user = self.get_user(pk)
         if user is None:
-            logger.debug("Unknown or inactive user: %s", user_pk)
+            logger.debug("Unknown or inactive user: %s", pk)
             return
-        if not crypto.constant_time_compare(data, self.get_revocation_key(user)):
+        if not crypto.constant_time_compare(key, self.get_revocation_key(user)):
             logger.debug("Invalid token: %s", token)
             return
         logger.debug("Valid token for user %s: %s", user, token)
+
         return user
 
     def authenticate(self, request, url_auth_token):

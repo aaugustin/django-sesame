@@ -194,8 +194,8 @@ in a view as follows::
         return HttpResponse("Hello {}!".format(user))
 
 When ``get_user()`` returns ``None``, it means that the token was missing,
-invalid, expired, or already used. Then you can show an appropriate error
-message or redirect to a login form.
+invalid, expired, or that the user account is inactive. Then you can show an
+appropriate error message or redirect to a login form.
 
 When ``SESAME_ONE_TIME`` is enabled, ``get_user()`` updates the user's last
 login date in order to invalidate the token. When ``SESAME_ONE_TIME`` isn't

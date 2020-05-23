@@ -31,11 +31,11 @@ def get_user(request, update_last_login=None):
     Else, return None.
 
     """
-    url_auth_token = request.GET.get(settings.TOKEN_NAME)
-    if url_auth_token is None:
+    token = request.GET.get(settings.TOKEN_NAME)
+    if token is None:
         return None
 
-    user = authenticate(request, url_auth_token=url_auth_token)
+    user = authenticate(request, sesame=token)
     if user is None:
         return None
 

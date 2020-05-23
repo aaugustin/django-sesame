@@ -10,10 +10,10 @@ class TestUtils(CreateUserMixin, TestCase):
         return RequestFactory().get("/" + get_query_string(self.user))
 
     def test_get_parameters(self):
-        self.assertEqual(list(get_parameters(self.user)), ["url_auth_token"])
+        self.assertEqual(list(get_parameters(self.user)), ["sesame"])
 
     def test_get_query_string(self):
-        self.assertIn("?url_auth_token=", get_query_string(self.user))
+        self.assertIn("?sesame=", get_query_string(self.user))
 
     def test_get_user(self):
         request = self.get_request_with_token()

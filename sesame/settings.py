@@ -6,7 +6,7 @@ from django.core.exceptions import ImproperlyConfigured
 
 DEFAULTS = {
     # Generating URLs
-    "TOKEN_NAME": "url_auth_token",
+    "TOKEN_NAME": "sesame",
     # Tokens lifecycle
     "MAX_AGE": None,
     "ONE_TIME": False,

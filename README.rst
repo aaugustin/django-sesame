@@ -8,7 +8,7 @@ your Django project.
 .. _django-sesame: https://github.com/aaugustin/django-sesame
 
 It generates URLs containing authentication tokens such as:
-https://example.com/?url_auth_token=AAAAARchl18CIQUlImmbV9q7PZk%3A89AEU34b0JLSrkT8Ty2RPISio5
+https://example.com/?sesame=AAAAARchl18CIQUlImmbV9q7PZk%3A89AEU34b0JLSrkT8Ty2RPISio5
 
 Then it authenticates users based on tokens found in URLs.
 
@@ -120,9 +120,11 @@ django-sesame provides two functions to generate authenticated URLs.
 
 Share resulting URLs with your users while ensuring adequate confidentiality.
 
-By default, the URL parameter is called ``url_auth_token``. You can set the
-``SESAME_TOKEN_NAME`` setting to a shorter name that doesn't conflict with
-query string parameters used by your application.
+By default, the URL parameter is named ``sesame``. You can change this with
+the ``SESAME_TOKEN_NAME`` setting. Make sure that it doesn't conflict with
+other query string parameters used by your application.
+
+(In version 1.8 and earlier, this parameter was named ``url_auth_token``.)
 
 Tokens lifecycle
 ================
@@ -208,11 +210,13 @@ the ``update_last_login`` keyword argument::
 function from ``django.contrib.auth``. It's also possible to verify an
 authentication token directly with  ``authenticate()``. To do so, the
 ``sesame.backends.ModelBackend`` authentication backend expects an
-``url_auth_token`` argument::
+``sesame`` argument::
 
     from django.contrib.auth import authenticate
 
-    user = authenticate(url_auth_token=...)
+    user = authenticate(sesame=...)
+
+(In version 1.8 and earlier, this argument was named ``url_auth_token``.)
 
 If you decide to use ``authenticate()`` instead of ``get_user()``, you must
 update ``user.last_login`` to invalidate one-time tokens. Indeed, in
@@ -312,6 +316,17 @@ currently logged-in user or ``AnonymousUser()``.
 
 Changelog
 =========
+
+2.0
+---
+
+* **Backwards-incompatible** Changed the default URL parameter to ``sesame``.
+  If you need to preserve existing URLs, you can set
+  ``SESAME_TOKEN_NAME = "url_auth_token"``.
+* **Backwards-incompatible** Changed the argument expected by
+  ``authenticate()`` to ``sesame``. You're affected only if you're explicitly
+  calling ``authenticate(url_auth_token=...)``. If so, change this call to
+  ``authenticate(sesame=...)``.
 
 1.8
 ---

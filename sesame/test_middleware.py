@@ -79,7 +79,7 @@ class TestMiddleware(TestCase):
         self.assertContains(response, "anonymous")
 
     def get_params(self):
-        return {"url_auth_token": create_token(self.user)}
+        return {"sesame": create_token(self.user)}
 
     def test_token(self):
         response = self.client.get("/", self.get_params())
@@ -150,7 +150,7 @@ class TestMiddleware(TestCase):
 
     def test_bad_token(self):
         params = self.get_params()
-        params["url_auth_token"] = params["url_auth_token"].lower()
+        params["sesame"] = params["sesame"].lower()
         response = self.client.get("/", params)
         self.assertUserNotLoggedIn(response)
 

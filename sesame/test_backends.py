@@ -8,5 +8,5 @@ from .tokens import create_token
 class TestModelBackend(CreateUserMixin, TestCase):
     def test_authenticate(self):
         token = create_token(self.user)
-        user = ModelBackend().authenticate(request=None, url_auth_token=token)
+        user = ModelBackend().authenticate(request=None, sesame=token)
         self.assertEqual(user, self.user)

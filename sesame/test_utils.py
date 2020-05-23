@@ -24,37 +24,32 @@ class TestUtils(CaptureLogMixin, CreateUserMixin, TestCase):
         self.assertIsNone(get_user(request))
 
     def test_get_user_empty_token(self):
-        request = RequestFactory().get("/sesame=")
+        request = RequestFactory().get("/?sesame=")
         self.assertIsNone(get_user(request))
 
     def test_get_user_bad_token(self):
         request = RequestFactory().get("/" + get_query_string(self.user).lower())
         self.assertIsNone(get_user(request))
-        self.assertIn("Bad token", self.get_log())
-
-    def test_get_user_bad_token(self):
-        request = RequestFactory().get("/" + get_query_string(self.user).lower())
-        self.assertIsNone(get_user(request))
-        self.assertIn("Bad token", self.get_log())
+        self.assertLogsContain("Bad token")
 
     @override_settings(SESAME_MAX_AGE=-10)
     def test_get_user_expired_token(self):
         request = self.get_request_with_token()
         self.assertIsNone(get_user(request))
-        self.assertIn("Expired token", self.get_log())
+        self.assertLogsContain("Expired token")
 
     def test_get_user_inactive_user(self):
         request = self.get_request_with_token()
         self.user.is_active = False
         self.user.save()
         self.assertIsNone(get_user(request))
-        self.assertIn("Unknown or inactive user", self.get_log())
+        self.assertLogsContain("Unknown or inactive user")
 
     def test_get_user_unknown_user(self):
         request = self.get_request_with_token()
         self.user.delete()
         self.assertIsNone(get_user(request))
-        self.assertIn("Unknown or inactive user", self.get_log())
+        self.assertLogsContain("Unknown or inactive user")
 
     def test_get_user_does_not_invalidate_tokens(self):
         request = self.get_request_with_token()
@@ -66,7 +61,7 @@ class TestUtils(CaptureLogMixin, CreateUserMixin, TestCase):
         request = self.get_request_with_token()
         self.assertEqual(get_user(request), self.user)
         self.assertIsNone(get_user(request))
-        self.assertIn("Invalid token", self.get_log())
+        self.assertLogsContain("Invalid token")
 
     def test_get_user_does_not_update_last_login(self):
         request = self.get_request_with_token()

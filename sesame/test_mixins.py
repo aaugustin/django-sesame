@@ -27,7 +27,7 @@ class CreateUserMixin(TestCase):
 
     @staticmethod
     def get_user(user_id):
-        return get_user_model().objects.filter(pk=user_id, is_active=True).first()
+        return get_user_model().objects.filter(pk=user_id).first()
 
 
 class CaptureLogMixin(unittest.TestCase):
@@ -36,15 +36,22 @@ class CaptureLogMixin(unittest.TestCase):
 
     def setUp(self):
         super().setUp()
-        self.log = io.StringIO()
-        self.handler = logging.StreamHandler(self.log)
+        self.buffer = io.StringIO()
+        self.handler = logging.StreamHandler(self.buffer)
         self.logger = logging.getLogger(self.logger_name)
         self.logger.addHandler(self.handler)
         self.logger.setLevel(logging.DEBUG)
 
-    def get_log(self):
+    @property
+    def logs(self):
         self.handler.flush()
-        return self.log.getvalue()
+        return self.buffer.getvalue()
+
+    def assertNoLogs(self):
+        self.assertEqual(self.logs, "")
+
+    def assertLogsContain(self, message):
+        self.assertIn(message, self.logs)
 
     def tearDown(self):
         self.logger.removeHandler(self.handler)

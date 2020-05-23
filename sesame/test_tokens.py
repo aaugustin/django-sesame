@@ -10,145 +10,94 @@ from .test_signals import reset_sesame_settings  # noqa
 from .tokens import create_token, packer, parse_token
 
 
-class TestTokens(CaptureLogMixin, CreateUserMixin, TestCase):
+class TestTokensBase(CaptureLogMixin, CreateUserMixin, TestCase):
     def test_valid_token(self):
         token = create_token(self.user)
         user = parse_token(token, self.get_user)
         self.assertEqual(user, self.user)
-        self.assertIn("Valid token for user %s" % self.username, self.get_log())
+        self.assertLogsContain("Valid token for user %s" % self.username)
 
+
+class TestTokens(TestTokensBase):
     def test_bad_token(self):
         token = create_token(self.user)
         user = parse_token(token.lower(), self.get_user)
         self.assertEqual(user, None)
-        self.assertIn("Bad token", self.get_log())
+        self.assertLogsContain("Bad token")
+
+    def test_random_token(self):
+        user = parse_token("!@#", self.get_user)
+        self.assertEqual(user, None)
+        self.assertLogsContain("Bad token")
 
     def test_unknown_user(self):
         token = create_token(self.user)
         self.user.delete()
         user = parse_token(token, self.get_user)
         self.assertEqual(user, None)
-        self.assertIn("Unknown or inactive user", self.get_log())
+        self.assertLogsContain("Unknown or inactive user")
 
-    def test_inactive_user(self):
-        self.user.is_active = False
-        self.user.save()
-        token = create_token(self.user)
-        user = parse_token(token, self.get_user)
-        self.assertEqual(user, None)
-        self.assertIn("Unknown or inactive user", self.get_log())
-
-    def test_password_change(self):
+    def test_token_invalidation_when_password_changes(self):
         token = create_token(self.user)
         self.user.set_password("hunter2")
         self.user.save()
         user = parse_token(token, self.get_user)
         self.assertEqual(user, None)
-        self.assertIn("Invalid token", self.get_log())
+        self.assertLogsContain("Invalid token")
 
+    @override_settings(SESAME_MAX_AGE=300)
+    def test_valid_max_age_token(self):
+        self.test_valid_token()
 
-@override_settings(SESAME_MAX_AGE=10)
-class TestTokensWithExpiry(TestTokens):
-    @override_settings(SESAME_MAX_AGE=-10)
-    def test_expired_token(self):
+    @override_settings(SESAME_MAX_AGE=-300)
+    def test_expired_max_age_token(self):
         token = create_token(self.user)
         user = parse_token(token, self.get_user)
         self.assertEqual(user, None)
-        self.assertIn("Expired token", self.get_log())
+        self.assertLogsContain("Expired token")
 
-    def test_token_without_timestamp(self):
-        with override_settings(SESAME_MAX_AGE=None):
+    def test_max_age_token_without_timestamp(self):
+        token = create_token(self.user)
+        with override_settings(SESAME_MAX_AGE=300):
+            user = parse_token(token, self.get_user)
+        self.assertEqual(user, None)
+        self.assertLogsContain("Valid signature but unexpected token")
+
+    def test_token_with_timestamp(self):
+        with override_settings(SESAME_MAX_AGE=300):
             token = create_token(self.user)
         user = parse_token(token, self.get_user)
         self.assertEqual(user, None)
-        self.assertIn("Valid signature but unexpected token", self.get_log())
+        self.assertLogsContain("Valid signature but unexpected token")
 
+    @override_settings(SESAME_ONE_TIME=True)
+    def test_valid_one_time_token(self):
+        self.test_valid_token()
 
-@override_settings(SESAME_ONE_TIME=True)
-class TestTokensWithOneTime(TestTokens):
-    def test_no_last_login(self):
+    @override_settings(SESAME_ONE_TIME=True)
+    def test_valid_one_time_token_when_user_never_logged_in(self):
         self.user.last_login = None
         self.user.save()
-        token = create_token(self.user)
-        user = parse_token(token, self.get_user)
-        self.assertEqual(user, self.user)
-        self.assertIn("Valid token for user %s" % self.username, self.get_log())
+        self.test_valid_token()
 
-    def test_last_login_change(self):
+    @override_settings(SESAME_ONE_TIME=True)
+    def test_one_time_token_invalidation_when_last_login_date_changes(self):
         token = create_token(self.user)
         self.user.last_login = timezone.now() - datetime.timedelta(1800)
         self.user.save()
         user = parse_token(token, self.get_user)
         self.assertEqual(user, None)
-        self.assertIn("Invalid token", self.get_log())
+        self.assertLogsContain("Invalid token")
 
-
-@override_settings(SESAME_INVALIDATE_ON_PASSWORD_CHANGE=False, SESAME_MAX_AGE=3600)
-class TestTokensWithoutInvalidateOnPasswordChange(TestTokens):
-    def test_password_change(self):
+    @override_settings(SESAME_INVALIDATE_ON_PASSWORD_CHANGE=False, SESAME_MAX_AGE=300)
+    def test_no_token_invalidation_on_password_change(self):
         token = create_token(self.user)
         self.user.set_password("hunter2")
         self.user.save()
         user = parse_token(token, self.get_user)
         self.assertEqual(user, self.user)
-        self.assertIn("Valid token for user %s" % self.username, self.get_log())
+        self.assertLogsContain("Valid token for user %s" % self.username)
 
-
-@override_settings(AUTH_USER_MODEL="test_app.BigAutoUser")
-class TestTokensWithBigAutoPrimaryKey(TestTokens):
-
-    pass
-
-
-@override_settings(AUTH_USER_MODEL="test_app.UUIDUser")
-class TestTokensWithUUIDPrimaryKey(TestTokens):
-
-    pass
-
-
-class Packer(BasePacker):
-    """
-    Verbatim copy of the example in the README.
-
-    """
-
-    @staticmethod
-    def pack_pk(user_pk):
-        assert len(user_pk) == 24
-        return bytes.fromhex(user_pk)
-
-    @staticmethod
-    def unpack_pk(data):
-        return data[:12].hex(), data[12:]
-
-
-@override_settings(
-    AUTH_USER_MODEL="test_app.StrUser", SESAME_PACKER=__name__ + ".Packer",
-)
-class TestTokensWithCustomPacker(TestTokens):
-
-    username = "abcdef012345abcdef567890"
-
-    def test_custom_packer_is_used(self):
-        token = create_token(self.user)
-        # base64.b64encode(bytes.fromhex(username)).decode() == "q83vASNFq83vVniQ"
-        self.assertEqual(token[:16], "q83vASNFq83vVniQ")
-
-
-class TestTokensWithUnsupportedPrimaryKey(TestCase):
-    def test_authenticate(self):
-        with self.assertRaises(NotImplementedError) as exc:
-            # The exception is raised in override_settings,
-            # when django-sesame initializes the tokenizer
-            with override_settings(AUTH_USER_MODEL="test_app.BooleanUser"):
-                pass
-
-        self.assertEqual(
-            str(exc.exception), "BooleanField primary keys aren't supported",
-        )
-
-
-class TestMisc(CaptureLogMixin, CreateUserMixin, TestCase):
     def test_naive_token_hijacking_fails(self):
         # Tokens contain the PK of the user, the hash of the revocation key,
         # and a signature. The revocation key may be identical for two users:
@@ -183,4 +132,56 @@ class TestMisc(CaptureLogMixin, CreateUserMixin, TestCase):
         token = data + sig1
         user = parse_token(token, self.get_user)
         self.assertEqual(user, None)
-        self.assertIn("Bad token", self.get_log())
+        self.assertLogsContain("Bad token")
+
+
+@override_settings(AUTH_USER_MODEL="test_app.BigAutoUser")
+class TestBigAutoPrimaryKey(TestTokensBase):
+    pass
+
+
+@override_settings(AUTH_USER_MODEL="test_app.UUIDUser")
+class TestUUIDPrimaryKey(TestTokensBase):
+    pass
+
+
+class Packer(BasePacker):
+    """
+    Verbatim copy of the example in the README.
+
+    """
+
+    @staticmethod
+    def pack_pk(user_pk):
+        assert len(user_pk) == 24
+        return bytes.fromhex(user_pk)
+
+    @staticmethod
+    def unpack_pk(data):
+        return data[:12].hex(), data[12:]
+
+
+@override_settings(
+    AUTH_USER_MODEL="test_app.StrUser", SESAME_PACKER=__name__ + ".Packer",
+)
+class TestCustomPacker(TestTokensBase):
+
+    username = "abcdef012345abcdef567890"
+
+    def test_custom_packer_is_used(self):
+        token = create_token(self.user)
+        # base64.b64encode(bytes.fromhex(username)).decode() == "q83vASNFq83vVniQ"
+        self.assertEqual(token[:16], "q83vASNFq83vVniQ")
+
+
+class TestUnsupportedPrimaryKey(TestCase):
+    def test_unsupported_primary_key(self):
+        with self.assertRaises(NotImplementedError) as exc:
+            # The exception is raised in override_settings,
+            # when django-sesame initializes the tokenizer
+            with override_settings(AUTH_USER_MODEL="test_app.BooleanUser"):
+                assert False  # pragma: no cover
+
+        self.assertEqual(
+            str(exc.exception), "BooleanField primary keys aren't supported",
+        )

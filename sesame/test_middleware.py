@@ -1,15 +1,13 @@
-import io
-import logging
 import unittest
-from urllib.parse import urlencode
 
 from django.contrib.auth import get_user
-from django.contrib.auth.models import AnonymousUser, User
+from django.contrib.auth.models import AnonymousUser
 from django.test import TestCase
 from django.test.utils import override_settings
 
+from .test_mixins import CreateUserMixin
 from .test_signals import reset_sesame_settings  # noqa
-from .tokens import create_token
+from .utils import get_parameters, get_query_string
 
 try:
     import ua_parser
@@ -45,53 +43,56 @@ CHROME_IOS_USER_AGENT = (
         }
     ],
 )
-class TestMiddleware(TestCase):
-    def setUp(self):
-        self.user = User.objects.create_user(username="john", password="doe")
+class TestMiddleware(CreateUserMixin, TestCase):
 
-        self.log = io.StringIO()
-        self.handler = logging.StreamHandler(self.log)
-        self.logger = logging.getLogger("sesame")
-        self.logger.addHandler(self.handler)
+    should_redirect_after_auth = True
 
-    def tearDown(self):
-        self.logger.removeHandler(self.handler)
-
-    redirect_enabled = True
-
-    def assertUserLoggedIn(self, response, redirect_url=None):
+    def assertUserLoggedIn(self, response, redirect_url):
         request = response.wsgi_request
         # User is logged in with django.contrib.sessions.
         self.assertEqual(get_user(request), self.user)
         # User is logged in with django.contrib.auth.
         self.assertEqual(request.user, self.user)
 
-        if redirect_url is not None and self.redirect_enabled:
+        if redirect_url is not None and self.should_redirect_after_auth:
             self.assertRedirects(response, redirect_url)
         else:
             self.assertContains(response, self.user.username)
 
     def assertUserNotLoggedIn(self, response):
         request = response.wsgi_request
+        # User isn't logged in with django.contrib.sessions.
         self.assertIsInstance(get_user(request), AnonymousUser)
+        # User isn't logged in with django.contrib.auth.
         self.assertIsInstance(request.user, AnonymousUser)
 
         self.assertContains(response, "anonymous")
 
-    def get_params(self):
-        return {"sesame": create_token(self.user)}
-
     def test_token(self):
-        response = self.client.get("/", self.get_params())
+        response = self.client.get("/", get_parameters(self.user))
         self.assertUserLoggedIn(response, redirect_url="/")
+
+    def test_no_token(self):
+        response = self.client.get("/")
+        self.assertUserNotLoggedIn(response)
+
+    def test_empty_token(self):
+        response = self.client.get("/", {"sesame": ""})
+        self.assertUserNotLoggedIn(response)
+
+    def test_bad_token(self):
+        params = get_parameters(self.user)
+        params["sesame"] = params["sesame"].lower()
+        response = self.client.get("/", params)
+        self.assertUserNotLoggedIn(response)
 
     @override_settings(SESAME_ONE_TIME=True)
     def test_one_time_token(self):
-        response = self.client.get("/", self.get_params())
+        response = self.client.get("/", get_parameters(self.user))
         self.assertUserLoggedIn(response, redirect_url="/")
 
     def test_reuse_token(self):
-        params = self.get_params()
+        params = get_parameters(self.user)
         response = self.client.get("/", params)
         self.assertUserLoggedIn(response, redirect_url="/")
         self.client.logout()
@@ -100,7 +101,7 @@ class TestMiddleware(TestCase):
 
     @override_settings(SESAME_ONE_TIME=True)
     def test_reuse_one_time_token(self):
-        params = self.get_params()
+        params = get_parameters(self.user)
         response = self.client.get("/", params)
         self.assertUserLoggedIn(response, redirect_url="/")
         self.client.logout()
@@ -113,7 +114,7 @@ class TestMiddleware(TestCase):
 
     def test_token_num_queries(self):
         with self.assertNumQueries(self.NUM_QUERIES):
-            response = self.client.get("/", self.get_params())
+            response = self.client.get("/", get_parameters(self.user))
         self.assertUserLoggedIn(response, redirect_url="/")
 
     ONE_TIME_NUM_QUERIES = 2
@@ -121,42 +122,32 @@ class TestMiddleware(TestCase):
     @override_settings(SESAME_ONE_TIME=True)
     def test_one_time_token_num_queries(self):
         with self.assertNumQueries(self.ONE_TIME_NUM_QUERIES):
-            response = self.client.get("/", self.get_params())
+            response = self.client.get("/", get_parameters(self.user))
         self.assertUserLoggedIn(response, redirect_url="/")
 
-    def test_token_with_path_and_param(self):
-        params = self.get_params()
+    def test_token_with_path_and_params(self):
+        params = get_parameters(self.user)
         params["bar"] = 42
         response = self.client.get("/foo", params)
         self.assertUserLoggedIn(response, redirect_url="/foo?bar=42")
 
     def test_token_in_POST_request(self):
-        response = self.client.post("/?" + urlencode(self.get_params()))
-        self.assertUserLoggedIn(response)
+        response = self.client.post("/" + get_query_string(self.user))
+        self.assertUserLoggedIn(response, redirect_url=None)
 
     @unittest.skipIf(ua_parser is None, "test requires ua-parser")
     def test_token_in_Safari_request(self):
         response = self.client.get(
-            "/", self.get_params(), HTTP_USER_AGENT=SAFARI_USER_AGENT
+            "/", get_parameters(self.user), HTTP_USER_AGENT=SAFARI_USER_AGENT
         )
-        self.assertUserLoggedIn(response)
+        self.assertUserLoggedIn(response, redirect_url=None)
 
     @unittest.skipIf(ua_parser is None, "test requires ua-parser")
     def test_token_in_iOS_request(self):
         response = self.client.get(
-            "/", self.get_params(), HTTP_USER_AGENT=CHROME_IOS_USER_AGENT
+            "/", get_parameters(self.user), HTTP_USER_AGENT=CHROME_IOS_USER_AGENT
         )
-        self.assertUserLoggedIn(response)
-
-    def test_bad_token(self):
-        params = self.get_params()
-        params["sesame"] = params["sesame"].lower()
-        response = self.client.get("/", params)
-        self.assertUserNotLoggedIn(response)
-
-    def test_no_token(self):
-        response = self.client.get("/")
-        self.assertUserNotLoggedIn(response)
+        self.assertUserLoggedIn(response, redirect_url=None)
 
 
 @override_settings(
@@ -169,7 +160,7 @@ class TestWithoutAuthMiddleware(TestMiddleware):
 
     # When django.contrib.auth isn't enabled, every URL must contain an
     # authentication token, so it mustn't be removed with a redirect.
-    redirect_enabled = False
+    should_redirect_after_auth = False
 
 
 @override_settings(
@@ -185,7 +176,7 @@ class TestBeforeAuthMiddleware(TestMiddleware):
     # django.contrib.auth middleware, sesame doesn't know that
     # django.contrib.auth is enabled, so it's the same as when
     # django.contrib.auth isn't enabled.
-    redirect_enabled = False
+    should_redirect_after_auth = False
 
     # Furthermore, the django.contrib.auth middleware overrides the
     # ``request.user`` attribute set by the sesame middleware via

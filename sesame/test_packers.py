@@ -60,12 +60,12 @@ class TestPackers(unittest.TestCase):
                 self.assertEqual(Packer().unpack_pk(data + rest), (user_pk, rest))
 
     error_cases = [
-        (BytesPacker, 256 * b"\xff", ValueError),
-        (StrPacker, 64 * "👍", ValueError),
+        (BytesPacker, 256 * b"\xff"),
+        (StrPacker, 64 * "👍"),
     ]
 
     def test_pack_pk_error(self):
-        for Packer, user_pk, exception in self.error_cases:
+        for Packer, user_pk in self.error_cases:
             with self.subTest(Packer=Packer, user_pk=user_pk):
-                with self.assertRaises(exception):
+                with self.assertRaises(ValueError):
                     Packer().pack_pk(user_pk)

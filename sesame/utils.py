@@ -3,8 +3,7 @@ from urllib.parse import urlencode
 from django.contrib.auth import authenticate
 from django.utils import timezone
 
-from . import settings
-from .backends import UrlAuthBackendMixin
+from . import settings, tokens
 
 
 def get_parameters(user):
@@ -12,7 +11,7 @@ def get_parameters(user):
     Return GET parameters to log in `user`.
 
     """
-    return {settings.TOKEN_NAME: UrlAuthBackendMixin().create_token(user)}
+    return {settings.TOKEN_NAME: tokens.create_token(user)}
 
 
 def get_query_string(user):

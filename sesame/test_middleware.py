@@ -9,6 +9,7 @@ from django.test import TestCase
 from django.test.utils import override_settings
 
 from .backends import ModelBackend
+from .tokens import create_token
 
 try:
     import ua_parser
@@ -78,7 +79,7 @@ class TestMiddleware(TestCase):
         self.assertContains(response, "anonymous")
 
     def get_params(self):
-        return {"url_auth_token": ModelBackend().create_token(self.user)}
+        return {"url_auth_token": create_token(self.user)}
 
     def test_token(self):
         response = self.client.get("/", self.get_params())

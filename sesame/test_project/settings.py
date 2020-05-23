@@ -28,7 +28,7 @@ PASSWORD_HASHERS = ["django.contrib.auth.hashers.SHA1PasswordHasher"]
 
 ROOT_URLCONF = "sesame.test_urls"
 
-SECRET_KEY = "Anyone who finds an URL will be able to log in. Seriously."
+SECRET_KEY = "Anyone who finds a URL will be able to log in. Seriously."
 
 SESSION_ENGINE = "django.contrib.sessions.backends.cache"
 

@@ -6,6 +6,7 @@ from django.utils import timezone
 
 from .packers import BasePacker
 from .test_mixins import CaptureLogMixin, CreateUserMixin
+from .test_signals import reset_sesame_settings  # noqa
 from .tokens import create_token, packer, parse_token
 
 

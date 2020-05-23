@@ -1,6 +1,7 @@
 from django.test import RequestFactory, TestCase, override_settings
 
 from .test_mixins import CreateUserMixin
+from .test_signals import reset_sesame_settings  # noqa
 from .utils import get_parameters, get_query_string, get_user
 
 

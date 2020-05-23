@@ -1,16 +1,8 @@
 from django.core.exceptions import ImproperlyConfigured
-from django.core.signals import setting_changed
-from django.dispatch import receiver
 from django.test import TestCase, override_settings
 
-from . import settings, tokens
-
-
-@receiver(setting_changed)
-def reset_sesame_settings(**kwargs):
-    settings.load()
-    tokens.signer = tokens.get_signer()
-    tokens.packer = tokens.get_packer()
+from . import settings
+from .test_signals import reset_sesame_settings  # noqa
 
 
 class TestSettings(TestCase):

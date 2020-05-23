@@ -1,70 +1,31 @@
 import datetime
-import io
-import logging
 
-from django.contrib.auth import get_user_model
 from django.core import signing
 from django.test import TestCase, override_settings
 from django.utils import timezone
 
 from .packers import BasePacker
-from .tokens import create_token, parse_token, packer
+from .test_mixins import CaptureLogMixin, CreateUserMixin
+from .tokens import create_token, packer, parse_token
 
 
-class CaptureLogMixin:
-    def setUp(self):
-        super().setUp()
-        self.log = io.StringIO()
-        self.handler = logging.StreamHandler(self.log)
-        self.logger = logging.getLogger("sesame")
-        self.logger.addHandler(self.handler)
-        self.logger.setLevel(logging.DEBUG)
-
-    def get_log(self):
-        self.handler.flush()
-        return self.log.getvalue()
-
-    def tearDown(self):
-        self.logger.removeHandler(self.handler)
-        super().tearDown()
-
-
-def get_user(user_id):
-    User = get_user_model()
-    try:
-        return User.objects.get(pk=user_id, is_active=True)
-    except User.DoesNotExist:
-        return None
-
-
-class TestTokens(CaptureLogMixin, TestCase):
-
-    username = "john"
-
-    def setUp(self):
-        super().setUp()
-        User = get_user_model()
-        self.user = User.objects.create(
-            username=self.username,
-            last_login=timezone.now() - datetime.timedelta(3600),
-        )
-
+class TestTokens(CaptureLogMixin, CreateUserMixin, TestCase):
     def test_valid_token(self):
         token = create_token(self.user)
-        user = parse_token(token, get_user)
+        user = parse_token(token, self.get_user)
         self.assertEqual(user, self.user)
         self.assertIn("Valid token for user %s" % self.username, self.get_log())
 
     def test_bad_token(self):
         token = create_token(self.user)
-        user = parse_token(token.lower(), get_user)
+        user = parse_token(token.lower(), self.get_user)
         self.assertEqual(user, None)
         self.assertIn("Bad token", self.get_log())
 
     def test_unknown_user(self):
         token = create_token(self.user)
         self.user.delete()
-        user = parse_token(token, get_user)
+        user = parse_token(token, self.get_user)
         self.assertEqual(user, None)
         self.assertIn("Unknown or inactive user", self.get_log())
 
@@ -72,7 +33,7 @@ class TestTokens(CaptureLogMixin, TestCase):
         self.user.is_active = False
         self.user.save()
         token = create_token(self.user)
-        user = parse_token(token, get_user)
+        user = parse_token(token, self.get_user)
         self.assertEqual(user, None)
         self.assertIn("Unknown or inactive user", self.get_log())
 
@@ -80,7 +41,7 @@ class TestTokens(CaptureLogMixin, TestCase):
         token = create_token(self.user)
         self.user.set_password("hunter2")
         self.user.save()
-        user = parse_token(token, get_user)
+        user = parse_token(token, self.get_user)
         self.assertEqual(user, None)
         self.assertIn("Invalid token", self.get_log())
 
@@ -90,14 +51,14 @@ class TestTokensWithExpiry(TestTokens):
     @override_settings(SESAME_MAX_AGE=-10)
     def test_expired_token(self):
         token = create_token(self.user)
-        user = parse_token(token, get_user)
+        user = parse_token(token, self.get_user)
         self.assertEqual(user, None)
         self.assertIn("Expired token", self.get_log())
 
     def test_token_without_timestamp(self):
         with override_settings(SESAME_MAX_AGE=None):
             token = create_token(self.user)
-        user = parse_token(token, get_user)
+        user = parse_token(token, self.get_user)
         self.assertEqual(user, None)
         self.assertIn("Valid signature but unexpected token", self.get_log())
 
@@ -108,7 +69,7 @@ class TestTokensWithOneTime(TestTokens):
         self.user.last_login = None
         self.user.save()
         token = create_token(self.user)
-        user = parse_token(token, get_user)
+        user = parse_token(token, self.get_user)
         self.assertEqual(user, self.user)
         self.assertIn("Valid token for user %s" % self.username, self.get_log())
 
@@ -116,7 +77,7 @@ class TestTokensWithOneTime(TestTokens):
         token = create_token(self.user)
         self.user.last_login = timezone.now() - datetime.timedelta(1800)
         self.user.save()
-        user = parse_token(token, get_user)
+        user = parse_token(token, self.get_user)
         self.assertEqual(user, None)
         self.assertIn("Invalid token", self.get_log())
 
@@ -127,7 +88,7 @@ class TestTokensWithoutInvalidateOnPasswordChange(TestTokens):
         token = create_token(self.user)
         self.user.set_password("hunter2")
         self.user.save()
-        user = parse_token(token, get_user)
+        user = parse_token(token, self.get_user)
         self.assertEqual(user, self.user)
         self.assertIn("Valid token for user %s" % self.username, self.get_log())
 
@@ -173,35 +134,28 @@ class TestTokensWithCustomPacker(TestTokens):
         self.assertEqual(token[:16], "q83vASNFq83vVniQ")
 
 
-
 class TestTokensWithUnsupportedPrimaryKey(TestCase):
-    def setUp(self):
-        User = get_user_model()
-        self.user = User.objects.create(username=True)
-
     def test_authenticate(self):
         with self.assertRaises(NotImplementedError) as exc:
             # The exception is raised in override_settings,
             # when django-sesame initializes the tokenizer
             with override_settings(AUTH_USER_MODEL="test_app.BooleanUser"):
-                create_token(self.user)
+                pass
 
         self.assertEqual(
             str(exc.exception), "BooleanField primary keys aren't supported",
         )
 
 
-class TestMisc(CaptureLogMixin, TestCase):
+class TestMisc(CaptureLogMixin, CreateUserMixin, TestCase):
     def test_naive_token_hijacking_fails(self):
         # Tokens contain the PK of the user, the hash of the revocation key,
         # and a signature. The revocation key may be identical for two users:
         # - if SESAME_INVALIDATE_ON_PASSWORD_CHANGE is False or if they don't
         #   have a password;
         # - if SESAME_ONE_TIME is False or if they have the same last_login.
-        User = get_user_model()
-        last_login = timezone.now() - datetime.timedelta(3600)
-        user_1 = User.objects.create(username="john", last_login=last_login)
-        user_2 = User.objects.create(username="jane", last_login=last_login)
+        user_1 = self.user
+        user_2 = self.create_user("jane", self.user.last_login)
 
         token1 = create_token(user_1)
         token2 = create_token(user_2)
@@ -226,6 +180,6 @@ class TestMisc(CaptureLogMixin, TestCase):
         bin_data = pk2 + key1
         data = signing.b64_encode(bin_data).decode()
         token = data + sig1
-        user = parse_token(token, get_user)
+        user = parse_token(token, self.get_user)
         self.assertEqual(user, None)
         self.assertIn("Bad token", self.get_log())

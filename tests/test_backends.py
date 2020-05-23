@@ -1,8 +1,9 @@
 from django.test import TestCase
 
-from .backends import ModelBackend
-from .test_mixins import CaptureLogMixin, CreateUserMixin
-from .tokens import create_token
+from sesame.backends import ModelBackend
+from sesame.tokens import create_token
+
+from .mixins import CaptureLogMixin, CreateUserMixin
 
 
 class TestModelBackend(CaptureLogMixin, CreateUserMixin, TestCase):

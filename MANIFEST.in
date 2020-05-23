@@ -1,2 +1,1 @@
 include LICENSE
-global-exclude test_*.py

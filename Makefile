@@ -1,17 +1,17 @@
 export PYTHONPATH:=.:$(PYTHONPATH)
-export DJANGO_SETTINGS_MODULE:=sesame.test_project.settings
+export DJANGO_SETTINGS_MODULE:=tests.settings
 
 style:
-	isort --recursive sesame
-	black sesame
-	flake8 sesame
+	isort --recursive sesame tests
+	black sesame tests
+	flake8 sesame tests
 
 test:
-	django-admin test sesame
+	django-admin test
 
 coverage:
 	coverage erase
-	coverage run `which django-admin` test sesame
+	coverage run `which django-admin` test
 	coverage html
 
 clean:

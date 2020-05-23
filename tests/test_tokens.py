@@ -4,10 +4,11 @@ from django.core import signing
 from django.test import TestCase, override_settings
 from django.utils import timezone
 
-from .packers import BasePacker
-from .test_mixins import CaptureLogMixin, CreateUserMixin
-from .test_signals import reset_sesame_settings  # noqa
-from .tokens import create_token, packer, parse_token
+from sesame.packers import BasePacker
+from sesame.tokens import create_token, packer, parse_token
+
+from .mixins import CaptureLogMixin, CreateUserMixin
+from .signals import reset_sesame_settings  # noqa
 
 
 class TestTokensBase(CaptureLogMixin, CreateUserMixin, TestCase):
@@ -135,12 +136,12 @@ class TestTokens(TestTokensBase):
         self.assertLogsContain("Bad token")
 
 
-@override_settings(AUTH_USER_MODEL="test_app.BigAutoUser")
+@override_settings(AUTH_USER_MODEL="tests.BigAutoUser")
 class TestBigAutoPrimaryKey(TestTokensBase):
     pass
 
 
-@override_settings(AUTH_USER_MODEL="test_app.UUIDUser")
+@override_settings(AUTH_USER_MODEL="tests.UUIDUser")
 class TestUUIDPrimaryKey(TestTokensBase):
     pass
 
@@ -162,7 +163,7 @@ class Packer(BasePacker):
 
 
 @override_settings(
-    AUTH_USER_MODEL="test_app.StrUser", SESAME_PACKER=__name__ + ".Packer",
+    AUTH_USER_MODEL="tests.StrUser", SESAME_PACKER=__name__ + ".Packer",
 )
 class TestCustomPacker(TestTokensBase):
 
@@ -179,7 +180,7 @@ class TestUnsupportedPrimaryKey(TestCase):
         with self.assertRaises(NotImplementedError) as exc:
             # The exception is raised in override_settings,
             # when django-sesame initializes the tokenizer
-            with override_settings(AUTH_USER_MODEL="test_app.BooleanUser"):
+            with override_settings(AUTH_USER_MODEL="tests.BooleanUser"):
                 assert False  # pragma: no cover
 
         self.assertEqual(

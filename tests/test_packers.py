@@ -1,7 +1,7 @@
 import unittest
 import uuid
 
-from .packers import (
+from sesame.packers import (
     BytesPacker,
     LongLongPacker,
     LongPacker,

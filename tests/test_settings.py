@@ -1,8 +1,9 @@
 from django.core.exceptions import ImproperlyConfigured
 from django.test import TestCase, override_settings
 
-from . import settings
-from .test_signals import reset_sesame_settings  # noqa
+from sesame import settings
+
+from .signals import reset_sesame_settings  # noqa
 
 
 class TestSettings(TestCase):

@@ -1,7 +1,7 @@
 from django.core.signals import setting_changed
 from django.dispatch import receiver
 
-from . import settings, tokens
+from sesame import settings, tokens
 
 
 @receiver(setting_changed)

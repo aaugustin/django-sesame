@@ -1,7 +1,7 @@
 style:
-	isort --recursive sesame tests
-	black sesame tests
-	flake8 sesame tests
+	isort --recursive src tests
+	black src tests
+	flake8 src tests
 
 test:
 	python -m django test --settings=tests.settings

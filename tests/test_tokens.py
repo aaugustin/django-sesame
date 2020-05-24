@@ -4,8 +4,8 @@ from django.core import signing
 from django.test import TestCase, override_settings
 from django.utils import timezone
 
-from sesame.packers import BasePacker
-from sesame.tokens import create_token, packer, parse_token
+from sesame import packers
+from sesame.tokens import create_token, parse_token
 
 from .mixins import CaptureLogMixin, CreateUserMixin
 from .signals import reset_sesame_settings  # noqa
@@ -16,10 +16,8 @@ class TestTokensBase(CaptureLogMixin, CreateUserMixin, TestCase):
         token = create_token(self.user)
         user = parse_token(token, self.get_user)
         self.assertEqual(user, self.user)
-        self.assertLogsContain("Valid token for user %s" % self.username)
+        self.assertLogsContain("Valid token for user john")
 
-
-class TestTokens(TestTokensBase):
     def test_bad_token(self):
         token = create_token(self.user)
         user = parse_token(token.lower(), self.get_user)
@@ -97,7 +95,16 @@ class TestTokens(TestTokensBase):
         self.user.save()
         user = parse_token(token, self.get_user)
         self.assertEqual(user, self.user)
-        self.assertLogsContain("Valid token for user %s" % self.username)
+        self.assertLogsContain("Valid token for user john")
+
+    @override_settings(
+        AUTH_USER_MODEL="tests.StrUser", SESAME_PACKER="tests.test_packers.Packer",
+    )
+    def test_custom_packer_is_used(self):
+        user = self.create_user(username="abcdef012345abcdef567890")
+        token = create_token(user)
+        # base64.b64encode(bytes.fromhex(username)).decode() == "q83vASNFq83vVniQ"
+        self.assertEqual(token[:16], "q83vASNFq83vVniQ")
 
     def test_naive_token_hijacking_fails(self):
         # Tokens contain the PK of the user, the hash of the revocation key,
@@ -118,8 +125,8 @@ class TestTokens(TestTokensBase):
         data2, sig2 = token2.split(":", 1)
         bin_data1 = signing.b64_decode(data1.encode())
         bin_data2 = signing.b64_decode(data2.encode())
-        pk1 = packer.pack_pk(user_1.pk)
-        pk2 = packer.pack_pk(user_2.pk)
+        pk1 = packers.packer.pack_pk(user_1.pk)
+        pk2 = packers.packer.pack_pk(user_2.pk)
         self.assertEqual(bin_data1[: len(pk1)], pk1)
         self.assertEqual(bin_data2[: len(pk2)], pk2)
         key1 = bin_data1[len(pk1) :]
@@ -134,55 +141,3 @@ class TestTokens(TestTokensBase):
         user = parse_token(token, self.get_user)
         self.assertEqual(user, None)
         self.assertLogsContain("Bad token")
-
-
-@override_settings(AUTH_USER_MODEL="tests.BigAutoUser")
-class TestBigAutoPrimaryKey(TestTokensBase):
-    pass
-
-
-@override_settings(AUTH_USER_MODEL="tests.UUIDUser")
-class TestUUIDPrimaryKey(TestTokensBase):
-    pass
-
-
-class Packer(BasePacker):
-    """
-    Verbatim copy of the example in the README.
-
-    """
-
-    @staticmethod
-    def pack_pk(user_pk):
-        assert len(user_pk) == 24
-        return bytes.fromhex(user_pk)
-
-    @staticmethod
-    def unpack_pk(data):
-        return data[:12].hex(), data[12:]
-
-
-@override_settings(
-    AUTH_USER_MODEL="tests.StrUser", SESAME_PACKER=__name__ + ".Packer",
-)
-class TestCustomPacker(TestTokensBase):
-
-    username = "abcdef012345abcdef567890"
-
-    def test_custom_packer_is_used(self):
-        token = create_token(self.user)
-        # base64.b64encode(bytes.fromhex(username)).decode() == "q83vASNFq83vVniQ"
-        self.assertEqual(token[:16], "q83vASNFq83vVniQ")
-
-
-class TestUnsupportedPrimaryKey(TestCase):
-    def test_unsupported_primary_key(self):
-        with self.assertRaises(NotImplementedError) as exc:
-            # The exception is raised in override_settings,
-            # when django-sesame initializes the tokenizer
-            with override_settings(AUTH_USER_MODEL="tests.BooleanUser"):
-                assert False  # pragma: no cover
-
-        self.assertEqual(
-            str(exc.exception), "BooleanField primary keys aren't supported",
-        )

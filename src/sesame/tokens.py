@@ -1,9 +1,7 @@
 import logging
 
-from django.contrib.auth import get_user_model
 from django.core import signing
 from django.utils import crypto
-from django.utils.module_loading import import_string
 
 from . import packers, settings
 
@@ -41,21 +39,6 @@ def unsign(token):
     return signing.b64_decode(data.encode())
 
 
-def get_packer():
-    if settings.PACKER is None:
-        pk_type = get_user_model()._meta.pk.get_internal_type()
-        try:
-            Packer = packers.PACKERS[pk_type]
-        except KeyError:
-            raise NotImplementedError(pk_type + " primary keys aren't supported")
-    else:
-        Packer = import_string(settings.PACKER)
-    return Packer()
-
-
-packer = get_packer()
-
-
 def get_revocation_key(user):
     """
     When the value returned by this method changes, this revocates tokens.
@@ -86,7 +69,7 @@ def create_token(user):
     Create a signed token from a user.
 
     """
-    pk = packer.pack_pk(user.pk)
+    pk = packers.packer.pack_pk(user.pk)
     key = get_revocation_key(user)
     return sign(pk + key)
 
@@ -111,7 +94,7 @@ def parse_token(token, get_user):
         )
         return
 
-    pk, key = packer.unpack_pk(data)
+    pk, key = packers.packer.unpack_pk(data)
 
     user = get_user(pk)
     if user is None:

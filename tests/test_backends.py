@@ -11,7 +11,7 @@ class TestModelBackend(CaptureLogMixin, CreateUserMixin, TestCase):
         token = create_token(self.user)
         user = ModelBackend().authenticate(request=None, sesame=token)
         self.assertEqual(user, self.user)
-        self.assertLogsContain("Valid token for user %s" % self.username)
+        self.assertLogsContain("Valid token for user john")
 
     def test_no_token(self):
         user = ModelBackend().authenticate(request=None, sesame=None)

@@ -1,6 +1,11 @@
 import struct
 import uuid
 
+from django.contrib.auth import get_user_model
+from django.utils.module_loading import import_string
+
+from . import settings
+
 __all__ = [
     "BasePacker",
     "ShortPacker",
@@ -158,3 +163,18 @@ PACKERS = {
     "CharField": StrPacker,
     "TextField": StrPacker,
 }
+
+
+def get_packer():
+    if settings.PACKER is None:
+        pk_type = get_user_model()._meta.pk.get_internal_type()
+        try:
+            Packer = PACKERS[pk_type]
+        except KeyError:
+            raise NotImplementedError(pk_type + " primary keys aren't supported")
+    else:
+        Packer = import_string(settings.PACKER)
+    return Packer()
+
+
+packer = get_packer()

@@ -1,7 +1,10 @@
-import unittest
 import uuid
 
+from django.test import TestCase, override_settings
+
+from sesame import packers
 from sesame.packers import (
+    BasePacker,
     BytesPacker,
     LongLongPacker,
     LongPacker,
@@ -13,8 +16,26 @@ from sesame.packers import (
     UUIDPacker,
 )
 
+from .signals import reset_sesame_settings  # noqa
 
-class TestPackers(unittest.TestCase):
+
+class Packer(BasePacker):
+    """
+    Verbatim copy of the example in the README.
+
+    """
+
+    @staticmethod
+    def pack_pk(user_pk):
+        assert len(user_pk) == 24
+        return bytes.fromhex(user_pk)
+
+    @staticmethod
+    def unpack_pk(data):
+        return data[:12].hex(), data[12:]
+
+
+class TestPackers(TestCase):
 
     random_uuid = uuid.uuid4()
     cases = [
@@ -46,6 +67,11 @@ class TestPackers(unittest.TestCase):
         (StrPacker, "", b"\x00"),
         (StrPacker, "marie-noëlle", b"\x0dmarie-no\xc3\xablle"),
         (StrPacker, 51 * "👍 ", b"\xff" + 51 * b"\xf0\x9f\x91\x8d "),
+        (
+            Packer,
+            "abcdef012345abcdef567890",
+            b"\xab\xcd\xef\x01\x23\x45\xab\xcd\xef\x56\x78\x90",
+        ),
     ]
 
     def test_pack_pk(self):
@@ -69,3 +95,24 @@ class TestPackers(unittest.TestCase):
             with self.subTest(Packer=Packer, user_pk=user_pk):
                 with self.assertRaises(ValueError):
                     Packer().pack_pk(user_pk)
+
+    def test_get_packer_with_auto_primary_key(self):
+        self.assertEqual(type(packers.packer), LongPacker)
+
+    @override_settings(AUTH_USER_MODEL="tests.UUIDUser")
+    def test_get_packer_with_uuid_primary_key(self):
+        self.assertEqual(type(packers.packer), UUIDPacker)
+
+    def test_get_packer_with_unsupported_primary_key(self):
+        with self.assertRaises(NotImplementedError) as exc:
+            with override_settings(AUTH_USER_MODEL="tests.BooleanUser"):
+                pass  # pragma: no cover
+        self.assertEqual(
+            str(exc.exception), "BooleanField primary keys aren't supported",
+        )
+
+    @override_settings(
+        AUTH_USER_MODEL="tests.StrUser", SESAME_PACKER="tests.test_packers.Packer",
+    )
+    def test_get_packer_with_custom_packer(self):
+        self.assertEqual(type(packers.packer), Packer)

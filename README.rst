@@ -87,10 +87,11 @@ django-sesame is released under the BSD license, like Django itself.
 Getting started
 ===============
 
-1. Install django-sesame and ua-parser::
+1. Install django-sesame::
 
-    $ pip install django-sesame
-    $ pip install ua-parser  # optional, see "Safari issues" below
+    $ pip install django-sesame[ua]
+
+  The `ua` extra is optional. See "Safari issues" below for details.
 
 2. Add ``sesame.backends.ModelBackend`` to ``AUTHENTICATION_BACKENDS``::
 
@@ -313,6 +314,32 @@ If ``django.contrib.sessions.middleware.SessionMiddleware`` and
 ``django.contrib.auth.middleware.AuthenticationMiddleware`` aren't enabled,
 ``sesame.middleware.AuthenticationMiddleware`` sets ``request.user`` to the
 currently logged-in user or ``AnonymousUser()``.
+
+Contributing
+============
+
+Prepare a development environment:
+
+* Install Poetry_.
+* Run ``poetry install --extras ua``.
+* Run ``poetry shell`` to load the development environment.
+
+Make changes:
+
+* Make changes to the code, tests, or docs.
+* Run ``make style`` and fix any flake8 violations.
+* Run ``make test`` or ``make coverage`` to run the set suite — it's fast!
+
+Iterate until you're happy.
+
+Check quality and submit your changes:
+
+* Install tox_.
+* Run ``tox`` to test across Python and Django versions — it's quite slow.
+* Submit a pull request.
+
+.. _Poetry: https://python-poetry.org/
+.. _tox: https://tox.readthedocs.io/
 
 Changelog
 =========

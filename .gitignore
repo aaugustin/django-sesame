@@ -1,9 +1,8 @@
-*.egg-info
 *.pyc
 .coverage
 .tox
-build
 dist
+django_sesame.egg-info
 docs/_build
 htmlcov
-MANIFEST
+poetry.lock

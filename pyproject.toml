@@ -1,0 +1,42 @@
+[build-system]
+requires = ["poetry>=1.0"]
+build-backend = "poetry.masonry.api"
+
+[tool.poetry]
+name = "django-sesame"
+version = "1.8"
+description = """\
+    Frictionless authentication with "Magic Links" \
+    for your Django project."""
+license = "BSD-3-Clause"
+authors = ["Aymeric Augustin <aymeric.augustin@m4x.org>"]
+readme = "README.rst"
+repository = "https://github.com/aaugustin/django-sesame"
+documentation = "https://django-sesame.readthedocs.io/"
+keywords = ["authentication", "token-based-authentication"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Environment :: Web Environment",
+    "Framework :: Django",
+    "Framework :: Django :: 2.2",
+    "Framework :: Django :: 3.0",
+    "Intended Audience :: Developers",
+    "Operating System :: OS Independent",
+]
+packages = [
+    { include = "sesame" },
+]
+
+[tool.poetry.dependencies]
+django = ">=2.2"
+python = "^3.5"
+ua-parser = { version = ">=0.10", optional = true }
+
+[tool.poetry.dev-dependencies]
+black = {version = "*", allow-prereleases = true, python = "^3.6"}
+coverage = "*"
+flake8 = "*"
+isort = "*"
+
+[tool.poetry.extras]
+ua = ["ua-parser"]

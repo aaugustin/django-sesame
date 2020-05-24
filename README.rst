@@ -354,6 +354,7 @@ Changelog
   ``authenticate()`` to ``sesame``. You're affected only if you're explicitly
   calling ``authenticate(url_auth_token=...)``. If so, change this call to
   ``authenticate(sesame=...)``.
+* Improved documentation.
 
 1.8
 ---

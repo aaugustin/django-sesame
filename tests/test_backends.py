@@ -1,7 +1,7 @@
 from django.test import TestCase
 
 from sesame.backends import ModelBackend
-from sesame.tokens import create_token
+from sesame.tokens_v1 import create_token
 
 from .mixins import CaptureLogMixin, CreateUserMixin
 

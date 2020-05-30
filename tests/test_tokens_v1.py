@@ -5,7 +5,7 @@ from django.test import TestCase, override_settings
 from django.utils import timezone
 
 from sesame import packers
-from sesame.tokens import create_token, parse_token
+from sesame.tokens_v1 import create_token, parse_token
 
 from .mixins import CaptureLogMixin, CreateUserMixin
 from .signals import reset_sesame_settings  # noqa

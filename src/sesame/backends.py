@@ -1,6 +1,6 @@
 from django.contrib.auth import backends as auth_backends
 
-from .tokens import parse_token
+from .tokens_v1 import parse_token
 
 
 class SesameBackendMixin:

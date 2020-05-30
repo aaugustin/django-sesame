@@ -106,6 +106,13 @@ class TestTokensBase(CaptureLogMixin, CreateUserMixin, TestCase):
         # base64.b64encode(bytes.fromhex(username)).decode() == "q83vASNFq83vVniQ"
         self.assertEqual(token[:16], "q83vASNFq83vVniQ")
 
+    def test_custom_packer_change(self):
+        token = create_token(self.user)
+        with override_settings(SESAME_PACKER="tests.test_packers.RepeatPacker"):
+            user = parse_token(token, self.get_user)
+        self.assertEqual(user, None)
+        self.assertLogsContain("Valid signature but unexpected token")
+
     def test_naive_token_hijacking_fails(self):
         # Tokens contain the PK of the user, the hash of the revocation key,
         # and a signature. The revocation key may be identical for two users:

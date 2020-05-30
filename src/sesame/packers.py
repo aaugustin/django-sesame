@@ -44,7 +44,8 @@ class BasePacker:
 
 class StructPackerMeta(type):
     def __new__(cls, name, bases, namespace, **kwds):
-        namespace["size"] = struct.calcsize(namespace["fmt"])
+        if "size" not in namespace and "fmt" in namespace:
+            namespace["size"] = struct.calcsize(namespace["fmt"])
         return super().__new__(cls, name, bases, namespace, **kwds)
 
 

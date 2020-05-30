@@ -89,16 +89,23 @@ def parse_token(token, get_user):
         return
     except Exception:
         logger.exception(
-            "Valid signature but unexpected token - if you changed "
-            "django-sesame settings, you must regenerate tokens"
+            "Valid signature but unexpected token; if you enabled "
+            "or disabled SESAME_MAX_AGE, you must regenerate tokens"
         )
         return
 
-    pk, key = packers.packer.unpack_pk(data)
+    try:
+        user_pk, key = packers.packer.unpack_pk(data)
+    except Exception:
+        logger.exception(
+            "Valid signature but unexpected token; if you changed "
+            "SESAME_PACKER, you must regenerate tokens"
+        )
+        return
 
-    user = get_user(pk)
+    user = get_user(user_pk)
     if user is None:
-        logger.debug("Unknown or inactive user: %s", pk)
+        logger.debug("Unknown or inactive user: %s", user_pk)
         return
     if not crypto.constant_time_compare(key, get_revocation_key(user)):
         logger.debug("Invalid token: %s", token)

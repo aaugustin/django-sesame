@@ -35,6 +35,25 @@ class Packer(BasePacker):
         return data[:12].hex(), data[12:]
 
 
+class RepeatPacker(LongPacker):
+    """
+    Packer that can raise an exception in unpack_pk.
+
+    """
+
+    @classmethod
+    def pack_pk(cls, user_pk):
+        data = super().pack_pk(user_pk)
+        assert data[:2] == b"\x00\x00"
+        return data[2:4] + data[2:]
+
+    @classmethod
+    def unpack_pk(cls, data):
+        assert data[:2] == data[2:4]
+        data = b"\x00\x00" + data[2:]
+        return super().unpack_pk(data)
+
+
 class TestPackers(TestCase):
 
     random_uuid = uuid.uuid4()
@@ -72,6 +91,7 @@ class TestPackers(TestCase):
             "abcdef012345abcdef567890",
             b"\xab\xcd\xef\x01\x23\x45\xab\xcd\xef\x56\x78\x90",
         ),
+        (RepeatPacker, 2, b"\x00\x02\x00\x02"),
     ]
 
     def test_pack_pk(self):

@@ -1,3 +1,5 @@
+import datetime
+
 from django.core.exceptions import ImproperlyConfigured
 from django.test import TestCase, override_settings
 
@@ -7,6 +9,10 @@ from .signals import reset_sesame_settings  # noqa
 
 
 class TestSettings(TestCase):
+    @override_settings(SESAME_MAX_AGE=datetime.timedelta(minutes=5))
+    def test_max_age_timedelta(self):
+        self.assertEqual(settings.MAX_AGE, 300)
+
     @override_settings(SESAME_INVALIDATE_ON_PASSWORD_CHANGE=False, SESAME_MAX_AGE=None)
     def test_insecure_configuration(self):
         with self.assertRaises(ImproperlyConfigured) as exc:

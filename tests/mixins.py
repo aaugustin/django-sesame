@@ -13,11 +13,11 @@ class CreateUserMixin(TestCase):
         super().setUp()
         self.user = self.create_user()
 
-    def create_user(self, username="john", last_login=None):
-        if last_login is None:
-            last_login = timezone.now() - datetime.timedelta(seconds=3600)
+    def create_user(self, username="john", **kwargs):
         return get_user_model().objects.create(
-            username=username, last_login=last_login,
+            username=username,
+            last_login=timezone.now() - datetime.timedelta(seconds=3600),
+            **kwargs,
         )
 
     @staticmethod

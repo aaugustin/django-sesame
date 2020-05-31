@@ -136,9 +136,10 @@ uses salted passwords — that's been the default in Django for a long time —
 the token is invalidated even if the new password is identical to the old one.
 
 If you want tokens to expire after a given amount of time, set the
-``SESAME_MAX_AGE`` setting to a duration in seconds. Then each token will
-contain the time it was generated at and django-sesame will check if it's
-still valid at each login attempt.
+``SESAME_MAX_AGE`` setting to a duration in seconds or a
+:class:`datetime.timedelta`. Then each token will contain the time it was
+generated at and django-sesame will check if it's still valid at each login
+attempt.
 
 If you want tokens to be usable only once, set the ``SESAME_ONE_TIME`` setting
 to ``True``. In that case tokens are only valid if the last login date hasn't
@@ -354,6 +355,7 @@ Changelog
   ``authenticate()`` to ``sesame``. You're affected only if you're explicitly
   calling ``authenticate(url_auth_token=...)``. If so, change this call to
   ``authenticate(sesame=...)``.
+* ``SESAME_MAX_AGE`` can be a :class:`datetime.timedelta`.
 * Improved documentation.
 
 1.8

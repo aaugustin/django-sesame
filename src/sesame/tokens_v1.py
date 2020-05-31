@@ -10,6 +10,31 @@ __all__ = ["create_token", "parse_token"]
 logger = logging.getLogger("sesame")
 
 
+def get_revocation_key(user):
+    """
+    When the value returned by this method changes, this revocates tokens.
+
+    It is derived from the hashed password so that changing the password
+    revokes tokens.
+
+    For one-time tokens, it also contains the last login datetime so that
+    logging in revokes existing tokens.
+
+    """
+    data = ""
+    if settings.INVALIDATE_ON_PASSWORD_CHANGE:
+        data += user.password
+    if settings.ONE_TIME:
+        data += str(user.last_login)
+    # The password is expected to be a secure hash but we hash it again
+    # for additional safety. We default to MD5 to minimize the length of
+    # the token. (Remember, if an attacker obtains the URL, he can already
+    # log in. This isn't high security.)
+    return crypto.pbkdf2(
+        data, settings.SALT, settings.ITERATIONS, digest=settings.DIGEST,
+    )
+
+
 def get_signer():
     if settings.MAX_AGE is None:
         return signing.Signer(salt=settings.SALT)
@@ -41,39 +66,14 @@ def unsign(token):
     return signing.b64_decode(data.encode())
 
 
-def get_revocation_key(user):
-    """
-    When the value returned by this method changes, this revocates tokens.
-
-    It always includes the password so that changing the password revokes
-    existing tokens.
-
-    In addition, for one-time tokens, it also contains the last login
-    datetime so that logging in revokes existing tokens.
-
-    """
-    value = ""
-    if settings.INVALIDATE_ON_PASSWORD_CHANGE:
-        value += user.password
-    if settings.ONE_TIME:
-        value += str(user.last_login)
-    # The password is expected to be a secure hash but we hash it again
-    # for additional safety. We default to MD5 to minimize the length of
-    # the token. (Remember, if an attacker obtains the URL, he can already
-    # log in. This isn't high security.)
-    return crypto.pbkdf2(
-        value, settings.SALT, settings.ITERATIONS, digest=settings.DIGEST,
-    )
-
-
 def create_token(user):
     """
-    Create a signed token from a user.
+    Create a signed token for a user.
 
     """
-    pk = packers.packer.pack_pk(user.pk)
+    primary_key = packers.packer.pack_pk(user.pk)
     key = get_revocation_key(user)
-    return sign(pk + key)
+    return sign(primary_key + key)
 
 
 def parse_token(token, get_user):

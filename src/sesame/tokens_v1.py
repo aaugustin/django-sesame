@@ -5,6 +5,8 @@ from django.utils import crypto
 
 from . import packers, settings
 
+__all__ = ["create_token", "parse_token"]
+
 logger = logging.getLogger("sesame")
 
 

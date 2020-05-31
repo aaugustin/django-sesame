@@ -19,6 +19,8 @@ DEFAULTS = {
     "ITERATIONS": 10000,
 }
 
+__all__ = list(DEFAULTS)
+
 
 # load() also works for reloading settings, which is useful for testing.
 

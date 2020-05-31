@@ -15,7 +15,6 @@ __all__ = [
     "LongLongPacker",
     "UnsignedLongLongPacker",
     "UUIDPacker",
-    "PACKERS",
 ]
 
 

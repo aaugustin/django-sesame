@@ -7,6 +7,8 @@ from django.shortcuts import redirect
 from . import settings
 from .utils import get_user
 
+__all__ = ["AuthenticationMiddleware"]
+
 
 class AuthenticationMiddleware:
     def __init__(self, get_response):

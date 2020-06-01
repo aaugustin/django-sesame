@@ -1,6 +1,6 @@
 from django.contrib.auth import backends as auth_backends
 
-from .tokens_v1 import parse_token
+from .tokens import parse_token
 
 __all__ = ["ModelBackend"]
 

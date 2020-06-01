@@ -3,7 +3,7 @@ from urllib.parse import urlencode
 from django.contrib.auth import authenticate
 from django.utils import timezone
 
-from . import settings, tokens_v1
+from . import settings, tokens
 
 __all__ = ["get_parameters", "get_query_string", "get_user"]
 
@@ -13,7 +13,7 @@ def get_parameters(user):
     Return GET parameters to log in `user`.
 
     """
-    return {settings.TOKEN_NAME: tokens_v1.create_token(user)}
+    return {settings.TOKEN_NAME: tokens.create_token(user)}
 
 
 def get_query_string(user):

@@ -8,7 +8,7 @@ your Django project.
 .. _django-sesame: https://github.com/aaugustin/django-sesame
 
 It generates URLs containing authentication tokens such as:
-https://example.com/?sesame=AAAAARchl18CIQUlImmbV9q7PZk%3A89AEU34b0JLSrkT8Ty2RPISio5
+https://example.com/?sesame=zxST9d0XT9xgfYLvoa9e2myN
 
 Then it authenticates users based on tokens found in URLs.
 

@@ -1,5 +1,6 @@
 import datetime
 import hashlib
+import importlib
 import sys
 
 from django.conf import settings
@@ -14,6 +15,8 @@ DEFAULTS = {
     "INVALIDATE_ON_PASSWORD_CHANGE": True,
     # Custom primary keys
     "PACKER": None,
+    # Tokens
+    "TOKENS": ["sesame.tokens_v2", "sesame.tokens_v1"],
     # Tokens v1
     "SALT": "sesame",
     "DIGEST": hashlib.md5,
@@ -34,11 +37,14 @@ def load():
     for name, default in DEFAULTS.items():
         setattr(module, name, getattr(settings, "SESAME_" + name, default))
 
-    global KEY, MAX_AGE, PACKER
+    global KEY, MAX_AGE, PACKER, TOKENS
 
     # Support defining MAX_AGE as a timedelta rather than a number of seconds.
     if isinstance(MAX_AGE, datetime.timedelta):
         MAX_AGE = MAX_AGE.total_seconds()
+
+    # Import token creation and parsing modules.
+    TOKENS = [importlib.import_module(tokens) for tokens in TOKENS]
 
     # Derive a personalized 64-bytes key from the base SECRET_KEY.
     # Include settings in the personalized key to invalidate tokens when

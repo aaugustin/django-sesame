@@ -14,7 +14,7 @@ class TestUtils(CaptureLogMixin, CreateUserMixin, TestCase):
         self.assertIn("?sesame=", get_query_string(self.user))
 
     def get_request_with_token(self):
-        return RequestFactory().get("/" + get_query_string(self.user))
+        return RequestFactory().get("/", get_parameters(self.user))
 
     def test_get_user(self):
         request = self.get_request_with_token()
@@ -25,11 +25,11 @@ class TestUtils(CaptureLogMixin, CreateUserMixin, TestCase):
         self.assertIsNone(get_user(request))
 
     def test_get_user_empty_token(self):
-        request = RequestFactory().get("/?sesame=")
+        request = RequestFactory().get("/", {"sesame": ""})
         self.assertIsNone(get_user(request))
 
     def test_get_user_bad_token(self):
-        request = RequestFactory().get("/" + get_query_string(self.user).lower())
+        request = RequestFactory().get("/", {"sesame": "~!@#$%^&*~!@#$%^&*~"})
         self.assertIsNone(get_user(request))
         self.assertLogsContain("Bad token")
 

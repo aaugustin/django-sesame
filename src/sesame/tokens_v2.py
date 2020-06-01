@@ -2,12 +2,13 @@ import base64
 import hashlib
 import hmac
 import logging
+import re
 import struct
 import time
 
 from . import packers, settings
 
-__all__ = ["create_token", "parse_token"]
+__all__ = ["create_token", "detect_token", "parse_token"]
 
 logger = logging.getLogger("sesame")
 
@@ -121,7 +122,7 @@ def sign(data):
 
 def create_token(user):
     """
-    Create a signed token for a user.
+    Create a v2 signed token for a user.
 
     """
     primary_key = packers.packer.pack_pk(user.pk)
@@ -139,7 +140,7 @@ def create_token(user):
 
 def parse_token(token, get_user):
     """
-    Obtain a user from a signed token.
+    Obtain a user from a v2 signed token.
 
     """
     token = token.encode()
@@ -201,3 +202,19 @@ def parse_token(token, get_user):
 
     logger.debug("Valid token for user %s", user)
     return user
+
+
+# Tokens are arbitrary Base64-encoded bytestrings. Their size depends on
+# SESAME_PACKER, SESAME_MAX_AGE, and SESAME_SIGNATURE_SIZE. Defaults are:
+# - without SESAME_MAX_AGE: 4 + 10 = 14 bytes = 19 Base64 characters.
+# - with SESAME_MAX_AGE: 4 + 4 + 10 = 18 bytes = 24 Base64 characters.
+# Minimum "sensible" size is 1 + 0 + 2 = 3 bytes = 4 Base64 characters.
+token_re = re.compile(r"[A-Za-z0-9-_]{4,}")
+
+
+def detect_token(token):
+    """
+    Tell whether token may be a v2 signed token.
+
+    """
+    return token_re.fullmatch(token) is not None

@@ -9,6 +9,7 @@ from sesame import packers
 from sesame.tokens_v2 import (
     TIMESTAMP_OFFSET,
     create_token,
+    detect_token,
     get_revocation_key,
     parse_token,
 )
@@ -20,6 +21,7 @@ from .signals import reset_sesame_settings  # noqa
 class TestTokensV2(CaptureLogMixin, CreateUserMixin, TestCase):
     def test_valid_token(self):
         token = create_token(self.user)
+        self.assertTrue(detect_token(token))
         user = parse_token(token, self.get_user)
         self.assertEqual(user, self.user)
         self.assertLogsContain("Valid token for user john")
@@ -30,7 +32,9 @@ class TestTokensV2(CaptureLogMixin, CreateUserMixin, TestCase):
     def test_truncated_token_in_primary_key(self):
         token = create_token(self.user)
         # Primary key is in bytes 0 - 5 1/3
-        user = parse_token(token[:4], self.get_user)
+        token = token[:4]
+        self.assertTrue(detect_token(token))
+        user = parse_token(token, self.get_user)
         self.assertEqual(user, None)
         self.assertLogsContain("Bad token: cannot extract primary key")
 
@@ -38,7 +42,9 @@ class TestTokensV2(CaptureLogMixin, CreateUserMixin, TestCase):
     def test_truncated_token_in_timestamp(self):
         token = create_token(self.user)
         # Timestamp is in bytes 5 1/3 - 10 2/3
-        user = parse_token(token[:8], self.get_user)
+        token = token[:8]
+        self.assertTrue(detect_token(token))
+        user = parse_token(token, self.get_user)
         self.assertEqual(user, None)
         self.assertLogsContain("Bad token: cannot extract timestamp")
 
@@ -46,7 +52,9 @@ class TestTokensV2(CaptureLogMixin, CreateUserMixin, TestCase):
     def test_truncated_token_in_signature(self):
         token = create_token(self.user)
         # Signature is in bytes 10 2/3 - 24
-        user = parse_token(token[:12], self.get_user)
+        token = token[:12]
+        self.assertTrue(detect_token(token))
+        user = parse_token(token, self.get_user)
         self.assertEqual(user, None)
         self.assertLogsContain("Bad token: cannot extract signature")
 
@@ -54,6 +62,7 @@ class TestTokensV2(CaptureLogMixin, CreateUserMixin, TestCase):
         token = create_token(self.user)
         # Alter signature, which is in bytes 5 1/3 - 18 2/3
         token = token[:6] + token[6:].lower()
+        self.assertTrue(detect_token(token))
         user = parse_token(token, self.get_user)
         self.assertEqual(user, None)
         self.assertLogsContain("Invalid token for user john")
@@ -62,6 +71,7 @@ class TestTokensV2(CaptureLogMixin, CreateUserMixin, TestCase):
     def test_random_token(self):
         token = "!@#$" * 6
         self.assertEqual(len(token), len(create_token(self.user)))
+        self.assertFalse(detect_token(token))
         user = parse_token(token, self.get_user)
         self.assertEqual(user, None)
         self.assertLogsContain("Bad token")
@@ -69,6 +79,7 @@ class TestTokensV2(CaptureLogMixin, CreateUserMixin, TestCase):
     def test_unknown_user(self):
         token = create_token(self.user)
         self.user.delete()
+        self.assertTrue(detect_token(token))
         user = parse_token(token, self.get_user)
         self.assertEqual(user, None)
         self.assertLogsContain("Unknown or inactive user: pk = 1")
@@ -78,6 +89,7 @@ class TestTokensV2(CaptureLogMixin, CreateUserMixin, TestCase):
     @override_settings(SESAME_MAX_AGE=300)
     def test_valid_max_age_token(self):
         token = create_token(self.user)
+        self.assertTrue(detect_token(token))
         user = parse_token(token, self.get_user)
         self.assertEqual(user, self.user)
         self.assertLogsContain("Valid token for user john")
@@ -85,6 +97,7 @@ class TestTokensV2(CaptureLogMixin, CreateUserMixin, TestCase):
     @override_settings(SESAME_MAX_AGE=-300)
     def test_expired_max_age_token(self):
         token = create_token(self.user)
+        self.assertTrue(detect_token(token))
         user = parse_token(token, self.get_user)
         self.assertEqual(user, None)
         self.assertLogsContain("Expired token")
@@ -93,20 +106,24 @@ class TestTokensV2(CaptureLogMixin, CreateUserMixin, TestCase):
     def test_extended_max_age_token(self):
         token = create_token(self.user)
         with override_settings(SESAME_MAX_AGE=300):
+            self.assertTrue(detect_token(token))
             user = parse_token(token, self.get_user)
         self.assertEqual(user, self.user)
         self.assertLogsContain("Valid token for user john")
 
+    @override_settings(SESAME_MAX_AGE=300)
     def test_max_age_token_without_timestamp(self):
-        token = create_token(self.user)
-        with override_settings(SESAME_MAX_AGE=300):
-            user = parse_token(token, self.get_user)
+        with override_settings(SESAME_MAX_AGE=None):
+            token = create_token(self.user)
+        self.assertTrue(detect_token(token))
+        user = parse_token(token, self.get_user)
         self.assertEqual(user, None)
         self.assertLogsContain("Bad token: cannot extract signature")
 
     def test_token_with_timestamp(self):
         with override_settings(SESAME_MAX_AGE=300):
             token = create_token(self.user)
+        self.assertTrue(detect_token(token))
         user = parse_token(token, self.get_user)
         self.assertEqual(user, None)
         self.assertLogsContain("Bad token: cannot extract signature")
@@ -163,6 +180,7 @@ class TestTokensV2(CaptureLogMixin, CreateUserMixin, TestCase):
         token = create_token(user)
         # base64.b64encode(bytes.fromhex(username)).decode() == "q83vASNFq83vVniQ"
         self.assertEqual(token[:16], "q83vASNFq83vVniQ")
+        self.assertTrue(detect_token(token))
 
     def test_custom_packer_change(self):
         token = create_token(self.user)

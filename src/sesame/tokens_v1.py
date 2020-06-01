@@ -1,11 +1,12 @@
 import logging
+import re
 
 from django.core import signing
 from django.utils import crypto
 
 from . import packers, settings
 
-__all__ = ["create_token", "parse_token"]
+__all__ = ["create_token", "detect_token", "parse_token"]
 
 logger = logging.getLogger("sesame")
 
@@ -68,7 +69,7 @@ def unsign(token):
 
 def create_token(user):
     """
-    Create a signed token for a user.
+    Create a v1 signed token for a user.
 
     """
     primary_key = packers.packer.pack_pk(user.pk)
@@ -78,7 +79,7 @@ def create_token(user):
 
 def parse_token(token, get_user):
     """
-    Obtain a user from a signed token.
+    Obtain a user from a v1 signed token.
 
     """
     try:
@@ -115,3 +116,27 @@ def parse_token(token, get_user):
     logger.debug("Valid token for user %s: %s", user, token)
 
     return user
+
+
+def get_token_re():
+    if settings.MAX_AGE is None:
+        # Size of primary key and revocation key depends on SESAME_PACKER and
+        # SESAME_DIGEST. Default is 4 + 16 = 20 bytes = 27 Base64 characters.
+        # Minimum "sensible" size is 1 + 2 = 3 bytes = 4 Base64 characters.
+        return re.compile(r"[A-Za-z0-9-_]{4,}:[A-Za-z0-9-_]{27}")
+
+    else:
+        # All timestamps use 6 Base62 characters because 100000 in Base62 is
+        # 1999-01-12T09:20:32Z, before django-sesame existed.
+        return re.compile(r"[A-Za-z0-9-_]{4,}:[0-9A-Za-z]{6}:[A-Za-z0-9-_]{27}")
+
+
+token_re = get_token_re()
+
+
+def detect_token(token):
+    """
+    Tell whether token may be a v1 signed token.
+
+    """
+    return token_re.fullmatch(token) is not None

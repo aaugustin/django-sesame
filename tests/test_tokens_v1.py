@@ -5,7 +5,7 @@ from django.test import TestCase, override_settings
 from django.utils import timezone
 
 from sesame import packers
-from sesame.tokens_v1 import create_token, parse_token
+from sesame.tokens_v1 import create_token, detect_token, parse_token
 
 from .mixins import CaptureLogMixin, CreateUserMixin
 from .signals import reset_sesame_settings  # noqa
@@ -14,6 +14,7 @@ from .signals import reset_sesame_settings  # noqa
 class TestTokensV1(CaptureLogMixin, CreateUserMixin, TestCase):
     def test_valid_token(self):
         token = create_token(self.user)
+        self.assertTrue(detect_token(token))
         user = parse_token(token, self.get_user)
         self.assertEqual(user, self.user)
         self.assertLogsContain("Valid token for user john")
@@ -24,6 +25,7 @@ class TestTokensV1(CaptureLogMixin, CreateUserMixin, TestCase):
         token = create_token(self.user)
         # Alter signature, which is is in bytes 28 - 55
         token = token[:28] + token[28:].lower()
+        self.assertTrue(detect_token(token))
         user = parse_token(token, self.get_user)
         self.assertEqual(user, None)
         self.assertLogsContain("Bad token")
@@ -31,6 +33,7 @@ class TestTokensV1(CaptureLogMixin, CreateUserMixin, TestCase):
     def test_random_token(self):
         token = "!@#$%" * 11
         self.assertEqual(len(token), len(create_token(self.user)))
+        self.assertFalse(detect_token(token))
         user = parse_token(token, self.get_user)
         self.assertEqual(user, None)
         self.assertLogsContain("Bad token")
@@ -38,6 +41,7 @@ class TestTokensV1(CaptureLogMixin, CreateUserMixin, TestCase):
     def test_unknown_user(self):
         token = create_token(self.user)
         self.user.delete()
+        self.assertTrue(detect_token(token))
         user = parse_token(token, self.get_user)
         self.assertEqual(user, None)
         self.assertLogsContain("Unknown or inactive user")
@@ -47,6 +51,7 @@ class TestTokensV1(CaptureLogMixin, CreateUserMixin, TestCase):
     @override_settings(SESAME_MAX_AGE=300)
     def test_valid_max_age_token(self):
         token = create_token(self.user)
+        self.assertTrue(detect_token(token))
         user = parse_token(token, self.get_user)
         self.assertEqual(user, self.user)
         self.assertLogsContain("Valid token for user john")
@@ -54,6 +59,7 @@ class TestTokensV1(CaptureLogMixin, CreateUserMixin, TestCase):
     @override_settings(SESAME_MAX_AGE=-300)
     def test_expired_max_age_token(self):
         token = create_token(self.user)
+        self.assertTrue(detect_token(token))
         user = parse_token(token, self.get_user)
         self.assertEqual(user, None)
         self.assertLogsContain("Expired token")
@@ -62,20 +68,24 @@ class TestTokensV1(CaptureLogMixin, CreateUserMixin, TestCase):
     def test_extended_max_age_token(self):
         token = create_token(self.user)
         with override_settings(SESAME_MAX_AGE=300):
+            self.assertTrue(detect_token(token))
             user = parse_token(token, self.get_user)
         self.assertEqual(user, self.user)
         self.assertLogsContain("Valid token for user john")
 
+    @override_settings(SESAME_MAX_AGE=300)
     def test_max_age_token_without_timestamp(self):
-        token = create_token(self.user)
-        with override_settings(SESAME_MAX_AGE=300):
-            user = parse_token(token, self.get_user)
+        with override_settings(SESAME_MAX_AGE=None):
+            token = create_token(self.user)
+        self.assertFalse(detect_token(token))
+        user = parse_token(token, self.get_user)
         self.assertEqual(user, None)
         self.assertLogsContain("Valid signature but unexpected token")
 
     def test_token_with_timestamp(self):
         with override_settings(SESAME_MAX_AGE=300):
             token = create_token(self.user)
+        self.assertFalse(detect_token(token))
         user = parse_token(token, self.get_user)
         self.assertEqual(user, None)
         self.assertLogsContain("Valid signature but unexpected token")
@@ -130,6 +140,7 @@ class TestTokensV1(CaptureLogMixin, CreateUserMixin, TestCase):
         token = create_token(user)
         # base64.b64encode(bytes.fromhex(username)).decode() == "q83vASNFq83vVniQ"
         self.assertEqual(token[:16], "q83vASNFq83vVniQ")
+        self.assertTrue(detect_token(token))
 
     def test_custom_packer_change(self):
         token = create_token(self.user)

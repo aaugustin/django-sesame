@@ -33,7 +33,7 @@ Known use cases for django-sesame include:
 
    Since emails may be forwarded, authenticated links shouldn't log the user
    in. They should only allow access to specific views, as described in
-   "Per-view authentication" below.
+   `Per-view authentication`_.
 
 3. Sharing links, which are a variant of authenticated links. When a user
    shares content with a guest, you can create a phantom account for the guest
@@ -52,9 +52,11 @@ Known use cases for django-sesame include:
 (In)security
 ============
 
-**Before using django-sesame in your project, please review the following
-advice carefully.** (Also, please don't use security-sensitive libraries
-published by strangers on the Internet without checking what they do.)
+.. warning::
+
+    **Before using django-sesame in your project, please review the following
+    advice carefully.** (Also, please don't use security-sensitive libraries
+    published by strangers on the Internet without checking what they do.)
 
 The major security weakness in django-sesame is a direct consequence of the
 feature it implements: **whoever obtains an authentication token will be able
@@ -64,9 +66,9 @@ URLs end up in countless insecure places: emails, referer headers, proxy logs,
 browser history, etc. You can't avoid that. At best you can mitigate it by
 creating short-lived or single-use tokens, as described below.
 
-Otherwise, a reasonable attempt has been made to provide a secure solution.
-django-sesame uses Django's signing framework to create signed tokens. It
-offers configurable options for token expiration or invalidation.
+Otherwise, a reasonable attempt was made to provide a secure solution. Tokens
+are secured with modern cryptography. There are configurable options for token
+expiration and invalidation.
 
 Requirements
 ============
@@ -74,7 +76,7 @@ Requirements
 django-sesame is tested with:
 
 - Django 2.2 (LTS) and 3.0;
-- all supported Python versions.
+- Python ≥ 3.6
 
 It builds upon ``django.contrib.auth``.
 
@@ -87,17 +89,23 @@ django-sesame is released under the BSD license, like Django itself.
 Getting started
 ===============
 
-1. Install django-sesame::
+1. Install django-sesame:
+
+   .. code:: bash
 
     $ pip install django-sesame[ua]
 
-  The `ua` extra is optional. See "Safari issues" below for details.
+   The ``ua`` extra is optional. See `Safari issues`_ for details.
 
-2. Add ``sesame.backends.ModelBackend`` to ``AUTHENTICATION_BACKENDS``::
+2. Add ``"sesame.backends.ModelBackend"`` to ``AUTHENTICATION_BACKENDS``:
+
+   .. code:: python
 
     AUTHENTICATION_BACKENDS += ["sesame.backends.ModelBackend"]
 
-3. Add ``sesame.middleware.AuthenticationMiddleware`` to ``MIDDLEWARE``::
+3. Add ``"sesame.middleware.AuthenticationMiddleware"`` to ``MIDDLEWARE``:
+
+   .. code:: python
 
     MIDDLEWARE += ["sesame.middleware.AuthenticationMiddleware"]
 
@@ -114,18 +122,22 @@ Generating URLs
 django-sesame provides two functions to generate authenticated URLs.
 
 1. ``sesame.utils.get_query_string(user)`` returns a complete query string
-   that you can append to any URL to enable one-click login.
+   such as ``"?sesame=zxST9d0XT9xgfYLvoa9e2myN"``. You can append it to any
+   URL to enable one-click login.
 
-2. ``sesame.utils.get_parameters(user)`` returns a dictionary of GET
-   parameters to add to the query string, if you're already building one.
+2. ``sesame.utils.get_parameters(user)`` returns a dictionary of query string
+   parameters such as ``{"sesame": "zxST9d0XT9xgfYLvoa9e2myN"}``. You can
+   merge it with other query string parameters, if you're already building a
+   query string.
 
-Share resulting URLs with your users while ensuring adequate confidentiality.
+Share the resulting URLs with your users though an adequately confidential
+channel for your use case.
 
 By default, the URL parameter is named ``sesame``. You can change this with
 the ``SESAME_TOKEN_NAME`` setting. Make sure that it doesn't conflict with
 other query string parameters used by your application.
 
-(In version 1.8 and earlier, this parameter was named ``url_auth_token``.)
+*Changed in 2.0:* the URL parameter used to be named ``url_auth_token``.
 
 Tokens lifecycle
 ================
@@ -137,26 +149,25 @@ the token is invalidated even if the new password is identical to the old one.
 
 If you want tokens to expire after a given amount of time, set the
 ``SESAME_MAX_AGE`` setting to a duration in seconds or a
-:class:`datetime.timedelta`. Then each token will contain the time it was
-generated at and django-sesame will check if it's still valid at each login
-attempt.
+``datetime.timedelta``. Then each token will contain the time it was generated
+at and django-sesame will check if it's still valid at each login attempt.
 
 If you want tokens to be usable only once, set the ``SESAME_ONE_TIME`` setting
-to ``True``. In that case tokens are only valid if the last login date hasn't
-changed since they were generated. Since logging in changes the last login
-date, such tokens are usable at most once. If you're intending to send links
-by email, be aware that some email providers scan links for security reasons,
-which consumes single-use tokens prematurely. Tokens with a short expiry are
-more reliable.
+to ``True``. Then tokens are valid only if the last login date hasn't changed
+since they were generated. Since logging in changes the last login date, such
+tokens are usable at most once. If you're intending to send links by email, be
+aware that some email providers scan links for security reasons, which
+consumes single-use tokens prematurely. Tokens with a short expiry are more
+reliable.
 
 If you don't want tokens to be invalidated by password changes, set the
 ``SESAME_INVALIDATE_ON_PASSWORD_CHANGE`` setting to ``False``. **This is
-strongly discouraged because it becomes impossible to invalidate a token**
-short of changing the ``SESAME_SALT`` setting and invalidating all tokens at
-once. If you're doing it anyway, you should set ``SESAME_MAX_AGE`` to a short
-value to minimize risks. This option may be useful for generating tokens
-during a signup process, when you don't know if the token will be used before
-or after initializing the password.
+discouraged because it becomes impossible to invalidate a single token.** Your
+only option if a token is compromised is to invalidate all tokens at once. If
+you're doing it anyway, you should set ``SESAME_MAX_AGE`` to a short value to
+minimize risks. This option may be useful for generating tokens during a
+signup process, when you don't know if the token will be used before or after
+initializing the password.
 
 Finally, if the ``is_active`` attribute of a user is set to ``False``,
 django-sesame rejects authentication tokens for this user.
@@ -170,19 +181,21 @@ generated tokens.
 Per-view authentication
 =======================
 
-The configuration described in the "Getting started" section enables a
-middleware that looks for a token in every request and, if there is a valid
-token, logs the user in. It's as if they had submitted their username and
-password in a login form. This provides compatibility with APIs like the
-``login_required`` decorator and the ``LoginRequired`` mixin.
+The configuration described in `Getting started`_ enables a middleware that
+looks for a token in every request and, if there is a valid token, logs the
+user in. It's as if they had submitted their username and password in a login
+form. This provides compatibility with APIs like the ``login_required``
+decorator and the ``LoginRequired`` mixin.
 
 Sometimes this behavior is too blunt. For example, you may want to build a
 Magic Link that gives access to a specific view but doesn't log the user in
 permanently.
 
-To achieve this, you can remove ``sesame.middleware.AuthenticationMiddleware``
-from the ``MIDDLEWARE`` setting and authenticate the user with django-sesame
-in a view as follows::
+To achieve this, remove ``"sesame.middleware.AuthenticationMiddleware"`` from
+the ``MIDDLEWARE`` setting and authenticate the user with django-sesame in a
+view as follows:
+
+.. code:: python
 
     from django.core.exceptions import PermissionDenied
     from django.http import HttpResponse
@@ -203,7 +216,9 @@ When ``SESAME_ONE_TIME`` is enabled, ``get_user()`` updates the user's last
 login date in order to invalidate the token. When ``SESAME_ONE_TIME`` isn't
 enabled, it doesn't, because making a database write for every call to
 ``get_user()`` could degrade performance. You can override this behavior with
-the ``update_last_login`` keyword argument::
+the ``update_last_login`` keyword argument:
+
+.. code:: python
 
     get_user(request, update_last_login=True)   # always update last_login
     get_user(request, update_last_login=False)  # never update last_login
@@ -212,13 +227,15 @@ the ``update_last_login`` keyword argument::
 function from ``django.contrib.auth``. It's also possible to verify an
 authentication token directly with  ``authenticate()``. To do so, the
 ``sesame.backends.ModelBackend`` authentication backend expects an
-``sesame`` argument::
+``sesame`` argument:
+
+.. code:: python
 
     from django.contrib.auth import authenticate
 
     user = authenticate(sesame=...)
 
-(In version 1.8 and earlier, this argument was named ``url_auth_token``.)
+*Changed in 2.0:* the argument used to be named ``url_auth_token``.
 
 If you decide to use ``authenticate()`` instead of ``get_user()``, you must
 update ``user.last_login`` to invalidate one-time tokens. Indeed, in
@@ -252,7 +269,9 @@ generation algorithm, the default representation may be suboptimal.
 
 For example, let's say primary keys are strings containing 24 hexadecimal
 characters. The default packer represents them with 25 bytes. You can reduce
-them to 12 bytes with this custom packer::
+them to 12 bytes with this custom packer:
+
+.. code:: python
 
     from sesame.packers import BasePacker
 
@@ -276,45 +295,77 @@ the ``sesame.packers`` module.
 Tokens security
 ===============
 
-Authentication tokens generated by django-sesame contain:
+django-sesame builds authentication tokens as follows:
 
-- The primary key of the user for which they were generated;
-- A revocation key which is used for invalidating tokens.
+- Encode the primary key of the user for which they were generated;
+- Assemble a revocation key which will be used for invalidating tokens;
+- If ``SESAME_MAX_AGE`` is enabled, encode the token generation timestamp;
+- Add a message authentication code (MAC) to prevent tampering with the token.
 
-The revocation key includes:
+The revocation key is derived from:
 
-- The hashed password of the user, unless
-  ``SESAME_INVALIDATE_ON_PASSWORD_CHANGE`` is disabled;
+- The password of the user, unless ``SESAME_INVALIDATE_ON_PASSWORD_CHANGE`` is
+  disabled;
 - The last login date of the user, if ``SESAME_ONE_TIME`` is enabled.
 
 Primary keys are in clear text. If this is a concern, you can write a custom
-packer to encrypt them. See "Custom primary keys" above for details.
+packer to encrypt them. See `Custom primary keys`_ for details.
 
-Revocation keys are hashed in order to keep tokens short. Also, this avoids
-leaking the password hash and corresponding salt if a token is compromised.
+django-sesame provides two token formats:
 
-The hashing algorithm is PBKDF2 with 10 000 iterations of MD5. It provides a
-16 bytes hash with better security than a single round of MD5. The digest
-algorithm and number of iterations can be altered with the ``SESAME_DIGEST``
-and ``SESAME_ITERATIONS`` settings. The salt is taken from the ``SESAME_SALT``
-setting.
+- v1 is the original format, which still works as designed;
+- v2 is a better, cleaner, faster design that produces shorter tokens.
 
-Finally, tokens are encoded with URL-safe Base64 and signed with Django's
-built-in ``Signer`` or ``TimestampSigner``, depending on whether
-``SESAME_MAX_AGE`` is set, to prevent tampering. The signature algorithm
-factors in the salt defined in the ``SESAME_SALT`` setting.
+The ``SESAME_TOKENS`` setting lists supported formats in order of decreasing
+preference. The first item defines the format of newly created tokens. Other
+items define other acceptable formats, if any.
+
+``SESAME_TOKENS`` defaults to ``["sesame.tokens_v2", "sesame.tokens_v1"]``
+which means "generate tokens v2, accept tokens v2 and v1".
+
+Tokens v2
+---------
+
+They contain a primary key, an optional timestamp, and a signature.
+
+The signature covers the primary key, the optional timestamp, and the
+revocation key. If the revocation key changes, the signature becomes invalid.
+As a consequence, there's no need to include the revocation key in tokens.
+
+The signature algorithm is Blake2 in keyed mode. A unique key is derived by
+hashing the ``SECRET_KEY`` setting and relevant ``SESAME_*`` settings.
+
+By default the signature length is 10 bytes. You can ajust it to any value
+between 1 and 64 bytes with the ``SESAME_SIGNATURE_SIZE`` setting.
+
+If you need to invalidate all tokens, set the ``SESAME_KEY`` setting to a new
+value. This will change the unique key and, as a consequence, invalidate all
+signatures.
+
+Tokens v1
+---------
+
+Tokens v1 contain a primary key and a revocation key, plus an optional
+timestamp and a signature generated by Django's built-in ``Signer`` or
+``TimestampSigner``.
+
+The signature algorithm HMAC-SHA1.
+
+If you need to invalidate all tokens, you can set the ``SESAME_SALT`` setting
+to a new value. This will change all signatures.
 
 Stateless authentication
 ========================
 
-Technically, django-sesame can provide stateless authenticated navigation
+Theoretically, django-sesame can provide stateless authenticated navigation
 without ``django.contrib.sessions``, provided all internal links include the
-authentication token, but that increases the security issues explained above.
+authentication token. That increases the security concernes and it's unclear
+that it meets any practical use case.
 
-If ``django.contrib.sessions.middleware.SessionMiddleware`` and
-``django.contrib.auth.middleware.AuthenticationMiddleware`` aren't enabled,
-``sesame.middleware.AuthenticationMiddleware`` sets ``request.user`` to the
-currently logged-in user or ``AnonymousUser()``.
+In a scenario where ``django.contrib.sessions.middleware.SessionMiddleware``
+and ``django.contrib.auth.middleware.AuthenticationMiddleware`` aren't
+enabled, ``sesame.middleware.AuthenticationMiddleware`` still sets
+``request.user`` to the currently logged-in user or ``AnonymousUser()``.
 
 Contributing
 ============
@@ -348,6 +399,8 @@ Changelog
 2.0
 ---
 
+* Introduced a faster and shorter token format (v2). The previous format (v1)
+  is still supported. See `Tokens security`_.
 * **Backwards-incompatible** Changed the default URL parameter to ``sesame``.
   If you need to preserve existing URLs, you can set
   ``SESAME_TOKEN_NAME = "url_auth_token"``.
@@ -355,7 +408,7 @@ Changelog
   ``authenticate()`` to ``sesame``. You're affected only if you're explicitly
   calling ``authenticate(url_auth_token=...)``. If so, change this call to
   ``authenticate(sesame=...)``.
-* ``SESAME_MAX_AGE`` can be a :class:`datetime.timedelta`.
+* ``SESAME_MAX_AGE`` can be a ``datetime.timedelta``.
 * Improved documentation.
 
 1.8

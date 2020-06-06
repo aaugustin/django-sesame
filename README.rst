@@ -2,6 +2,10 @@
    :width: 400px
    :alt: django-sesame
 
+#############
+django-sesame
+#############
+
 `django-sesame`_ provides frictionless authentication with "Magic Links" for
 your Django project.
 
@@ -11,6 +15,29 @@ It generates URLs containing authentication tokens such as:
 https://example.com/?sesame=zxST9d0XT9xgfYLvoa9e2myN
 
 Then it authenticates users based on tokens found in URLs.
+
+Table of contents
+=================
+
+* `Use cases`_
+* `(In)security`_
+* `User guide`_
+
+  * `Requirements`_
+  * `Getting started`_
+  * `Generating URLs`_
+  * `Tokens lifecycle`_
+  * `Per-view authentication`_
+
+* `Advanced topics`_
+
+  * `Safari issues`_
+  * `Tokens security`_
+  * `Custom primary keys`_
+  * `Stateless authentication`_
+
+* `Contributing`_
+* `Changelog`_
 
 Use cases
 =========
@@ -70,24 +97,25 @@ Otherwise, a reasonable attempt was made to provide a secure solution. Tokens
 are secured with modern cryptography. There are configurable options for token
 expiration and invalidation.
 
+User guide
+==========
+
 Requirements
-============
+------------
 
 django-sesame is tested with:
 
 - Django 2.2 (LTS) and 3.0;
 - Python ≥ 3.6
 
-It builds upon ``django.contrib.auth``.
-
-It supports custom user models, provided they have ``password`` and
-``last_login`` fields. Most custom user models inherit these fields from
-``AbstractBaseUser``.
+It builds upon ``django.contrib.auth``. It supports custom user models,
+provided they have ``password`` and ``last_login`` fields. Most custom user
+models inherit these fields from ``AbstractBaseUser``.
 
 django-sesame is released under the BSD license, like Django itself.
 
 Getting started
-===============
+---------------
 
 1. Install django-sesame:
 
@@ -112,12 +140,8 @@ Getting started
    The best position for ``sesame.middleware.AuthenticationMiddleware`` is
    just after ``django.contrib.auth.middleware.AuthenticationMiddleware``.
 
-4. Generate authentication tokens with ``sesame.utils.get_query_string(user)``.
-
-That's all!
-
 Generating URLs
-===============
+---------------
 
 django-sesame provides functions to generate authenticated URLs in the
 ``sesame.utils`` module.
@@ -169,7 +193,7 @@ other query string parameters used by your application.
 *Changed in 2.0:* the URL parameter used to be named ``url_auth_token``.
 
 Tokens lifecycle
-================
+----------------
 
 By default, tokens don't expire but are tied to the password of the user.
 Changing the password invalidates the token. When the authentication backend
@@ -208,7 +232,7 @@ you can change its value and the new value will apply even to previously
 generated tokens.
 
 Per-view authentication
-=======================
+-----------------------
 
 The configuration described in `Getting started`_ enables a middleware that
 looks for a token in every request and, if there is a valid token, logs the
@@ -272,8 +296,11 @@ update ``user.last_login`` to invalidate one-time tokens. Indeed, in
 caller, usually the higher-level ``login()`` function, is responsible for
 updating ``user.last_login``.
 
+Advanced topics
+===============
+
 Safari issues
-=============
+-------------
 
 The django-sesame middleware removes the token from the URL with a HTTP 302
 Redirect after authenticating a user successfully. Unfortunately, in some
@@ -285,8 +312,70 @@ detects that the browser is Safari. This relies on the ua-parser package,
 which is an optional dependency. If it isn't installed, django-sesame always
 redirects.
 
+Tokens security
+---------------
+
+django-sesame builds authentication tokens as follows:
+
+- Encode the primary key of the user for which they were generated;
+- Assemble a revocation key which will be used for invalidating tokens;
+- If ``SESAME_MAX_AGE`` is enabled, encode the token generation timestamp;
+- Add a message authentication code (MAC) to prevent tampering with the token.
+
+The revocation key is derived from:
+
+- The password of the user, unless ``SESAME_INVALIDATE_ON_PASSWORD_CHANGE`` is
+  disabled;
+- The last login date of the user, if ``SESAME_ONE_TIME`` is enabled.
+
+Primary keys are in clear text. If this is a concern, you can write a custom
+packer to encrypt them. See `Custom primary keys`_ for details.
+
+django-sesame provides two token formats:
+
+- v1 is the original format, which still works as designed;
+- v2 is a better, cleaner, faster design that produces shorter tokens.
+
+The ``SESAME_TOKENS`` setting lists supported formats in order of decreasing
+preference. The first item defines the format of newly created tokens. Other
+items define other acceptable formats, if any.
+
+``SESAME_TOKENS`` defaults to ``["sesame.tokens_v2", "sesame.tokens_v1"]``
+which means "generate tokens v2, accept tokens v2 and v1".
+
+Tokens v2
+.........
+
+They contain a primary key, an optional timestamp, and a signature.
+
+The signature covers the primary key, the optional timestamp, and the
+revocation key. If the revocation key changes, the signature becomes invalid.
+As a consequence, there's no need to include the revocation key in tokens.
+
+The signature algorithm is Blake2 in keyed mode. A unique key is derived by
+hashing the ``SECRET_KEY`` setting and relevant ``SESAME_*`` settings.
+
+By default the signature length is 10 bytes. You can ajust it to any value
+between 1 and 64 bytes with the ``SESAME_SIGNATURE_SIZE`` setting.
+
+If you need to invalidate all tokens, set the ``SESAME_KEY`` setting to a new
+value. This will change the unique key and, as a consequence, invalidate all
+signatures.
+
+Tokens v1
+.........
+
+Tokens v1 contain a primary key and a revocation key, plus an optional
+timestamp and a signature generated by Django's built-in ``Signer`` or
+``TimestampSigner``.
+
+The signature algorithm HMAC-SHA1.
+
+If you need to invalidate all tokens, you can set the ``SESAME_SALT`` setting
+to a new value. This will change all signatures.
+
 Custom primary keys
-===================
+-------------------
 
 When generating a token for a user, django-sesame stores the primary key of
 that user in the token. In order to keep tokens short, django-sesame creates
@@ -321,70 +410,8 @@ custom packer class.
 For details, read ``help(BasePacker)`` and look at built-in packers defined in
 the ``sesame.packers`` module.
 
-Tokens security
-===============
-
-django-sesame builds authentication tokens as follows:
-
-- Encode the primary key of the user for which they were generated;
-- Assemble a revocation key which will be used for invalidating tokens;
-- If ``SESAME_MAX_AGE`` is enabled, encode the token generation timestamp;
-- Add a message authentication code (MAC) to prevent tampering with the token.
-
-The revocation key is derived from:
-
-- The password of the user, unless ``SESAME_INVALIDATE_ON_PASSWORD_CHANGE`` is
-  disabled;
-- The last login date of the user, if ``SESAME_ONE_TIME`` is enabled.
-
-Primary keys are in clear text. If this is a concern, you can write a custom
-packer to encrypt them. See `Custom primary keys`_ for details.
-
-django-sesame provides two token formats:
-
-- v1 is the original format, which still works as designed;
-- v2 is a better, cleaner, faster design that produces shorter tokens.
-
-The ``SESAME_TOKENS`` setting lists supported formats in order of decreasing
-preference. The first item defines the format of newly created tokens. Other
-items define other acceptable formats, if any.
-
-``SESAME_TOKENS`` defaults to ``["sesame.tokens_v2", "sesame.tokens_v1"]``
-which means "generate tokens v2, accept tokens v2 and v1".
-
-Tokens v2
----------
-
-They contain a primary key, an optional timestamp, and a signature.
-
-The signature covers the primary key, the optional timestamp, and the
-revocation key. If the revocation key changes, the signature becomes invalid.
-As a consequence, there's no need to include the revocation key in tokens.
-
-The signature algorithm is Blake2 in keyed mode. A unique key is derived by
-hashing the ``SECRET_KEY`` setting and relevant ``SESAME_*`` settings.
-
-By default the signature length is 10 bytes. You can ajust it to any value
-between 1 and 64 bytes with the ``SESAME_SIGNATURE_SIZE`` setting.
-
-If you need to invalidate all tokens, set the ``SESAME_KEY`` setting to a new
-value. This will change the unique key and, as a consequence, invalidate all
-signatures.
-
-Tokens v1
----------
-
-Tokens v1 contain a primary key and a revocation key, plus an optional
-timestamp and a signature generated by Django's built-in ``Signer`` or
-``TimestampSigner``.
-
-The signature algorithm HMAC-SHA1.
-
-If you need to invalidate all tokens, you can set the ``SESAME_SALT`` setting
-to a new value. This will change all signatures.
-
 Stateless authentication
-========================
+------------------------
 
 Theoretically, django-sesame can provide stateless authenticated navigation
 without ``django.contrib.sessions``, provided all internal links include the

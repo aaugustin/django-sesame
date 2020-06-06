@@ -12,4 +12,4 @@ coverage:
 	coverage html
 
 clean:
-	rm -rf .coverage dist django_sesame.egg-info docs/_build htmlcov
+	rm -rf .coverage dist docs/_build htmlcov src/django_sesame.egg-info

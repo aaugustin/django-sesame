@@ -36,6 +36,7 @@ Table of contents
   * `Custom primary keys`_
   * `Stateless authentication`_
 
+* `Infrequently asked questions`_
 * `Contributing`_
 * `Changelog`_
 
@@ -422,6 +423,45 @@ In a scenario where ``django.contrib.sessions.middleware.SessionMiddleware``
 and ``django.contrib.auth.middleware.AuthenticationMiddleware`` aren't
 enabled, ``sesame.middleware.AuthenticationMiddleware`` still sets
 ``request.user`` to the currently logged-in user or ``AnonymousUser()``.
+
+Infrequently asked questions
+============================
+
+**Is django-sesame usable without passwords?**
+
+Yes, it is.
+
+You should call ``user.set_unusable_password()`` when you create users.
+
+**How do I understand why a token is invalid?**
+
+Enable debug logs by setting the ``sesame`` logger to the ``DEBUG`` level.
+
+.. code:: python
+
+    import logging
+    logger = logging.getLogger("sesame")
+    logger.setLevel(logging.DEBUG)
+    logger.addHandler(logging.StreamHandler())
+
+Then you should get a hint in logs.
+
+Depending on how logging is set up in your project, there may by another way
+to enable this configuration.
+
+**Why does upgrading Django invalidate tokens?**
+
+Each release of Django increases the work factor of password hashers. After
+deploying a new version of Django, when a user logs in with their password,
+Django upgrades the password hash. This invalidates the user's token.
+
+This problem occurs only when a user logs in alternatively with a long-lived
+token and with a password, which isn't frequent in practice. If you're facing
+it, you should regenerate and redistribute tokens after upgrading Django.
+
+Other workarounds, such as disabling token invalidation on password change or
+using a custom hasher to keep the work factor constant, are discouraged
+because they create security concerns.
 
 Contributing
 ============

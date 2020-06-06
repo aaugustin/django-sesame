@@ -15,6 +15,9 @@ __all__ = [
     "LongLongPacker",
     "UnsignedLongLongPacker",
     "UUIDPacker",
+    "BytesPacker",
+    "StrPacker",
+    "packer",
 ]
 
 

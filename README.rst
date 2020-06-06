@@ -119,16 +119,45 @@ That's all!
 Generating URLs
 ===============
 
-django-sesame provides two functions to generate authenticated URLs.
+django-sesame provides functions to generate authenticated URLs in the
+``sesame.utils`` module.
 
-1. ``sesame.utils.get_query_string(user)`` returns a complete query string
-   such as ``"?sesame=zxST9d0XT9xgfYLvoa9e2myN"``. You can append it to any
-   URL to enable one-click login.
+Load a user from the database:
 
-2. ``sesame.utils.get_parameters(user)`` returns a dictionary of query string
-   parameters such as ``{"sesame": "zxST9d0XT9xgfYLvoa9e2myN"}``. You can
-   merge it with other query string parameters, if you're already building a
-   query string.
+.. code:: python
+
+    >>> from django.contrib.auth import get_user_model
+    >>> User = get_user_model()
+    >>> user = User.objects.first()
+
+Now you can create a query string that you can append to any URL to enable
+one-click login:
+
+.. code:: python
+
+    >>> from sesame.utils import get_query_string
+    >>> get_query_string(user)
+    '?sesame=zxST9d0XT9xgfYLvoa9e2myN'
+
+You can also obtain a ``dict`` of parameters rather than a pre-built query
+string:
+
+.. code:: python
+
+    >>> from sesame.utils import get_parameters
+    >>> get_parameters(user)
+    {'sesame': 'zxST9d0XT9xgfYLvoa9e2myN'}
+
+Then you can add other parameters to this ``dict`` before serializing it to a
+query string.
+
+Finally, here's how to get only the token:
+
+.. code:: python
+
+    >>> from sesame.utils import get_token
+    >>> get_token(user)
+    'zxST9d0XT9xgfYLvoa9e2myN'
 
 Share the resulting URLs with your users though an adequately confidential
 channel for your use case.
@@ -401,6 +430,7 @@ Changelog
 
 * Introduced a faster and shorter token format (v2). The previous format (v1)
   is still supported. See `Tokens security`_.
+* Added the ``get_token()`` function to generate a token.
 * **Backwards-incompatible** Changed the default URL parameter to ``sesame``.
   If you need to preserve existing URLs, you can set
   ``SESAME_TOKEN_NAME = "url_auth_token"``.

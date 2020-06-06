@@ -1,17 +1,21 @@
 from django.test import RequestFactory, TestCase, override_settings
 
-from sesame.utils import get_parameters, get_query_string, get_user
+from sesame.utils import get_parameters, get_query_string, get_token, get_user
 
 from .mixins import CaptureLogMixin, CreateUserMixin
 from .signals import reset_sesame_settings  # noqa
 
 
 class TestUtils(CaptureLogMixin, CreateUserMixin, TestCase):
+    def test_get_token(self):
+        self.assertIsInstance(get_token(self.user), str)
+
     def test_get_parameters(self):
-        self.assertEqual(list(get_parameters(self.user)), ["sesame"])
+        self.assertEqual(get_parameters(self.user), {"sesame": get_token(self.user)})
 
     def test_get_query_string(self):
-        self.assertIn("?sesame=", get_query_string(self.user))
+        # Tokens v2 only contain URL-safe characters. There's no escaping.
+        self.assertEqual(get_query_string(self.user), "?sesame=" + get_token(self.user))
 
     def get_request_with_token(self):
         return RequestFactory().get("/", get_parameters(self.user))

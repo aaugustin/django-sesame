@@ -164,7 +164,7 @@ one-click login:
     >>> get_query_string(user)
     '?sesame=zxST9d0XT9xgfYLvoa9e2myN'
 
-You can also obtain a ``dict`` of parameters rather than a pre-built query
+You can also obtain a ``dict`` of parameters rather than ready-to-use query
 string:
 
 .. code:: python
@@ -220,7 +220,7 @@ discouraged because it becomes impossible to invalidate a single token.** Your
 only option if a token is compromised is to invalidate all tokens at once. If
 you're doing it anyway, you should set ``SESAME_MAX_AGE`` to a short value to
 minimize risks. This option may be useful for generating tokens during a
-signup process, when you don't know if the token will be used before or after
+sign up process, when you don't know if the token will be used before or after
 initializing the password.
 
 Finally, if the ``is_active`` attribute of a user is set to ``False``,
@@ -356,7 +356,7 @@ As a consequence, there's no need to include the revocation key in tokens.
 The signature algorithm is Blake2 in keyed mode. A unique key is derived by
 hashing the ``SECRET_KEY`` setting and relevant ``SESAME_*`` settings.
 
-By default the signature length is 10 bytes. You can ajust it to any value
+By default the signature length is 10 bytes. You can adjust it to any value
 between 1 and 64 bytes with the ``SESAME_SIGNATURE_SIZE`` setting.
 
 If you need to invalidate all tokens, set the ``SESAME_KEY`` setting to a new
@@ -416,7 +416,7 @@ Stateless authentication
 
 Theoretically, django-sesame can provide stateless authenticated navigation
 without ``django.contrib.sessions``, provided all internal links include the
-authentication token. That increases the security concernes and it's unclear
+authentication token. That increases the security concerns and it's unclear
 that it meets any practical use case.
 
 In a scenario where ``django.contrib.sessions.middleware.SessionMiddleware``
@@ -536,7 +536,7 @@ Changelog
 * Added compatibility with custom user models where the primary key is a
   ``UUIDField``.
 * Added the ``get_user()`` function to obtain a user instance from a request.
-* Improved error message for pre-existing tokens when changing the
+* Improved error message for preexisting tokens when changing the
   ``SESAME_MAX_AGE`` setting.
 * Fixed authentication on Safari by disabling the redirect which triggers ITP.
 

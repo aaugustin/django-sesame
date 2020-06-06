@@ -113,6 +113,16 @@ class TestTokensV1(CaptureLogMixin, CreateUserMixin, TestCase):
 
     # Test token invalidation on password change
 
+    def test_valid_token_when_user_has_no_password(self):
+        self.user.password = ""
+        self.user.save()
+        self.test_valid_token()
+
+    def test_valid_token_when_user_has_unusable_password(self):
+        self.user.set_unusable_password()
+        self.user.save()
+        self.test_valid_token()
+
     def test_invalid_token_after_password_change(self):
         token = create_token(self.user)
         self.user.set_password("hunter2")
@@ -151,6 +161,7 @@ class TestTokensV1(CaptureLogMixin, CreateUserMixin, TestCase):
 
     # Miscellaneous tests
 
+    @override_settings(SESAME_INVALIDATE_ON_PASSWORD_CHANGE=False)
     def test_naive_token_hijacking_fails(self):
         # The revocation key may be identical for two users:
         # - if SESAME_INVALIDATE_ON_PASSWORD_CHANGE is False or if they don't

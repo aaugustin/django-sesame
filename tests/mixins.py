@@ -13,12 +13,16 @@ class CreateUserMixin(TestCase):
         super().setUp()
         self.user = self.create_user()
 
-    def create_user(self, username="john", **kwargs):
-        return get_user_model().objects.create(
+    def create_user(self, username="john", password="letmein", **kwargs):
+        User = get_user_model()
+        user = User(
             username=username,
             last_login=timezone.now() - datetime.timedelta(seconds=3600),
             **kwargs,
         )
+        user.set_password(password)
+        user.save()
+        return user
 
     @staticmethod
     def get_user(user_id):

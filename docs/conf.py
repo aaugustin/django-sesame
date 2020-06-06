@@ -14,7 +14,7 @@ copyright = '2012-{}, Aymeric Augustin'.format(datetime.date.today().year)
 author = 'Aymeric Augustin'
 
 # The full version, including alpha/beta/rc tags
-release = '1.8'
+release = '2.0'
 
 
 # -- General configuration ---------------------------------------------------

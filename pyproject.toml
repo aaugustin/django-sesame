@@ -15,7 +15,7 @@ use_parentheses = true
 
 [tool.poetry]
 name = "django-sesame"
-version = "1.8"
+version = "2.0"
 description = """\
     Frictionless authentication with "Magic Links" \
     for your Django project."""

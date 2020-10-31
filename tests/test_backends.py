@@ -11,7 +11,7 @@ class TestModelBackend(CaptureLogMixin, CreateUserMixin, TestCase):
         token = create_token(self.user)
         user = ModelBackend().authenticate(request=None, sesame=token)
         self.assertEqual(user, self.user)
-        self.assertLogsContain("Valid token for user john")
+        self.assertLogsContain("Valid token for user john in default scope")
 
     def test_no_token(self):
         token = None
@@ -38,3 +38,9 @@ class TestModelBackend(CaptureLogMixin, CreateUserMixin, TestCase):
         user = ModelBackend().authenticate(request=None, sesame=token)
         self.assertIsNone(user)
         self.assertLogsContain("Unknown or inactive user")
+
+    def test_scoped_token(self):
+        token = create_token(self.user, scope="test")
+        user = ModelBackend().authenticate(request=None, sesame=token, scope="test")
+        self.assertEqual(user, self.user)
+        self.assertLogsContain("Valid token for user john in scope test")

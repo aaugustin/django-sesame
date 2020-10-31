@@ -24,7 +24,7 @@ class TestTokensV2(CaptureLogMixin, CreateUserMixin, TestCase):
         self.assertTrue(detect_token(token))
         user = parse_token(token, self.get_user)
         self.assertEqual(user, self.user)
-        self.assertLogsContain("Valid token for user john")
+        self.assertLogsContain("Valid token for user john in default scope")
 
     # Test invalid tokens
 
@@ -65,7 +65,7 @@ class TestTokensV2(CaptureLogMixin, CreateUserMixin, TestCase):
         self.assertTrue(detect_token(token))
         user = parse_token(token, self.get_user)
         self.assertEqual(user, None)
-        self.assertLogsContain("Invalid token for user john")
+        self.assertLogsContain("Invalid token for user john in default scope")
 
     @override_settings(SESAME_MAX_AGE=300)
     def test_random_token(self):
@@ -92,7 +92,7 @@ class TestTokensV2(CaptureLogMixin, CreateUserMixin, TestCase):
         self.assertTrue(detect_token(token))
         user = parse_token(token, self.get_user)
         self.assertEqual(user, self.user)
-        self.assertLogsContain("Valid token for user john")
+        self.assertLogsContain("Valid token for user john in default scope")
 
     @override_settings(SESAME_MAX_AGE=-300)
     def test_expired_max_age_token(self):
@@ -109,7 +109,7 @@ class TestTokensV2(CaptureLogMixin, CreateUserMixin, TestCase):
             self.assertTrue(detect_token(token))
             user = parse_token(token, self.get_user)
         self.assertEqual(user, self.user)
-        self.assertLogsContain("Valid token for user john")
+        self.assertLogsContain("Valid token for user john in default scope")
 
     @override_settings(SESAME_MAX_AGE=300)
     def test_max_age_token_without_timestamp(self):
@@ -147,7 +147,7 @@ class TestTokensV2(CaptureLogMixin, CreateUserMixin, TestCase):
         self.user.save()
         user = parse_token(token, self.get_user)
         self.assertEqual(user, None)
-        self.assertLogsContain("Invalid token for user john")
+        self.assertLogsContain("Invalid token for user john in default scope")
 
     # Test token invalidation on password change
 
@@ -167,7 +167,7 @@ class TestTokensV2(CaptureLogMixin, CreateUserMixin, TestCase):
         self.user.save()
         user = parse_token(token, self.get_user)
         self.assertEqual(user, None)
-        self.assertLogsContain("Invalid token for user john")
+        self.assertLogsContain("Invalid token for user john in default scope")
 
     @override_settings(SESAME_INVALIDATE_ON_PASSWORD_CHANGE=False)
     def test_valid_token_after_password_change(self):
@@ -176,7 +176,37 @@ class TestTokensV2(CaptureLogMixin, CreateUserMixin, TestCase):
         self.user.save()
         user = parse_token(token, self.get_user)
         self.assertEqual(user, self.user)
-        self.assertLogsContain("Valid token for user john")
+        self.assertLogsContain("Valid token for user john in default scope")
+
+    # Test scoped tokens
+
+    def test_valid_scoped_token_in_scope(self):
+        token = create_token(self.user, scope="test")
+        self.assertTrue(detect_token(token))
+        user = parse_token(token, self.get_user, scope="test")
+        self.assertEqual(user, self.user)
+        self.assertLogsContain("Valid token for user john in scope test")
+
+    def test_invalid_scoped_token_in_other_scope(self):
+        token = create_token(self.user, scope="test")
+        self.assertTrue(detect_token(token))
+        user = parse_token(token, self.get_user, scope="other")
+        self.assertEqual(user, None)
+        self.assertLogsContain("Invalid token for user john in scope other")
+
+    def test_invalid_scoped_token_in_default_scope(self):
+        token = create_token(self.user, scope="test")
+        self.assertTrue(detect_token(token))
+        user = parse_token(token, self.get_user)
+        self.assertEqual(user, None)
+        self.assertLogsContain("Invalid token for user john in default scope")
+
+    def test_invalid_token_in_scope(self):
+        token = create_token(self.user)
+        self.assertTrue(detect_token(token))
+        user = parse_token(token, self.get_user, scope="test")
+        self.assertEqual(user, None)
+        self.assertLogsContain("Invalid token for user john in scope test")
 
     # Test custom primary key packer
 
@@ -218,7 +248,7 @@ class TestTokensV2(CaptureLogMixin, CreateUserMixin, TestCase):
         with override_settings(SESAME_KEY="new"):
             user = parse_token(token, self.get_user)
         self.assertEqual(user, None)
-        self.assertLogsContain("Invalid token for user john")
+        self.assertLogsContain("Invalid token for user john in default scope")
 
     def test_primary_key_and_timestamp_confusion(self):
         """Token signature changes if SESAME_MAX_AGE is enabled or disabled."""
@@ -249,7 +279,7 @@ class TestTokensV2(CaptureLogMixin, CreateUserMixin, TestCase):
             with unittest.mock.patch("time.time", return_value=TIME + 1):
                 user = parse_token(token2, self.get_user)
         self.assertEqual(user, None)
-        self.assertLogsContain("Invalid token for user john")
+        self.assertLogsContain("Invalid token for user john in default scope")
 
     def test_packer_confusion(self):
         """Token signature changes if SESAME_PACKER changes."""
@@ -271,7 +301,7 @@ class TestTokensV2(CaptureLogMixin, CreateUserMixin, TestCase):
         with override_settings(SESAME_PACKER="tests.test_packers.RepeatPacker"):
             user = parse_token(token2, self.get_user)
         self.assertEqual(user, None)
-        self.assertLogsContain("Invalid token for user john")
+        self.assertLogsContain("Invalid token for user john in default scope")
 
     @override_settings(SESAME_INVALIDATE_ON_PASSWORD_CHANGE=False)
     def test_naive_token_hijacking_fails(self):

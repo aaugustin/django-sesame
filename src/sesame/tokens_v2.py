@@ -120,7 +120,7 @@ def sign(data):
     ).digest()
 
 
-def create_token(user):
+def create_token(user, scope=""):
     """
     Create a v2 signed token for a user.
 
@@ -129,7 +129,7 @@ def create_token(user):
     timestamp = pack_timestamp()
     revocation_key = get_revocation_key(user)
 
-    signature = sign(primary_key + timestamp + revocation_key)
+    signature = sign(primary_key + timestamp + revocation_key + scope.encode())
 
     # If the revocation key changes, the signature becomes invalid, so we
     # don't need to include a hash of the revocation key in the token.
@@ -138,7 +138,7 @@ def create_token(user):
     return token.decode()
 
 
-def parse_token(token, get_user):
+def parse_token(token, get_user, scope=""):
     """
     Obtain a user from a v2 signed token.
 
@@ -194,13 +194,17 @@ def parse_token(token, get_user):
 
     primary_key_and_timestamp = data[: -settings.SIGNATURE_SIZE]
     revocation_key = get_revocation_key(user)
-    expected_signature = sign(primary_key_and_timestamp + revocation_key)
+    expected_signature = sign(
+        primary_key_and_timestamp + revocation_key + scope.encode()
+    )
 
     if not hmac.compare_digest(signature, expected_signature):
-        logger.debug("Invalid token for user %s", user)
+        log_scope = "in default scope" if scope == "" else f"in scope {scope}"
+        logger.debug("Invalid token for user %s %s", user, log_scope)
         return
 
-    logger.debug("Valid token for user %s", user)
+    log_scope = "in default scope" if scope == "" else f"in scope {scope}"
+    logger.debug("Valid token for user %s %s", user, log_scope)
     return user
 
 

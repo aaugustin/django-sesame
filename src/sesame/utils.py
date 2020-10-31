@@ -9,27 +9,28 @@ from .tokens import create_token as get_token
 __all__ = ["get_token", "get_parameters", "get_query_string", "get_user"]
 
 
-def get_parameters(user):
+def get_parameters(user, scope=""):
     """
-    Return GET parameters to log in a user.
-
-    """
-    return {settings.TOKEN_NAME: get_token(user)}
-
-
-def get_query_string(user):
-    """
-    Return a complete query string to log in a user.
+    Return GET parameters to authenticate a user.
 
     """
-    return "?" + urlencode(get_parameters(user))
+    return {settings.TOKEN_NAME: get_token(user, scope)}
 
 
-def get_user(request, update_last_login=None):
+def get_query_string(user, scope=""):
+    """
+    Return a complete query string to authenticate a user.
+
+    """
+    return "?" + urlencode(get_parameters(user, scope))
+
+
+def get_user(request, update_last_login=None, scope=""):
     """
     Authenticate a user based on the token found in the URL.
 
-    If a valid token is found, update the last login date and return the user.
+    If a valid token is found and one-time tokens are enabled,
+    update the last login date and return the user.
 
     Else, return None.
 
@@ -38,7 +39,7 @@ def get_user(request, update_last_login=None):
     if token is None:
         return None
 
-    user = authenticate(request, sesame=token)
+    user = authenticate(request, sesame=token, scope=scope)
     if user is None:
         return None
 

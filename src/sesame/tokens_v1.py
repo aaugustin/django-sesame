@@ -74,21 +74,25 @@ def unsign(token):
     return signing.b64_decode(data.encode())
 
 
-def create_token(user):
+def create_token(user, scope=""):
     """
     Create a v1 signed token for a user.
 
     """
+    if scope != "":
+        raise NotImplementedError("v1 tokens don't support scope")
     primary_key = packers.packer.pack_pk(user.pk)
     key = get_revocation_key(user)
     return sign(primary_key + key)
 
 
-def parse_token(token, get_user):
+def parse_token(token, get_user, scope=""):
     """
     Obtain a user from a v1 signed token.
 
     """
+    if scope != "":
+        raise NotImplementedError("v1 tokens don't support scope")
     try:
         data = unsign(token)
     except signing.SignatureExpired:

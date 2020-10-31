@@ -140,6 +140,25 @@ class TestTokensV1(CaptureLogMixin, CreateUserMixin, TestCase):
         self.assertEqual(user, self.user)
         self.assertLogsContain("Valid token for user john")
 
+    # Test scoped tokens - unsupported
+
+    def test_create_scoped_token(self):
+        with self.assertRaises(NotImplementedError) as exc:
+            create_token(self.user, scope="other")
+        self.assertEqual(
+            str(exc.exception),
+            "v1 tokens don't support scope",
+        )
+
+    def test_parse_scoped_token(self):
+        token = create_token(self.user)
+        with self.assertRaises(NotImplementedError) as exc:
+            parse_token(token, self.get_user, scope="other")
+        self.assertEqual(
+            str(exc.exception),
+            "v1 tokens don't support scope",
+        )
+
     # Test custom primary key packer
 
     @override_settings(

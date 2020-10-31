@@ -10,12 +10,28 @@ class TestUtils(CaptureLogMixin, CreateUserMixin, TestCase):
     def test_get_token(self):
         self.assertIsInstance(get_token(self.user), str)
 
+    def test_get_scoped_token(self):
+        self.assertIsInstance(get_token(self.user, scope="test"), str)
+
     def test_get_parameters(self):
         self.assertEqual(get_parameters(self.user), {"sesame": get_token(self.user)})
+
+    def test_get_parameters_with_scope(self):
+        self.assertEqual(
+            get_parameters(self.user, scope="test"),
+            {"sesame": get_token(self.user, scope="test")},
+        )
 
     def test_get_query_string(self):
         # Tokens v2 only contain URL-safe characters. There's no escaping.
         self.assertEqual(get_query_string(self.user), "?sesame=" + get_token(self.user))
+
+    def test_get_query_string_with_scope(self):
+        # Tokens v2 only contain URL-safe characters. There's no escaping.
+        self.assertEqual(
+            get_query_string(self.user, scope="test"),
+            "?sesame=" + get_token(self.user, scope="test"),
+        )
 
     def get_request_with_token(self):
         return RequestFactory().get("/", get_parameters(self.user))

@@ -143,7 +143,8 @@ class TestTokensV1(CaptureLogMixin, CreateUserMixin, TestCase):
     # Test custom primary key packer
 
     @override_settings(
-        AUTH_USER_MODEL="tests.StrUser", SESAME_PACKER="tests.test_packers.Packer",
+        AUTH_USER_MODEL="tests.StrUser",
+        SESAME_PACKER="tests.test_packers.Packer",
     )
     def test_custom_packer_is_used(self):
         user = self.create_user(username="abcdef012345abcdef567890")

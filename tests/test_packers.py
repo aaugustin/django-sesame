@@ -128,11 +128,13 @@ class TestPackers(TestCase):
             with override_settings(AUTH_USER_MODEL="tests.BooleanUser"):
                 pass  # pragma: no cover
         self.assertEqual(
-            str(exc.exception), "BooleanField primary keys aren't supported",
+            str(exc.exception),
+            "BooleanField primary keys aren't supported",
         )
 
     @override_settings(
-        AUTH_USER_MODEL="tests.StrUser", SESAME_PACKER="tests.test_packers.Packer",
+        AUTH_USER_MODEL="tests.StrUser",
+        SESAME_PACKER="tests.test_packers.Packer",
     )
     def test_get_packer_with_custom_packer(self):
         self.assertEqual(type(packers.packer), Packer)

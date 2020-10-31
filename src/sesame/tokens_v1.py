@@ -33,7 +33,10 @@ def get_revocation_key(user):
     # the token. (Remember, if an attacker obtains the URL, he can already
     # log in. This isn't high security.)
     return crypto.pbkdf2(
-        data, settings.SALT, settings.ITERATIONS, digest=settings.DIGEST,
+        data,
+        settings.SALT,
+        settings.ITERATIONS,
+        digest=settings.DIGEST,
     )
 
 

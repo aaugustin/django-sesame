@@ -1,5 +1,5 @@
 style:
-	isort --recursive src tests
+	isort src tests
 	black src tests
 	flake8 src tests
 

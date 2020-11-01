@@ -27,7 +27,7 @@ class TestTokensV1(CaptureLogMixin, CreateUserMixin, TestCase):
         token = token[:28] + token[28:].lower()
         self.assertTrue(detect_token(token))
         user = parse_token(token, self.get_user)
-        self.assertEqual(user, None)
+        self.assertIsNone(user)
         self.assertLogsContain("Bad token")
 
     def test_random_token(self):
@@ -35,7 +35,7 @@ class TestTokensV1(CaptureLogMixin, CreateUserMixin, TestCase):
         self.assertEqual(len(token), len(create_token(self.user)))
         self.assertFalse(detect_token(token))
         user = parse_token(token, self.get_user)
-        self.assertEqual(user, None)
+        self.assertIsNone(user)
         self.assertLogsContain("Bad token")
 
     def test_unknown_user(self):
@@ -43,7 +43,7 @@ class TestTokensV1(CaptureLogMixin, CreateUserMixin, TestCase):
         self.user.delete()
         self.assertTrue(detect_token(token))
         user = parse_token(token, self.get_user)
-        self.assertEqual(user, None)
+        self.assertIsNone(user)
         self.assertLogsContain("Unknown or inactive user")
 
     # Test token expiry
@@ -61,7 +61,7 @@ class TestTokensV1(CaptureLogMixin, CreateUserMixin, TestCase):
         token = create_token(self.user)
         self.assertTrue(detect_token(token))
         user = parse_token(token, self.get_user)
-        self.assertEqual(user, None)
+        self.assertIsNone(user)
         self.assertLogsContain("Expired token")
 
     @override_settings(SESAME_MAX_AGE=-300)
@@ -79,7 +79,7 @@ class TestTokensV1(CaptureLogMixin, CreateUserMixin, TestCase):
             token = create_token(self.user)
         self.assertFalse(detect_token(token))
         user = parse_token(token, self.get_user)
-        self.assertEqual(user, None)
+        self.assertIsNone(user)
         self.assertLogsContain("Valid signature but unexpected token")
 
     def test_token_with_timestamp(self):
@@ -87,7 +87,7 @@ class TestTokensV1(CaptureLogMixin, CreateUserMixin, TestCase):
             token = create_token(self.user)
         self.assertFalse(detect_token(token))
         user = parse_token(token, self.get_user)
-        self.assertEqual(user, None)
+        self.assertIsNone(user)
         self.assertLogsContain("Valid signature but unexpected token")
 
     # Test one-time tokens
@@ -108,7 +108,7 @@ class TestTokensV1(CaptureLogMixin, CreateUserMixin, TestCase):
         self.user.last_login = timezone.now() - datetime.timedelta(1800)
         self.user.save()
         user = parse_token(token, self.get_user)
-        self.assertEqual(user, None)
+        self.assertIsNone(user)
         self.assertLogsContain("Invalid token")
 
     # Test token invalidation on password change
@@ -128,7 +128,7 @@ class TestTokensV1(CaptureLogMixin, CreateUserMixin, TestCase):
         self.user.set_password("hunter2")
         self.user.save()
         user = parse_token(token, self.get_user)
-        self.assertEqual(user, None)
+        self.assertIsNone(user)
         self.assertLogsContain("Invalid token")
 
     @override_settings(SESAME_INVALIDATE_ON_PASSWORD_CHANGE=False)
@@ -176,7 +176,7 @@ class TestTokensV1(CaptureLogMixin, CreateUserMixin, TestCase):
         token = create_token(self.user)
         with override_settings(SESAME_PACKER="tests.test_packers.RepeatPacker"):
             user = parse_token(token, self.get_user)
-        self.assertEqual(user, None)
+        self.assertIsNone(user)
         self.assertLogsContain("Valid signature but unexpected token")
 
     # Miscellaneous tests
@@ -215,5 +215,5 @@ class TestTokensV1(CaptureLogMixin, CreateUserMixin, TestCase):
         data = signing.b64_encode(data).decode()
         token = data + sig1
         user = parse_token(token, self.get_user)
-        self.assertEqual(user, None)
+        self.assertIsNone(user)
         self.assertLogsContain("Bad token")

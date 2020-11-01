@@ -49,7 +49,7 @@ class TestUtils(CaptureLogMixin, CreateUserMixin, TestCase):
         with override_settings(SESAME_TOKENS=["sesame.tokens_v1"]):
             token = create_token(self.user)
         user = parse_token(token, self.get_user)
-        self.assertEqual(user, None)
+        self.assertIsNone(user)
         self.assertLogsContain("Bad token: doesn't match a supported format")
 
     @override_settings(SESAME_TOKENS=["sesame.tokens_v1"])
@@ -57,5 +57,5 @@ class TestUtils(CaptureLogMixin, CreateUserMixin, TestCase):
         with override_settings(SESAME_TOKENS=["sesame.tokens_v2"]):
             token = create_token(self.user)
         user = parse_token(token, self.get_user)
-        self.assertEqual(user, None)
+        self.assertIsNone(user)
         self.assertLogsContain("Bad token: doesn't match a supported format")

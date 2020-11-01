@@ -149,7 +149,7 @@ django-sesame provides functions to generate authenticated URLs in the
 
 Load a user from the database:
 
-.. code:: python
+.. code:: pycon
 
     >>> from django.contrib.auth import get_user_model
     >>> User = get_user_model()
@@ -158,27 +158,27 @@ Load a user from the database:
 Now you can create a query string that you can append to any URL to enable
 one-click login:
 
-.. code:: python
+.. code:: pycon
 
     >>> from sesame.utils import get_query_string
     >>> get_query_string(user)
     '?sesame=zxST9d0XT9xgfYLvoa9e2myN'
 
-You can also obtain a ``dict`` of parameters rather than ready-to-use query
-string:
+You can also obtain a ``dict`` of URL parameters rather than ready-to-use
+query string:
 
-.. code:: python
+.. code:: pycon
 
     >>> from sesame.utils import get_parameters
     >>> get_parameters(user)
     {'sesame': 'zxST9d0XT9xgfYLvoa9e2myN'}
 
-Then you can add other parameters to this ``dict`` before serializing it to a
-query string.
+Then you can add other URL parameters to this ``dict`` before serializing it
+to a query string.
 
 Finally, here's how to get only the token:
 
-.. code:: python
+.. code:: pycon
 
     >>> from sesame.utils import get_token
     >>> get_token(user)

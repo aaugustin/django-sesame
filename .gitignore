@@ -2,7 +2,6 @@
 .coverage
 .tox
 dist
-django_sesame.egg-info
 docs/_build
 htmlcov
 poetry.lock

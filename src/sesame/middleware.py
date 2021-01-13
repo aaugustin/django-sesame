@@ -29,7 +29,7 @@ class AuthenticationMiddleware:
         """
         # If django.contrib.sessions is enabled, don't update the last login,
         # because login(request, user) will do it.
-        # If django.contrib.sessions is dilabled, keep the default behavior of
+        # If django.contrib.sessions is disabled, keep the default behavior of
         # updating last login only for one-time tokens.
         update_last_login = False if hasattr(request, "session") else None
 

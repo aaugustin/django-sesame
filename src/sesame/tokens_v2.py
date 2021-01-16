@@ -1,5 +1,4 @@
 import base64
-import binascii
 import hashlib
 import hmac
 import logging
@@ -145,15 +144,16 @@ def parse_token(token, get_user, scope=""):
 
     """
     token = token.encode()
-    try:
-        data = base64.urlsafe_b64decode(token + b"=" * (-len(token) % 4))
-    except binascii.Error as e:
-        logger.debug("Bad token: %s", e)
-        return
 
     # Below, error messages should give a hint to developers debugging apps
     # but remain sufficiently generic for the common situation where tokens
     # get truncated by accident.
+
+    try:
+        data = base64.urlsafe_b64decode(token + b"=" * (-len(token) % 4))
+    except Exception:
+        logger.debug("Bad token: cannot decode token")
+        return
 
     # Extract user primary key, token age, and signature from token.
 

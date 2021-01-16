@@ -34,10 +34,7 @@ class TestTokensV2(CaptureLogMixin, CreateUserMixin, TestCase):
         self.assertTrue(detect_token(token))
         user = parse_token(token, self.get_user)
         self.assertIsNone(user)
-        self.assertLogsContain(
-            "Bad token: Invalid base64-encoded string: number of data "
-            "characters (9) cannot be 1 more than a multiple of 4"
-        )
+        self.assertLogsContain("Bad token: cannot decode token")
 
     @override_settings(SESAME_MAX_AGE=300)
     def test_truncated_token_in_primary_key(self):

@@ -529,6 +529,11 @@ Check quality and submit your changes:
 Changelog
 =========
 
+2.2
+---
+
+* Fixed crash on truncated v2 tokens.
+
 2.1
 ---
 

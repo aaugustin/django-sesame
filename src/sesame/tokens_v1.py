@@ -86,13 +86,16 @@ def create_token(user, scope=""):
     return sign(primary_key + key)
 
 
-def parse_token(token, get_user, scope=""):
+def parse_token(token, get_user, scope="", max_age=None):
     """
     Obtain a user from a v1 signed token.
 
     """
     if scope != "":
         raise NotImplementedError("v1 tokens don't support scope")
+    if max_age is not None:
+        raise NotImplementedError("v1 tokens don't support max_age")
+
     try:
         data = unsign(token)
     except signing.SignatureExpired:

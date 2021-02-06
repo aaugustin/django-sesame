@@ -25,21 +25,20 @@ def get_query_string(user, scope=""):
     return "?" + urlencode(get_parameters(user, scope))
 
 
-def get_user(request, update_last_login=None, scope=""):
+def get_user(request, update_last_login=None, scope="", max_age=None):
     """
     Authenticate a user based on the token found in the URL.
 
-    If a valid token is found and one-time tokens are enabled,
-    update the last login date and return the user.
+    If a valid token is found, return the user. Else, return None.
 
-    Else, return None.
+    If one-time tokens are enabled, update the last login date.
 
     """
     token = request.GET.get(settings.TOKEN_NAME)
     if token is None:
         return None
 
-    user = authenticate(request, sesame=token, scope=scope)
+    user = authenticate(request, sesame=token, scope=scope, max_age=max_age)
     if user is None:
         return None
 

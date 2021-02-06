@@ -159,6 +159,17 @@ class TestTokensV1(CaptureLogMixin, CreateUserMixin, TestCase):
             "v1 tokens don't support scope",
         )
 
+    # Test custom max_age - unsupported
+
+    def test_parse_token_with_custom_max_age(self):
+        token = create_token(self.user)
+        with self.assertRaises(NotImplementedError) as exc:
+            parse_token(token, self.get_user, max_age=300)
+        self.assertEqual(
+            str(exc.exception),
+            "v1 tokens don't support max_age",
+        )
+
     # Test custom primary key packer
 
     @override_settings(

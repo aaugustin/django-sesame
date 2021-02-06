@@ -1,4 +1,5 @@
 import base64
+import datetime
 import hashlib
 import hmac
 import logging
@@ -138,7 +139,7 @@ def create_token(user, scope=""):
     return token.decode()
 
 
-def parse_token(token, get_user, scope=""):
+def parse_token(token, get_user, scope="", max_age=None):
     """
     Obtain a user from a v2 signed token.
 
@@ -184,7 +185,16 @@ def parse_token(token, get_user, scope=""):
 
     # Check if token is expired. This is the fastest check.
 
-    if age is not None and age >= settings.MAX_AGE:
+    if max_age is None:
+        max_age = settings.MAX_AGE
+    elif settings.MAX_AGE is None:
+        logger.warning(
+            "Ignoring max_age argument; "
+            "it isn't supported when SESAME_MAX_AGE = None"
+        )
+    elif isinstance(max_age, datetime.timedelta):
+        max_age = max_age.total_seconds()
+    if age is not None and age >= max_age:
         logger.debug("Expired token: age = %d seconds", age)
         return
 

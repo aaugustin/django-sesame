@@ -16,7 +16,7 @@ def create_token(user, scope=""):
     return tokens.create_token(user, scope)
 
 
-def parse_token(token, get_user, scope=""):
+def parse_token(token, get_user, scope="", max_age=None):
     """
     Obtain a user from a signed token and an optional scope.
 
@@ -25,7 +25,7 @@ def parse_token(token, get_user, scope=""):
         # We can detect the version of a token simply by inspecting it:
         # v1 tokens contain a colon; v2 tokens don't.
         if tokens.detect_token(token):
-            return tokens.parse_token(token, get_user, scope)
+            return tokens.parse_token(token, get_user, scope, max_age)
     else:
         logger.debug("Bad token: doesn't match a supported format")
         return

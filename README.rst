@@ -29,6 +29,7 @@ Table of contents
   * `Tokens lifecycle`_
   * `Per-view authentication`_
   * `Scoped tokens`_
+  * `Override expiration`_
 
 * `Advanced topics`_
 
@@ -334,6 +335,26 @@ The default scope is ``""``. ``"sesame.middleware.AuthenticationMiddleware"``
 considers a token generated with a non-default scope to be invalid and doesn't
 log the user in, even if the token is valid in that scope.
 
+Override expiration
+-------------------
+
+If you have several use cases inside the same application and they require
+different expiry durations, you can override ``SESAME_MAX_AGE``:
+
+.. code:: python
+
+    from sesame.utils import get_user
+
+    def recover(request):
+        user = get_user(request, max_age=120)
+        if user is None:
+            raise PermissionDenied
+        ...
+
+This doesn't work when ``SESAME_MAX_AGE`` is ``None`` — because tokens don't
+contain a timestamp in that case. In other words, changing the expiry duration
+is supported, but switching between expiring and non-expiring tokens isn't.
+
 Advanced topics
 ===============
 
@@ -528,6 +549,11 @@ Check quality and submit your changes:
 
 Changelog
 =========
+
+2.3
+---
+
+* Support overriding max_age. This feature is only available for v2 tokens.
 
 2.2
 ---

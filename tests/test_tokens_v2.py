@@ -216,6 +216,33 @@ class TestTokensV2(CaptureLogMixin, CreateUserMixin, TestCase):
         self.assertIsNone(user)
         self.assertLogsContain("Invalid token for user john in scope test")
 
+    # Test custom max_age
+
+    @override_settings(SESAME_MAX_AGE=-300)
+    def test_custom_max_age(self):
+        token = create_token(self.user)
+        self.assertTrue(detect_token(token))
+        user = parse_token(token, self.get_user, max_age=300)
+        self.assertEqual(user, self.user)
+        self.assertLogsContain("Valid token for user john")
+
+    @override_settings(SESAME_MAX_AGE=-300)
+    def test_custom_max_age_timedelta(self):
+        token = create_token(self.user)
+        self.assertTrue(detect_token(token))
+        max_age = datetime.timedelta(seconds=300)
+        user = parse_token(token, self.get_user, max_age=max_age)
+        self.assertEqual(user, self.user)
+        self.assertLogsContain("Valid token for user john")
+
+    def test_custom_max_age_ignored(self):
+        token = create_token(self.user)
+        self.assertTrue(detect_token(token))
+        user = parse_token(token, self.get_user, max_age=-300)
+        self.assertEqual(user, self.user)
+        self.assertLogsContain("Ignoring max_age argument")
+        self.assertLogsContain("Valid token for user john")
+
     # Test custom primary key packer
 
     @override_settings(

@@ -108,7 +108,7 @@ Requirements
 
 django-sesame is tested with:
 
-- Django 2.2 (LTS), 3.0, and 3.1;
+- Django 2.2 (LTS), 3.0, 3.1, and 3.2 (LTS);
 - Python ≥ 3.6
 
 It builds upon ``django.contrib.auth``. It supports custom user models,

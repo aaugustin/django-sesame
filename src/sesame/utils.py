@@ -25,20 +25,33 @@ def get_query_string(user, scope=""):
     return "?" + urlencode(get_parameters(user, scope))
 
 
-def get_user(request, update_last_login=None, scope="", max_age=None):
+def get_user(request_or_sesame, update_last_login=None, scope="", max_age=None):
     """
-    Authenticate a user based on the token found in the URL.
+    Authenticate a user based on a token.
+
+    The first argument may be either a Django ``HTTPRequest`` containing a
+    token in the URL or the token itself, to support use cases outside the
+    lifecycle of a HTTP request.
 
     If a valid token is found, return the user. Else, return None.
 
     If one-time tokens are enabled, update the last login date.
 
     """
-    token = request.GET.get(settings.TOKEN_NAME)
-    if token is None:
-        return None
+    if isinstance(request_or_sesame, str):
+        request = None
+        sesame = request_or_sesame
+    else:
+        # request is expected to be a django.http.HTTPRequest
+        request = request_or_sesame
+        try:
+            sesame = request_or_sesame.GET.get(settings.TOKEN_NAME)
+        except Exception:
+            raise TypeError("get_user() expects a HTTPRequest or a token")
+        if sesame is None:
+            return None
 
-    user = authenticate(request, sesame=token, scope=scope, max_age=max_age)
+    user = authenticate(request, sesame=sesame, scope=scope, max_age=max_age)
     if user is None:
         return None
 

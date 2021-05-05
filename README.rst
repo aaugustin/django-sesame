@@ -28,6 +28,7 @@ Table of contents
   * `Generating URLs`_
   * `Tokens lifecycle`_
   * `Per-view authentication`_
+  * `Authentication outside views`_
   * `Scoped tokens`_
   * `Override expiration`_
 
@@ -37,6 +38,7 @@ Table of contents
   * `Tokens security`_
   * `Custom primary keys`_
   * `Stateless authentication`_
+  * `Low-level authentication`_
 
 * `Infrequently asked questions`_
 * `Contributing`_
@@ -279,25 +281,17 @@ the ``update_last_login`` keyword argument:
     get_user(request, update_last_login=True)   # always update last_login
     get_user(request, update_last_login=False)  # never update last_login
 
-``get_user()`` is a thin wrapper around the low-level ``authenticate()``
-function from ``django.contrib.auth``. It's also possible to verify an
-authentication token directly with  ``authenticate()``. To do so, the
-``sesame.backends.ModelBackend`` authentication backend expects an
-``sesame`` argument:
+Authentication outside views
+----------------------------
+
+You may want to authenticate users outside of a Django view, where there's no
+``request`` object available. To support this use case, ``get_user()`` also
+accepts a token directly:
 
 .. code:: python
 
-    from django.contrib.auth import authenticate
-
-    user = authenticate(sesame=...)
-
-*Changed in 2.0:* the argument used to be named ``url_auth_token``.
-
-If you decide to use ``authenticate()`` instead of ``get_user()``, you must
-update ``user.last_login`` to invalidate one-time tokens. Indeed, in
-``django.contrib.auth``, ``authenticate()`` is a low-level function. The
-caller, usually the higher-level ``login()`` function, is responsible for
-updating ``user.last_login``.
+    sesame = get_sesame(...)  # getting a token from somewhere else
+    user = get_user(sesame)
 
 Scoped tokens
 -------------
@@ -482,6 +476,29 @@ and ``django.contrib.auth.middleware.AuthenticationMiddleware`` aren't
 enabled, ``sesame.middleware.AuthenticationMiddleware`` still sets
 ``request.user`` to the currently logged-in user or ``AnonymousUser()``.
 
+Low-level authentication
+------------------------
+
+``get_user()`` is a thin wrapper around the low-level ``authenticate()``
+function from ``django.contrib.auth``. It's also possible to verify an
+authentication token directly with  ``authenticate()``. To do so, the
+``sesame.backends.ModelBackend`` authentication backend expects an
+``sesame`` argument:
+
+.. code:: python
+
+    from django.contrib.auth import authenticate
+
+    user = authenticate(sesame=...)
+
+*Changed in 2.0:* the argument used to be named ``url_auth_token``.
+
+If you decide to use ``authenticate()`` instead of ``get_user()``, you must
+update ``user.last_login`` to invalidate one-time tokens. Indeed, in
+``django.contrib.auth``, ``authenticate()`` is a low-level function. The
+caller, usually the higher-level ``login()`` function, is responsible for
+updating ``user.last_login``.
+
 Infrequently asked questions
 ============================
 
@@ -550,10 +567,15 @@ Check quality and submit your changes:
 Changelog
 =========
 
+2.4
+---
+
+* Added the ability to pass a token to ``get_user()`` instead of a request.
+
 2.3
 ---
 
-* Support overriding max_age. This feature is only available for v2 tokens.
+* Supported overriding max_age. This feature is only available for v2 tokens.
 
 2.2
 ---

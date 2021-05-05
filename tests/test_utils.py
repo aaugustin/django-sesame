@@ -33,83 +33,101 @@ class TestUtils(CaptureLogMixin, CreateUserMixin, TestCase):
             "?sesame=" + get_token(self.user, scope="test"),
         )
 
-    def get_request_with_token(self):
-        return RequestFactory().get("/", get_parameters(self.user))
+    def test_get_user_no_request_or_token(self):
+        with self.assertRaises(TypeError) as exc:
+            self.assertIsNone(get_user(None))
+        self.assertEqual(
+            str(exc.exception),
+            "get_user() expects a HTTPRequest or a token",
+        )
 
-    def test_get_user(self):
-        request = self.get_request_with_token()
+    def test_get_user_token(self):
+        token = get_token(self.user)
+        self.assertEqual(get_user(token), self.user)
+
+    def test_get_user_empty_token(self):
+        token = ""
+        self.assertIsNone(get_user(token))
+
+    def test_get_user_bad_token(self):
+        token = "~!@#$%^&*~!@#$%^&*~"
+        self.assertIsNone(get_user(token))
+        self.assertLogsContain("Bad token")
+
+    def test_get_user_request(self):
+        request = RequestFactory().get("/", get_parameters(self.user))
         self.assertEqual(get_user(request), self.user)
 
-    def test_get_user_no_token(self):
+    def test_get_user_request_without_token(self):
         request = RequestFactory().get("/")
         self.assertIsNone(get_user(request))
 
-    def test_get_user_empty_token(self):
+    def test_get_user_request_with_empty_token(self):
         request = RequestFactory().get("/", {"sesame": ""})
         self.assertIsNone(get_user(request))
 
-    def test_get_user_bad_token(self):
+    def test_get_user_request_with_bad_token(self):
         request = RequestFactory().get("/", {"sesame": "~!@#$%^&*~!@#$%^&*~"})
         self.assertIsNone(get_user(request))
         self.assertLogsContain("Bad token")
 
     @override_settings(SESAME_MAX_AGE=-10)
     def test_get_user_expired_token(self):
-        request = self.get_request_with_token()
-        self.assertIsNone(get_user(request))
+        token = get_token(self.user)
+        self.assertIsNone(get_user(token))
         self.assertLogsContain("Expired token")
 
     def test_get_user_inactive_user(self):
-        request = self.get_request_with_token()
+        token = get_token(self.user)
         self.user.is_active = False
         self.user.save()
-        self.assertIsNone(get_user(request))
+        self.assertIsNone(get_user(token))
         self.assertLogsContain("Unknown or inactive user")
 
     def test_get_user_unknown_user(self):
-        request = self.get_request_with_token()
+        token = get_token(self.user)
         self.user.delete()
-        self.assertIsNone(get_user(request))
+        self.assertIsNone(get_user(token))
         self.assertLogsContain("Unknown or inactive user")
 
     def test_get_user_does_not_invalidate_tokens(self):
-        request = self.get_request_with_token()
-        self.assertEqual(get_user(request), self.user)
-        self.assertEqual(get_user(request), self.user)
+        token = get_token(self.user)
+        self.assertEqual(get_user(token), self.user)
+        self.assertEqual(get_user(token), self.user)
 
     @override_settings(SESAME_ONE_TIME=True)
     def test_get_user_invalidates_one_time_tokens(self):
-        request = self.get_request_with_token()
-        self.assertEqual(get_user(request), self.user)
-        self.assertIsNone(get_user(request))
+        token = get_token(self.user)
+        self.assertEqual(get_user(token), self.user)
+        self.assertIsNone(get_user(token))
         self.assertLogsContain("Invalid token")
 
     def test_get_user_does_not_update_last_login(self):
-        request = self.get_request_with_token()
+        token = get_token(self.user)
         last_login = self.user.last_login
-        self.assertEqual(get_user(request), self.user)
+        self.assertEqual(get_user(token), self.user)
         self.user.refresh_from_db()
         self.assertEqual(self.user.last_login, last_login)
 
     @override_settings(SESAME_ONE_TIME=True)
     def test_get_user_updates_last_login_for_one_time_tokens(self):
-        request = self.get_request_with_token()
+        token = get_token(self.user)
         last_login = self.user.last_login
-        self.assertEqual(get_user(request), self.user)
+        self.assertEqual(get_user(token), self.user)
         self.user.refresh_from_db()
         self.assertGreater(self.user.last_login, last_login)
 
     def test_get_user_force_update_last_login(self):
-        request = self.get_request_with_token()
+        token = get_token(self.user)
         last_login = self.user.last_login
-        self.assertEqual(get_user(request, update_last_login=True), self.user)
+        self.assertEqual(get_user(token, update_last_login=True), self.user)
         self.user.refresh_from_db()
         self.assertGreater(self.user.last_login, last_login)
 
     @override_settings(SESAME_ONE_TIME=True)
     def test_get_user_force_not_update_last_login(self):
-        request = self.get_request_with_token()
+        token = get_token(self.user)
         last_login = self.user.last_login
-        self.assertEqual(get_user(request, update_last_login=False), self.user)
+        self.assertEqual(get_user(token, update_last_login=False), self.user)
         self.user.refresh_from_db()
         self.assertEqual(self.user.last_login, last_login)

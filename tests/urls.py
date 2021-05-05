@@ -1,6 +1,6 @@
-from django.conf.urls import url
 from django.http import HttpResponse
 from django.template import engines
+from django.urls import re_path
 
 
 def show_user(request):
@@ -17,4 +17,4 @@ def show_user(request):
     return HttpResponse(content, content_type="text/plain")
 
 
-urlpatterns = [url(r"^", show_user)]
+urlpatterns = [re_path(r"", show_user)]

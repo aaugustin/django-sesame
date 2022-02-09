@@ -1,8 +1,2 @@
 /* There's a logo to replace the h1. */
 h1 { display: none; }
-
-/* Keep space between multi-paragraph list items (which the theme removes). */
-li > p ~ p:last-child { margin-bottom: 1em; }
-
-/* Remove space inside table of contents. Go back 1em because p  */
-li > p:first-child + ul:last-child { margin-top: -1em; margin-bottom: 0; }

@@ -1,6 +1,7 @@
 backend
 Changelog
 django
+durations
 frictionless
 hasher
 hashers

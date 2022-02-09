@@ -32,3 +32,5 @@ SECRET_KEY = "Anyone who finds a URL will be able to log in. Seriously."
 SESSION_ENGINE = "django.contrib.sessions.backends.cache"
 
 TEMPLATES = [{"BACKEND": "django.template.backends.django.DjangoTemplates"}]
+
+USE_TZ = True

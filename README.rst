@@ -134,16 +134,23 @@ Getting started
 
    .. code:: python
 
-    AUTHENTICATION_BACKENDS += ["sesame.backends.ModelBackend"]
+    AUTHENTICATION_BACKENDS = [
+        ...,
+        "sesame.backends.ModelBackend",
+        ...,
+    ]
 
-3. Add ``"sesame.middleware.AuthenticationMiddleware"`` to ``MIDDLEWARE``:
+3. Add ``"sesame.middleware.AuthenticationMiddleware"`` to ``MIDDLEWARE``,
+   just after Django’s ``AuthenticationMiddleware``:
 
    .. code:: python
 
-    MIDDLEWARE += ["sesame.middleware.AuthenticationMiddleware"]
-
-   The best position for ``sesame.middleware.AuthenticationMiddleware`` is
-   just after ``django.contrib.auth.middleware.AuthenticationMiddleware``.
+    MIDDLEWARE = [
+        ...,
+        "django.contrib.auth.middleware.AuthenticationMiddleware",
+        "sesame.middleware.AuthenticationMiddleware",
+        ...,
+    ]
 
 Generating URLs
 ---------------

@@ -42,6 +42,7 @@ Table of contents
 
 * `Infrequently asked questions`_
 * `Contributing`_
+* `Releasing`_
 * `Changelog`_
 
 Use cases
@@ -124,7 +125,7 @@ Getting started
 
 1. Install django-sesame:
 
-   .. code:: bash
+   .. code:: shell-session
 
     $ pip install django-sesame[ua]
 
@@ -574,6 +575,27 @@ Check quality and submit your changes:
 
 .. _Poetry: https://python-poetry.org/
 .. _tox: https://tox.readthedocs.io/
+
+Releasing
+=========
+
+Increment version number X.Y in ``docs/conf.py`` and ``pyproject.toml``.
+
+Commit, tag, and push the change:
+
+.. code:: shell-session
+
+    $ git commit -m "Bump version number".
+    $ git tag X.Y
+    $ git push
+    $ git push --tags
+
+Build and publish the new version:
+
+.. code:: shell-session
+
+    $ poetry build
+    $ poetry publish
 
 Changelog
 =========

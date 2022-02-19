@@ -7,11 +7,7 @@ branch = true
 source = ["sesame", "tests"]
 
 [tool.isort]
-force_grid_wrap = 0
-include_trailing_comma = true
-line_length = 88
-multi_line_output = 3
-use_parentheses = true
+profile = "black"
 
 [tool.poetry]
 name = "django-sesame"
@@ -47,7 +43,7 @@ python = "^3.6"
 ua-parser = { version = ">=0.10", optional = true }
 
 [tool.poetry.dev-dependencies]
-black = {version = "*", allow-prereleases = true, python = "^3.6"}
+black = "*"
 coverage = "*"
 flake8 = "*"
 isort = "*"

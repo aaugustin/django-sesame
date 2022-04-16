@@ -550,6 +550,16 @@ Other workarounds, such as disabling token invalidation on password change or
 using a custom hasher to keep the work factor constant, are discouraged
 because they create security concerns.
 
+**Why do all tokens start with AAAA...?**
+
+This is the Base64 encoding of an integer storing a small value.
+
+By default, Django uses integers as primary keys for users, starting from 1.
+These primary keys are included in tokens, which are encoded with Base64.
+
+When the primary key of the ``User`` model is an ``AutoField``, as long as you
+have less that one million users, all tokens start with AA.
+
 Contributing
 ============
 

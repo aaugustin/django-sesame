@@ -50,7 +50,7 @@ def load():
     # Include settings in the personalized key to invalidate tokens when
     # these settings change. This ensures that tokens generated with one
     # packer cannot be misinterpreted by another packer or that changing
-    # the timestamp offset doesn't revive expired tokens, for example.
+    # MAX_AGE doesn't revive expired tokens, for example.
     base_key = "|".join(
         [
             # Usually SECRET_KEY is a str but Django also supports bytes.

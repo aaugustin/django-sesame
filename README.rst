@@ -411,7 +411,7 @@ which means "generate tokens v2, accept tokens v2 and v1".
 Tokens v2
 .........
 
-They contain a primary key, an optional timestamp, and a signature.
+Tokens v2 contain a primary key, an optional timestamp, and a signature.
 
 The signature covers the primary key, the optional timestamp, and the
 revocation key. If the revocation key changes, the signature becomes invalid.

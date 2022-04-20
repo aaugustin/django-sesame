@@ -481,7 +481,7 @@ Alternate user keys
 If your user model has multiple unique keys, it may be desireable to use one 
 other than actual primary key in the token.
 
-Use the optional parameter `user_pk` when creating a token, token parameters,
+Use the optional parameter `user_key` when creating a token, token parameters,
 or query string. Then in your middleware backend, make sure your `get_user`
 method can return a user record when given this key.
 
@@ -489,7 +489,7 @@ method can return a user record when given this key.
 
     from sesame.backends import ModelBackend
 
-    class ExamplBackend(ModelBackend):
+    class ExampleBackend(ModelBackend):
         def get_user(self, user_key):
             try:
                 return User.objects.get(key=user_key)

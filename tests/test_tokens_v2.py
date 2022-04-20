@@ -27,7 +27,7 @@ class TestTokensV2(CaptureLogMixin, CreateUserMixin, TestCase):
         self.assertLogsContain("Valid token for user john in default scope")
 
     def test_valid_token_custom_user_key(self):
-        token = create_token(self.user, user_pk=1)
+        token = create_token(self.user, user_key=1)
         self.assertTrue(detect_token(token))
         user = parse_token(token, self.get_custom_user)
         self.assertEqual(user, self.user)

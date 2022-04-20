@@ -7,13 +7,13 @@ logger = logging.getLogger("sesame")
 __all__ = ["create_token", "parse_token"]
 
 
-def create_token(user, scope=""):
+def create_token(user, scope="", user_pk=None):
     """
     Create a signed token for a user and an optional scope.
 
     """
     tokens = settings.TOKENS[0]
-    return tokens.create_token(user, scope)
+    return tokens.create_token(user, scope, user_pk)
 
 
 def parse_token(token, get_user, scope="", max_age=None):

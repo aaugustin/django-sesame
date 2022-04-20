@@ -74,14 +74,17 @@ def unsign(token):
     return signing.b64_decode(data.encode())
 
 
-def create_token(user, scope=""):
+def create_token(user, scope="", user_pk=None):
     """
     Create a v1 signed token for a user.
 
     """
     if scope != "":
         raise NotImplementedError("v1 tokens don't support scope")
-    primary_key = packers.packer.pack_pk(user.pk)
+    if not user_pk:
+        user_pk = user.pk
+
+    primary_key = packers.packer.pack_pk(user_pk)
     key = get_revocation_key(user)
     return sign(primary_key + key)
 

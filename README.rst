@@ -475,6 +475,31 @@ custom packer class.
 For details, read ``help(BasePacker)`` and look at built-in packers defined in
 the ``sesame.packers`` module.
 
+Alternate user keys
+-------------------
+
+If your user model has multiple unique keys, it may be desireable to use one 
+other than actual primary key in the token.
+
+Use the optional parameter `user_pk` when creating a token, token parameters,
+or query string. Then in your middleware backend, make sure your `get_user`
+method can return a user record when given this key.
+
+.. code:: python
+
+    from sesame.backends import ModelBackend
+
+    class ExamplBackend(ModelBackend):
+        def get_user(self, user_key):
+            try:
+                return User.objects.get(key=user_key)
+            except User.DoesNotExist:
+                return None
+
+Beware, if the key you provide for a user's token is not actually unique,
+then your backend may return a user different from the owner of the token
+granting access to the wrong account.
+
 Stateless authentication
 ------------------------
 

@@ -28,6 +28,10 @@ class CreateUserMixin(TestCase):
     def get_user(user_id):
         return get_user_model().objects.filter(pk=user_id).first()
 
+    @staticmethod
+    def get_custom_user(user_key):
+        return get_user_model().objects.filter(id=user_key).first()
+
 
 class CaptureLogMixin(unittest.TestCase):
 

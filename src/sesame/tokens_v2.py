@@ -121,12 +121,15 @@ def sign(data):
     ).digest()
 
 
-def create_token(user, scope=""):
+def create_token(user, scope="", user_pk=None):
     """
     Create a v2 signed token for a user.
 
     """
-    primary_key = packers.packer.pack_pk(user.pk)
+    if not user_pk:
+        user_pk = user.pk
+
+    primary_key = packers.packer.pack_pk(user_pk)
     timestamp = pack_timestamp()
     revocation_key = get_revocation_key(user)
 

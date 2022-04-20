@@ -9,20 +9,20 @@ from .tokens import create_token as get_token
 __all__ = ["get_token", "get_parameters", "get_query_string", "get_user"]
 
 
-def get_parameters(user, scope=""):
+def get_parameters(user, scope="", user_pk=None):
     """
     Return GET parameters to authenticate a user.
 
     """
-    return {settings.TOKEN_NAME: get_token(user, scope)}
+    return {settings.TOKEN_NAME: get_token(user, scope, user_pk)}
 
 
-def get_query_string(user, scope=""):
+def get_query_string(user, scope="", user_pk=None):
     """
     Return a complete query string to authenticate a user.
 
     """
-    return "?" + urlencode(get_parameters(user, scope))
+    return "?" + urlencode(get_parameters(user, scope, user_pk))
 
 
 def get_user(request_or_sesame, update_last_login=None, scope="", max_age=None):

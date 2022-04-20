@@ -500,6 +500,11 @@ Beware, if the key you provide for a user's token is not actually unique,
 then your backend may return a user different from the owner of the token
 granting access to the wrong account.
 
+Lastly, make sure you set Sesame's packer setting `SESAME_PACKER` to match the
+new type, as it will choose the user model's primary key type by default. For
+example, you can use the native packers already in Sesame if needed, or supply
+your own custom packer.
+
 Stateless authentication
 ------------------------
 

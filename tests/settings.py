@@ -16,6 +16,8 @@ INSTALLED_APPS = [
     "tests",
 ]
 
+LOGIN_REDIRECT_URL = "/login/redirect/url/"
+
 MIDDLEWARE = [
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",

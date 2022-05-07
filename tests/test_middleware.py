@@ -35,14 +35,6 @@ CHROME_IOS_USER_AGENT = (
         "django.contrib.auth.middleware.AuthenticationMiddleware",
         "sesame.middleware.AuthenticationMiddleware",
     ],
-    TEMPLATES=[
-        {
-            "BACKEND": "django.template.backends.django.DjangoTemplates",
-            "OPTIONS": {
-                "context_processors": ["django.contrib.auth.context_processors.auth"]
-            },
-        }
-    ],
 )
 class TestMiddleware(CreateUserMixin, TestCase):
 

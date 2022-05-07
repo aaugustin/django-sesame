@@ -16,8 +16,6 @@ INSTALLED_APPS = [
     "tests",
 ]
 
-LOGGING_CONFIG = None
-
 MIDDLEWARE = [
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",

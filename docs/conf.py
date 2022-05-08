@@ -24,6 +24,7 @@ release = "2.4"
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
+    "sphinx.ext.autosectionlabel",
     "sphinx_copybutton",
 ]
 if "spelling" in sys.argv:

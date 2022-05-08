@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>GitHub social preview</title>
+        <style>
+            body {
+                background-color: black;
+                color: white;
+                font-family: -apple-system;
+                font-size: 36px;
+                font-weight: 100;
+                text-align: center;
+            }
+            p.screenshot {
+                background-color: white;
+                box-sizing: border-box;
+                margin: 40px auto;
+                width: 1280px;
+                height: 640px;
+                padding: 40px;
+            }
+            p.screenshot.x2 {
+                width: 640px;
+                height: 320px;
+                padding: 20px;
+            }
+            p.screenshot img {
+                display: block;
+                width: 100%;
+                padding: 60px 0 50px 0;
+            }
+            p.screenshot.x2 img {
+                padding: 30px 0 25px 0;
+            }
+        </style>
+    </head>
+    <body>
+        <p>Take a screenshot of this DOM node to make a PNG.</p>
+        <p>For 2x DPI screens.</p>
+        <p class="screenshot x2"><img src="vertical.svg" alt="preview @ 2x"></p>
+        <p>For regular screens.</p>
+        <p class="screenshot"><img src="vertical.svg" alt="preview"></p>
+    </body>
+</html>

@@ -10,7 +10,7 @@ import datetime
 # -- Project information -----------------------------------------------------
 
 project = "django-sesame"
-copyright = "2012-{}, Aymeric Augustin".format(datetime.date.today().year)
+copyright = f"2012-{datetime.date.today().year}, Aymeric Augustin and contributors"
 author = "Aymeric Augustin"
 
 # The full version, including alpha/beta/rc tags
@@ -26,26 +26,38 @@ extensions = [
     "sphinxcontrib.spelling",
 ]
 
+# Add any paths that contain templates here, relative to this directory.
+templates_path = ["_templates"]
+
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
 exclude_patterns = ["_build"]
-
-# Workaround for https://github.com/readthedocs/readthedocs.org/issues/2569.
-master_doc = "index"
 
 
 # -- Options for HTML output -------------------------------------------------
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
-html_theme = "alabaster"
+html_theme = "furo"
+
+html_theme_options = {
+    "light_css_variables": {
+        "color-brand-primary": "#2b8c67",  # green from logo
+        "color-brand-content": "#0c4b33",  # darker green
+    },
+    "dark_css_variables": {
+        "color-brand-primary": "#2b8c67",  # green from logo
+        "color-brand-content": "#c9f0dd",  # lighter green
+    },
+    "sidebar_hide_name": True,
+}
+
+html_logo = "_static/django-sesame.svg"
+
+html_favicon = "_static/favicon.ico"
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ["_static"]
-
-html_css_files = ["custom.css"]
-
-html_sidebars = {"**": []}

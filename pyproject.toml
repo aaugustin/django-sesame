@@ -43,7 +43,10 @@ ua-parser = { version = ">=0.10", optional = true }
 black = "*"
 coverage = "*"
 flake8 = "*"
+furo = "*"
 isort = "*"
+sphinx = "*"
+sphinxcontrib-spelling = "*"
 
 [tool.poetry.extras]
 ua = ["ua-parser"]

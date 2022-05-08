@@ -1,2 +1,2 @@
-sphinx
+furo
 sphinxcontrib-spelling

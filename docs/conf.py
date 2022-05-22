@@ -5,6 +5,7 @@
 # https://www.sphinx-doc.org/en/master/usage/configuration.html
 
 import datetime
+import sys
 
 
 # -- Project information -----------------------------------------------------
@@ -22,9 +23,9 @@ release = "2.4"
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
-extensions = [
-    "sphinxcontrib.spelling",
-]
+extensions = []
+if "spelling" in sys.argv:
+    extensions.append("sphinxcontrib.spelling")
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]

@@ -1,2 +1,1 @@
 furo
-sphinxcontrib-spelling

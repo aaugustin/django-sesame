@@ -46,7 +46,7 @@ flake8 = "*"
 furo = "*"
 isort = "*"
 sphinx = "*"
-sphinxcontrib-spelling = "*"
+sphinxcontrib-spelling = { version = "*", optional = true }
 
 [tool.poetry.extras]
 ua = ["ua-parser"]

@@ -46,6 +46,7 @@ flake8 = "*"
 furo = "*"
 isort = "*"
 sphinx = "*"
+sphinx-autobuild = "*"
 sphinxcontrib-spelling = { version = "*", optional = true }
 
 [tool.poetry.extras]

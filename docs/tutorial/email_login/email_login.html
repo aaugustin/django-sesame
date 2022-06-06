@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Log in</title>
+    </head>
+    <body>
+        {% if request.user.is_authenticated %}
+        <p>You are already logged in as {{ request.user.email }}.</p>
+        {% endif %}
+        <form action="{{ request.path }}" method="POST">
+            {% csrf_token %}
+            <p>
+                {{ form }}
+                <input type="submit" value="Send log in link">
+            </p>
+        </form>
+    </body>
+</html>

@@ -47,6 +47,7 @@ furo = "*"
 isort = "*"
 sphinx = "*"
 sphinx-autobuild = "*"
+sphinx-copybutton = "*"
 sphinxcontrib-spelling = { version = "*", optional = true }
 
 [tool.poetry.extras]

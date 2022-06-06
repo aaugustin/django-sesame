@@ -34,7 +34,7 @@ Increment version number X.Y in ``docs/conf.py`` and ``pyproject.toml``.
 
 Commit, tag, and push the change:
 
-.. code:: shell-session
+.. code-block:: console
 
     $ git commit -m "Bump version number".
     $ git tag X.Y
@@ -43,7 +43,7 @@ Commit, tag, and push the change:
 
 Build and publish the new version:
 
-.. code:: shell-session
+.. code-block:: console
 
     $ poetry build
     $ poetry publish

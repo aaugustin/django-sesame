@@ -4,7 +4,7 @@ Override expiration
 If you have several use cases inside the same application and they require
 different expiry durations, you can override ``SESAME_MAX_AGE``:
 
-.. code:: python
+.. code-block:: python
 
     from sesame.utils import get_user
 

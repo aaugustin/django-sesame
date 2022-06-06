@@ -6,7 +6,7 @@ token created from one purpose from being reused for another purpose.
 
 Add a ``scope`` to generate authenticated URLs valid only in that scope:
 
-.. code:: pycon
+.. code-block:: pycon
 
     >>> from sesame.utils import get_query_string
     >>> get_query_string(user, scope="sharing")
@@ -17,7 +17,7 @@ accept an optional ``scope`` argument. ``scope`` must be a string.
 
 Then you can verify the token with the same scope:
 
-.. code:: python
+.. code-block:: python
 
     from sesame.utils import get_user
 

@@ -7,7 +7,7 @@ authentication token directly with  ``authenticate()``. To do so, the
 ``sesame.backends.ModelBackend`` authentication backend expects an
 ``sesame`` argument:
 
-.. code:: python
+.. code-block:: python
 
     from django.contrib.auth import authenticate
 

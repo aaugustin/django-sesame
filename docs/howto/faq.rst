@@ -11,7 +11,7 @@ You should call ``user.set_unusable_password()`` when you create users.
 
 Enable debug logs by setting the ``sesame`` logger to the ``DEBUG`` level.
 
-.. code:: python
+.. code-block:: python
 
     import logging
     logger = logging.getLogger("sesame")

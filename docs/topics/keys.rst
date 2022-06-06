@@ -13,7 +13,7 @@ For example, let's say primary keys are strings containing 24 hexadecimal
 characters. The default packer represents them with 25 bytes. You can reduce
 them to 12 bytes with this custom packer:
 
-.. code:: python
+.. code-block:: python
 
     from sesame.packers import BasePacker
 

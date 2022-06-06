@@ -15,7 +15,7 @@ To achieve this, remove ``"sesame.middleware.AuthenticationMiddleware"`` from
 the ``MIDDLEWARE`` setting and authenticate the user with django-sesame in a
 view as follows:
 
-.. code:: python
+.. code-block:: python
 
     from django.core.exceptions import PermissionDenied
     from django.http import HttpResponse
@@ -38,7 +38,7 @@ enabled, it doesn't, because making a database write for every call to
 ``get_user()`` could degrade performance. You can override this behavior with
 the ``update_last_login`` keyword argument:
 
-.. code:: python
+.. code-block:: python
 
     get_user(request, update_last_login=True)   # always update last_login
     get_user(request, update_last_login=False)  # never update last_login

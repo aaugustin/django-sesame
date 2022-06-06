@@ -55,7 +55,7 @@ signer = get_signer()
 
 def sign(data):
     """
-    Create an URL-safe, signed token from ``data``.
+    Create a URL-safe, signed token from ``data``.
 
     """
     data = signing.b64_encode(data).decode()

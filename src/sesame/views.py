@@ -62,7 +62,7 @@ class LoginView(RedirectURLMixin, View):
 
         sesame = request.GET.get(settings.TOKEN_NAME)
         if sesame is None:
-            raise PermissionDenied
+            return self.login_failed()
 
         user = authenticate(
             request,
@@ -71,10 +71,16 @@ class LoginView(RedirectURLMixin, View):
             max_age=self.max_age,
         )
         if user is None:
-            raise PermissionDenied
+            return self.login_failed()
 
         login(request, user)  # updates the last login date
 
+        return self.login_success()
+
+    def login_failed(self):
+        raise PermissionDenied
+
+    def login_success(self):
         if self.next_page is None:
             return HttpResponse(status=HTTPStatus.NO_CONTENT)
         else:

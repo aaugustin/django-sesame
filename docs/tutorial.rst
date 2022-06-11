@@ -349,3 +349,280 @@ Feel free to make your own improvements!
 
 Authenticated links
 -------------------
+
+In the first part, we saw how to log a user in with a magic link. This requires
+a user account. What if we'd like to share a private page without requiring the
+recipient to sign up for an account?
+
+We will use a vacation rentals service as an example. We will provide customers
+with private links to share bookings with other travelers. These links point to
+a specific view of a booking. They mustn't log the recipient in, lest they gain
+access to the whole customer account.
+
+Configure long-lived tokens
+............................
+
+We expect that customers may book a rental up to one year before it starts. Our
+private links don't give access to anything particularly sensitive. Therefore,
+we can safely set the lifetime of private links to a bit more than one year.
+
+By default, django-sesame invalidates tokens when a user changes their password
+(and when a user logs in after upgrading Django; their password hash is updated
+which has the same effect). We will disable this behavior so that private links
+always remain valid.
+
+Open your project settings and add these lines:
+
+.. code-block:: python
+
+    import datetime
+    SESAME_MAX_AGE = datetime.timedelta(days=400)
+
+    SESAME_INVALIDATE_ON_PASSWORD_CHANGE = False
+
+We're all set. Now we can focus on the app.
+
+Create a booking app
+....................
+
+Initialize an app:
+
+.. code-block:: console
+
+    $ ./manage.py startapp bookings
+
+Add it to the |INSTALLED_APPS setting|__:
+
+.. |INSTALLED_APPS setting| replace:: ``INSTALLED_APPS`` setting
+__ https://docs.djangoproject.com/en/stable/ref/settings/#std:setting-INSTALLED_APPS
+
+.. code-block:: python
+
+    INSTALLED_APPS = [
+        ...
+        "bookings",
+    ]
+
+Open ``models.py`` and create this model:
+
+.. code-block:: python
+    :caption: bookings/models.py
+
+    from django.conf import settings
+    from django.db import models
+
+    class Booking(models.Model):
+        name = models.CharField(max_length=100)
+        customer = models.ForeignKey(to=settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+
+For the purposes of this tutorial, we need only a foreign key to the user model.
+Of course, a realistic model would provide many other fields.
+
+Generate and apply the database migration:
+
+.. code-block:: console
+
+    $ ./manage.py makemigrations bookings
+    $ ./manage.py migrate bookings
+
+Open ``admin.py`` and configure a model admin:
+
+.. code-block:: python
+    :caption: bookings/admin.py
+
+    from django.contrib import admin
+
+    from .models import Booking
+
+    @admin.register(Booking)
+    class BookingAdmin(admin.ModelAdmin):
+        list_display = ["id", "name", "customer"]
+
+Check that your development server is running.
+
+Open http://127.0.0.1:8000/admin/bookings/booking/add/ in a browser. Log in with
+an admin account. Create a booking for your test user:
+
+.. image:: tutorial/auth_links/add_booking.png
+    :width: 800
+    :align: center
+
+Create a sharing page
+.....................
+
+At first, the sharing page will be public. We will make it private later.
+
+Create this template:
+
+.. literalinclude:: tutorial/auth_links/share_booking.html
+    :caption: bookings/templates/bookings/share_booking.html
+    :language: html+django
+
+
+Open ``views.py`` and create this view:
+
+.. code-block:: python
+    :caption: bookings/views.py
+
+    from django.shortcuts import get_object_or_404, render
+
+    from .models import Booking
+
+    def share_booking(request, pk):
+        booking = get_object_or_404(Booking, pk=pk)
+        return render(request, "bookings/share_booking.html", {"booking": booking})
+
+Add a route to this view in your URLconf:
+
+.. code-block:: python
+    :caption: urls.py
+
+    from django.urls import path
+
+    from bookings.views import share_booking
+
+    urlpatterns = [
+        ...,
+        path("booking/<int:pk>/share/", share_booking, name="share-booking"),
+        ...,
+    ]
+
+Open http://127.0.0.1:8000/booking/1/share/. You should see the sharing page for
+your booking:
+
+.. image:: tutorial/auth_links/share_booking.png
+    :width: 800
+    :align: center
+
+Looks gorgeous. Now let's restrict access to those who have a private link.
+
+Generate a private link
+.......................
+
+A private link must give access to only one booking. To achieve this, we will
+add a scope to access tokens.
+
+The scope for a booking will be ``"booking:<pk>"``, where ``<pk>`` is replaced
+with the primary key of the booking. This sets a unique scope for each booking.
+We are including ``booking`` in the name of the scope in case we want to create
+tokens for other kinds of objects later.
+
+Scopes are arbitrary. The only requirement is to provide the same scope when
+generating a token and when authenticating it. If scopes don't match, then the
+token is rejected. This prevents reuse of a token generated for a booking in
+order to view another booking.
+
+We can create tokens with :func:`sesame.utils.get_query_string`. It generates a
+URL query string with an authentication token. It accepts a ``scope`` argument.
+
+Add a method to the ``Booking`` model to generate private links:
+
+.. literalinclude:: tutorial/auth_links/models.py
+    :caption: bookings/models.py
+
+For the purposes of this tutorial, you will get the private link in the admin.
+In an actual app, you would provide it to the customer in his booking summary.
+
+Display private links in the model admin:
+
+.. literalinclude:: tutorial/auth_links/admin.py
+    :caption: bookings/admin.py
+
+Navigate to your booking in the admin:
+
+.. image:: tutorial/auth_links/view_booking.png
+    :width: 800
+    :align: center
+
+Copy the URL of the link, paste it in a notepad, and check that it looks like
+http://127.0.0.1:8000/booking/1/share/?sesame=AAAAAQSZEgSh6g4hVT_PJqO6, except
+with a different token.
+
+Add access control
+..................
+
+Now let's modify the sharing view to look for the token and authenticate it.
+
+We can use :func:`sesame.utils.get_user` for this purpose. It accepts a
+``scope`` argument.
+
+Modify the ``share_booking`` view:
+
+.. literalinclude:: tutorial/auth_links/views.py
+    :caption: bookings/views.py
+
+When a valid token is found, :func:`~sesame.utils.get_user` returns the user
+authenticated by the token. Here, that's the customer who made the booking.
+Else, :func:`~sesame.utils.get_user` returns :obj:`None`.
+
+.. admonition:: Why restrict the search to ``customer.booking_set``?
+    :class: hint
+
+    Given the following assumptions:
+
+    * We create tokens scoped on a given booking only for the customer who made
+      that booking;
+    * The customer of a booking never changes;
+
+    we know that the user authenticated by the token is always the customer of
+    the booking.
+
+    Restricting the lookup to bookings by this customer isn't strictly needed.
+    It's more of a safety net in case we create tokens incorrectly.
+
+Simplify the view
+.................
+
+You can decorate a view with :func:`sesame.decorators.authenticate` to look for
+a token and authenticate a user. If a valid token is found,
+:func:`~sesame.decorators.authenticate` stores the user in ``request.user``.
+Else, it raises :exc:`~django.core.exceptions.PermissionDenied`.
+
+Take advantage of this decorator to simplify ``share_booking``:
+
+.. literalinclude:: tutorial/auth_links/views_decorator.py
+    :caption: bookings/views.py
+
+Perhaps you noticed that ``scope="booking:{pk}"`` is a regular string, not a
+f-string like ``scope=f"booking:{pk}"`` previously. Indeed, the ``scope``
+parameter is evaluated when importing ``bookings.views``, not when processing
+an HTTP request, so the value of ``pk`` isn't known yet.
+
+How will the scope eventually contain the right value of ``pk``?
+
+At each HTTP request, :func:`~sesame.decorators.authenticate` performs string
+formatting on ``scope`` using the arguments extracted from the URL and passed
+to the view. This is where ``{pk}`` is replaced with the current value of the
+``pk`` parameter of ``share_booking``.
+
+One more thing
+..............
+
+Here's what the sharing view would look like as a class-based view:
+
+.. literalinclude:: tutorial/auth_links/views_generic.py
+    :caption: bookings/views.py
+
+You would reference it in the URLconf as follows:
+
+.. code-block:: python
+    :caption: urls.py
+
+    from django.urls import path
+
+    from bookings.views import ShareBooking
+
+    urlpatterns = [
+        ...
+        path("booking/<int:pk>/share/", ShareBooking.as_view(), name="share-booking"),
+        ...
+    ]
+
+Alternatively, here's a a class-based view decorated with
+:func:`~sesame.decorators.authenticate`:
+
+.. literalinclude:: tutorial/auth_links/views_generic_decorator.py
+    :caption: bookings/views.py
+
+Using a class-based view brings no benefit here. This was just an example of how
+you could add authentication with django-sesame to an existing class-based view.

@@ -2,7 +2,7 @@ from django.http import HttpResponse
 from django.template import engines
 
 
-def show_user(request):
+def show_user(request, *args, **kwargs):
     content = (
         engines["django"]
         .from_string(

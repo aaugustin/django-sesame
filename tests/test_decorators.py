@@ -63,6 +63,24 @@ class TestAuthenticate(CreateUserMixin, TestCase):
         self.assertEqual(response.wsgi_request.user, user1)
         self.assertContains(response, user1.username)
 
+    def test_scope(self):
+        params = get_parameters(self.user, scope="scope")
+        response = self.client.get("/authenticate/scope/", params)
+        self.assertEqual(response.wsgi_request.user, self.user)
+        self.assertContains(response, self.user.username)
+
+    def test_scope_interpolate_positional_argument(self):
+        params = get_parameters(self.user, scope="arg:spam")
+        response = self.client.get("/authenticate/scope/arg/spam/", params)
+        self.assertEqual(response.wsgi_request.user, self.user)
+        self.assertContains(response, self.user.username)
+
+    def test_scope_interpolate_keyword_argument(self):
+        params = get_parameters(self.user, scope="kwarg:eggs")
+        response = self.client.get("/authenticate/scope/kwarg/eggs/", params)
+        self.assertEqual(response.wsgi_request.user, self.user)
+        self.assertContains(response, self.user.username)
+
     @override_settings(MIDDLEWARE=[])
     def test_without_session_middleware(self):
         params = get_parameters(self.user)

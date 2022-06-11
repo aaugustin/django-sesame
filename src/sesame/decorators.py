@@ -14,7 +14,7 @@ def authenticate(
     *,
     scope="",
     max_age=None,
-    required=False,
+    required=True,
     permanent=False,
     override=True,
 ):

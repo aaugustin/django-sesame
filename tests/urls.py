@@ -7,7 +7,7 @@ from .views import show_user
 
 urlpatterns = [
     path("authenticate/", authenticate(show_user)),
-    path("authenticate/required/", authenticate(required=True)(show_user)),
+    path("authenticate/not_required/", authenticate(required=False)(show_user)),
     path("authenticate/permanent/", authenticate(permanent=True)(show_user)),
     path("authenticate/no_override/", authenticate(override=False)(show_user)),
     path("login/", LoginView.as_view()),

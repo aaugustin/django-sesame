@@ -19,19 +19,19 @@ class TestAuthenticate(CreateUserMixin, TestCase):
         self.assertEqual(response.wsgi_request.user, self.user)
         self.assertContains(response, self.user.username)
 
-    def test_default_non_required(self):
+    def test_default_required(self):
         response = self.client.get("/authenticate/")
-        # User isn't logged in with django.contrib.auth.
-        self.assertIsInstance(response.wsgi_request.user, AnonymousUser)
-        self.assertContains(response, "anonymous")
-
-    def test_required(self):
-        response = self.client.get("/authenticate/required/")
         # User isn't logged in with django.contrib.auth.
         self.assertIsInstance(response.wsgi_request.user, AnonymousUser)
         self.assertEqual(response.status_code, http.HTTPStatus.FORBIDDEN)
 
-    def test_default_non_permanent(self):
+    def test_not_required(self):
+        response = self.client.get("/authenticate/not_required/")
+        # User isn't logged in with django.contrib.auth.
+        self.assertIsInstance(response.wsgi_request.user, AnonymousUser)
+        self.assertContains(response, "anonymous")
+
+    def test_default_not_permanent(self):
         params = get_parameters(self.user)
         response = self.client.get("/authenticate/", params)
         # User isn't logged in with django.contrib.sessions
@@ -54,7 +54,7 @@ class TestAuthenticate(CreateUserMixin, TestCase):
         self.assertEqual(response.wsgi_request.user, user2)
         self.assertContains(response, user2.username)
 
-    def test_non_override(self):
+    def test_no_override(self):
         user1 = self.user
         user2 = self.create_user("jane")
         self.client.force_login(user1)

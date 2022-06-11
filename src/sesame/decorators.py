@@ -44,7 +44,7 @@ def authenticate(
         user = get_user(
             request,
             update_last_login=False if permanent else None,
-            scope=scope,
+            scope=scope.format(*args, **kwargs),
             max_age=max_age,
         )
 

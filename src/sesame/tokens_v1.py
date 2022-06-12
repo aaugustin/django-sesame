@@ -135,7 +135,7 @@ def parse_token(token, get_user, scope="", max_age=None):
 def get_token_re():
     if settings.MAX_AGE is None:
         # Size of primary key and revocation key depends on SESAME_PACKER and
-        # SESAME_DIGEST. Default is 4 + 16 = 20 bytes = 27 Base64 characters.
+        # SESAME_DIGEST. Default is 8 + 16 = 24 bytes = 32 Base64 characters.
         # Minimum "sensible" size is 1 + 2 = 3 bytes = 4 Base64 characters.
         return re.compile(r"[A-Za-z0-9-_]{4,}:[A-Za-z0-9-_]{27}")
 

@@ -11,6 +11,36 @@ __all__ = ["AuthenticationMiddleware"]
 
 
 class AuthenticationMiddleware:
+    """
+    Look for a signed token in the URL of any request and log a user in.
+
+    After login, remove the token from the URL with an HTTP redirect.
+
+    .. admonition:: This functionality requires additional setup for Safari.
+        :class: warning
+
+        :class:`AuthenticationMiddleware` requires the optional ``ua`` extra to
+        prevent :ref:`issues with Safari <Safari issues>`:
+
+        .. code-block:: console
+
+            $ pip install 'django-sesame[ua]'
+
+    In the :setting:`MIDDLEWARE` setting,
+    ``"sesame.middleware.AuthenticationMiddleware"`` should be placed just after
+    ``"django.contrib.auth.middleware.AuthenticationMiddleware"``:
+
+    .. code-block:: python
+
+        MIDDLEWARE = [
+            ...,
+            "django.contrib.auth.middleware.AuthenticationMiddleware",
+            "sesame.middleware.AuthenticationMiddleware",
+            ...,
+        ]
+
+    """
+
     def __init__(self, get_response):
         self.get_response = get_response
 
@@ -21,10 +51,11 @@ class AuthenticationMiddleware:
 
     def process_request(self, request):
         """
-        Log user in if `request` contains a valid login token.
+        Log user the in if ``request`` contains a valid token.
 
         Return an HTTP redirect response that removes the token from the URL
-        after a successful login when sessions are enabled, else ``None``.
+        after a successful login (except on Safari to avoid triggering ITP,
+        and only when sessions are enabled).
 
         """
         # If django.contrib.sessions is enabled, don't update the last login,

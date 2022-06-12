@@ -5,7 +5,26 @@
 # https://www.sphinx-doc.org/en/master/usage/configuration.html
 
 import datetime
+import os.path
 import sys
+
+import django.conf
+
+# -- Path setup --------------------------------------------------------------
+
+# If extensions (or modules to document with autodoc) are in another directory,
+# add these directories to sys.path here. If the directory is relative to the
+# documentation root, use os.path.abspath to make it absolute, like shown here.
+sys.path.insert(0, os.path.join(os.path.abspath(".."), "src"))
+
+
+# -- Django setup ------------------------------------------------------------
+
+django.conf.settings.configure(
+    INSTALLED_APPS=["django.contrib.auth", "django.contrib.contenttypes"],
+    SECRET_KEY="Anyone who finds a URL will be able to log in. Seriously.",
+)
+django.setup()
 
 
 # -- Project information -----------------------------------------------------
@@ -24,11 +43,32 @@ release = "2.4"
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
+    "sphinx.ext.autodoc",
     "sphinx.ext.autosectionlabel",
+    "sphinx.ext.intersphinx",
     "sphinx_copybutton",
 ]
 if "spelling" in sys.argv:
     extensions.append("sphinxcontrib.spelling")
+
+intersphinx_mapping = {
+    "django": (
+        "https://docs.djangoproject.com/en/stable/",
+        "https://docs.djangoproject.com/en/stable/_objects/"
+    ),
+    "python": (
+        "https://docs.python.org/3",
+        None,
+    ),
+}
+
+# Copied from docs/_ext/djangodocs.py in Django.
+def setup(app):
+    app.add_crossref_type(
+        directivename="setting",
+        rolename="setting",
+        indextemplate="pair: %s; setting",
+    )
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]

@@ -31,7 +31,7 @@ class BasePacker:
         """
         Create a short representation of the primary key of a user.
 
-        Return bytes.
+        Return :class:`bytes`.
 
         """
 
@@ -39,7 +39,9 @@ class BasePacker:
         """
         Extract the primary key of a user from a signed token.
 
-        Return the primary key and the remaining bytes.
+        ``data`` contains :class:`bytes`.
+
+        Return the primary key and the remaining data as :class:`bytes`.
 
         """
 

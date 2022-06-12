@@ -49,6 +49,25 @@ __all__ = ["LoginView"]
 
 
 class LoginView(RedirectURLMixin, View):
+    """
+    Look for a signed token in the URL of a GET request and log a user in.
+
+    If a valid token is found, the user is redirected to the URL specified in
+    the ``next`` query string parameter or the ``next_page`` attribute of the
+    view. ``next_page`` defaults to :setting:`LOGIN_REDIRECT_URL`.
+
+    If a ``scope`` attribute is set, a :ref:`scoped token <Scoped tokens>` is
+    expected.
+
+    If a ``max_age`` attribute is set, override the :data:`SESAME_MAX_AGE`
+    setting.
+
+    In addition to ``next_page``, :class:`LoginView` also supports
+    ``redirect_field_name``, ``success_url_allowed_hosts``, and
+    ``get_default_redirect_url()``. These APIs behave like their counterparts
+    in Django's built-in :class:`~django.contrib.auth.views.LoginView`.
+
+    """
 
     scope = ""
     max_age = None

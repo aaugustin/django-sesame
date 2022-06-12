@@ -75,14 +75,11 @@ Open your project settings and add this line:
 Configure redirect after login
 ..............................
 
-Set the |LOGIN_REDIRECT_URL setting|__ to a URL that tells whether the user is
+Set :setting:`LOGIN_REDIRECT_URL` to a URL that tells whether the user is
 authenticated so you can easily tell whether login succeeds.
 
 If you initialized a new project and you test with a superuser, you can simply
 use the admin. Conveniently, it provides a link to log out:
-
-.. |LOGIN_REDIRECT_URL setting| replace:: ``LOGIN_REDIRECT_URL`` setting
-__ https://docs.djangoproject.com/en/stable/ref/settings/#std:setting-LOGIN_REDIRECT_URL
 
 .. code-block:: python
 
@@ -106,9 +103,6 @@ user.
 Create templates to display the form and to show a message after submitting it
 successfully.
 
-.. |DIRS option of the TEMPLATES setting| replace:: ``DIRS`` option of the ``TEMPLATES`` setting
-__ https://docs.djangoproject.com/en/stable/ref/settings/#dirs
-
 .. literalinclude:: tutorial/email_login/email_login.html
     :caption: templates/email_login.html
     :language: html+django
@@ -120,7 +114,8 @@ __ https://docs.djangoproject.com/en/stable/ref/settings/#dirs
 In an existing project, you may inherit a base template and add styling.
 
 Make sure that Django can find the templates. If needed, add the directory where
-they're stored to the |DIRS option of the TEMPLATES setting|__.
+they're stored to the :setting:`DIRS <TEMPLATES-DIRS>` option of the
+:setting:`TEMPLATES` setting.
 
 Create a view to handle the form display and submission logic.
 
@@ -264,12 +259,10 @@ Try again. You should see:
 
     magic link: http://127.0.0.1:8000/login/auth/?sesame=AAAAAQSR1UAocK9OxRHSjn-B
 
-Open that link. You're logged in and redirected to |LOGIN_REDIRECT_URL|__!
+Open that link. You're logged in and redirected to
+:setting:`LOGIN_REDIRECT_URL`!
 
 Log out now so you can try logging in again later.
-
-.. |LOGIN_REDIRECT_URL| replace:: ``LOGIN_REDIRECT_URL``
-__ https://docs.djangoproject.com/en/stable/ref/settings/#std:setting-LOGIN_REDIRECT_URL
 
 Email the magic link
 ....................
@@ -332,9 +325,8 @@ Log out and try logging in with the test user again. You should see:
 Click that link and check that you're logged in. Then log out.
 
 If you're patient, you can wait five minutes for the link to expire and confirm
-that it doesn't work anymore. You should get a `403 Forbidden`__ error.
-
-__ https://docs.djangoproject.com/en/stable/ref/views/#the-403-http-forbidden-view
+that it doesn't work anymore. You should get a :func:`403 Forbidden
+<django.views.defaults.permission_denied>` error.
 
 Improve the view
 ................
@@ -391,10 +383,7 @@ Initialize an app:
 
     $ ./manage.py startapp bookings
 
-Add it to the |INSTALLED_APPS setting|__:
-
-.. |INSTALLED_APPS setting| replace:: ``INSTALLED_APPS`` setting
-__ https://docs.djangoproject.com/en/stable/ref/settings/#std:setting-INSTALLED_APPS
+Add it to the :setting:`INSTALLED_APPS`:
 
 .. code-block:: python
 

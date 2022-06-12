@@ -18,6 +18,48 @@ def authenticate(
     permanent=False,
     override=True,
 ):
+    """
+    Decorator that looks for a signed token in the URL and authenticates a user.
+
+    If a valid token is found, the user is available as ``request.user`` in the
+    view. Else, :exc:`~django.core.exceptions.PermissionDenied` is raised,
+    resulting in an HTTP 403 Forbidden error.
+
+    :obj:`authenticate` may be applied to a view directly::
+
+        @authenticate def view(request):
+            ...
+
+    or with arguments::
+
+        @authenticate(scope="status-page")
+        def view(request):
+            ...
+
+    If ``scope`` is set, a :ref:`scoped token <Scoped tokens>` is expected.
+
+    If ``max_age`` is set, override the :data:`SESAME_MAX_AGE` setting.
+
+    Set ``required`` to :obj:`False` to set ``request.user`` to an
+    :class:`~django.contrib.auth.models.AnonymousUser` and execute the view when
+    the token is invalid, instead of raising an exception. Then, you can check
+    if ``request.user.is_authenticated``.
+
+    :obj:`authenticate` doesn't log the user in permanently. It is intended to
+    provide direct access to a specific resource without exposing all other
+    private resources. This makes it more acceptable to use the less secure
+    authentication mechanism provided by django-sesame.
+
+    Set ``permanent`` to :obj:`True` to call :func:`~django.contrib.auth.login`
+    after a user is authenticated.
+
+    :obj:`authenticate` doesn't care if a user is already logged in. It looks
+    for a signed token anyway and overrides ``request.user``.
+
+    Set ``override`` to :obj:`False` to skip authentication if a user is already
+    logged in.
+
+    """
     if view is None:
         return functools.partial(
             authenticate,

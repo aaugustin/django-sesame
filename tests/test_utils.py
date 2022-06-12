@@ -38,7 +38,7 @@ class TestUtils(CaptureLogMixin, CreateUserMixin, TestCase):
             self.assertIsNone(get_user(None))
         self.assertEqual(
             str(exc.exception),
-            "get_user() expects a HttpRequest or a token",
+            "get_user() expects an HTTPRequest or a token",
         )
 
     def test_get_user_token(self):

@@ -1,3 +1,4 @@
+django
 furo
 sphinx
 sphinx-autobuild

@@ -28,8 +28,8 @@ them to 12 bytes with this custom packer:
         def unpack_pk(data):
             return data[:12].hex(), data[12:]
 
-Then, set the ``SESAME_PACKER`` setting to the dotted Python path to your
+Then, set the :data:`SESAME_PACKER` setting to the dotted Python path to your
 custom packer class.
 
-For details, read ``help(BasePacker)`` and look at built-in packers defined in
-the ``sesame.packers`` module.
+For details, see :class:`~sesame.packers.BasePacker` and look at built-in
+packers defined in the ``sesame.packers`` module.

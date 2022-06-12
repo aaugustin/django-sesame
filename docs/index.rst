@@ -21,11 +21,8 @@ Install django-sesame:
     $ pip install django-sesame
 
 Open your project settings and add ``"sesame.backends.ModelBackend"`` to the
-|AUTHENTICATION_BACKENDS setting|__. Extending the default value, this looks
-like:
-
-.. |AUTHENTICATION_BACKENDS setting| replace:: ``AUTHENTICATION_BACKENDS`` setting
-__ https://docs.djangoproject.com/en/stable/ref/settings/#std:setting-AUTHENTICATION_BACKENDS
+:setting:`AUTHENTICATION_BACKENDS` setting. Extending the default value, this
+looks like:
 
 .. code-block:: python
 

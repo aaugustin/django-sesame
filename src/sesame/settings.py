@@ -17,13 +17,13 @@ DEFAULTS = {
     "PACKER": None,
     # Tokens
     "TOKENS": ["sesame.tokens_v2", "sesame.tokens_v1"],
+    # Tokens v2
+    "KEY": "",
+    "SIGNATURE_SIZE": 10,
     # Tokens v1
     "SALT": "sesame",
     "DIGEST": hashlib.md5,
     "ITERATIONS": 10000,
-    # Tokens v2
-    "KEY": "",
-    "SIGNATURE_SIZE": 10,
 }
 
 __all__ = list(DEFAULTS)

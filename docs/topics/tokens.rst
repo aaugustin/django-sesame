@@ -22,10 +22,6 @@ django-sesame provides two token formats:
 - v1 is the original format, which still works as designed;
 - v2 is a better, cleaner, faster design that produces shorter tokens.
 
-The ``SESAME_TOKENS`` setting lists supported formats in order of decreasing
-preference. The first item defines the format of newly created tokens. Other
-items define other acceptable formats, if any.
-
 ``SESAME_TOKENS`` defaults to ``["sesame.tokens_v2", "sesame.tokens_v1"]``
 which means "generate tokens v2, accept tokens v2 and v1".
 

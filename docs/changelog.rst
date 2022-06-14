@@ -4,52 +4,72 @@ Changelog
 2.4
 ---
 
-* Added the ability to pass a token to ``get_user()`` instead of a request.
+* Added the ability to pass a token to :func:`~sesame.utils.get_user` instead of
+  a request.
 
 2.3
 ---
 
-* Supported overriding max_age. This feature is only available for v2 tokens.
+* Supported overriding ``max_age``. This feature is only available for v2 tokens.
 
 2.2
 ---
 
-* Fixed crash on truncated v2 tokens.
+* Fixed crash when a v2 token is truncated.
 
 2.1
 ---
 
-* Added scoped tokens. This feature is only available for v2 tokens.
+* Added :ref:`scoped tokens <Scoped tokens>`. This feature is only available for
+  v2 tokens.
 
 2.0
 ---
 
-* Introduced a faster and shorter token format (v2). The previous format (v1)
-  is still supported. See :ref:`Tokens security`.
-* Added the ``get_token()`` function to generate a token.
-* **Backwards-incompatible** Changed the default URL parameter to ``sesame``.
-  If you need to preserve existing URLs, you can set
-  ``SESAME_TOKEN_NAME = "url_auth_token"``.
-* **Backwards-incompatible** Changed the argument expected by
-  ``authenticate()`` to ``sesame``. You're affected only if you're explicitly
-  calling ``authenticate(url_auth_token=...)``. If so, change this call to
-  ``authenticate(sesame=...)``.
-* ``SESAME_MAX_AGE`` can be a ``datetime.timedelta``.
+.. admonition:: Version 2.0 introduces a faster and shorter token format (v2).
+    :class: important
+
+    The new format (v2) is enabled by default for new tokens.
+
+    The original format (v1) is still supported for backwards-compatibility.
+
+    See :ref:`Tokens security` for details.
+
+.. admonition:: Changed the default name of the URL parameter to ``sesame``.
+    :class: warning
+
+    If you need to preserve existing URLs, you can set the
+    :data:`SESAME_TOKEN_NAME` setting ``"url_auth_token"``.
+
+.. admonition:: Changed the argument expected by |authenticate()| to ``sesame``.
+    :class: warning
+
+    You're affected only if you call ``authenticate(url_auth_token=...)``
+    explicitly. If so, change this call to ``authenticate(sesame=...)``.
+
+.. |authenticate()| replace:: :func:`~django.contrib.auth.authenticate`
+
+Also:
+
+* Added :func:`~sesame.utils.get_token()` to generate a token.
+* :data:`SESAME_MAX_AGE` can be a :class:`datetime.timedelta`.
 * Improved documentation.
 
 1.8
 ---
 
 * Added compatibility with custom user models with most types of primary keys,
-  including ``BigAutoField``, ``SmallAutoField``, other integer fields,
-  ``CharField`` and ``BinaryField``.
+  including :class:`~django.db.models.BigAutoField`,
+  :class:`~django.db.models.SmallAutoField`, other integer fields,
+  :class:`~django.db.models.CharField`, and
+  :class:`~django.db.models.BinaryField`.
 * Added the ability to customize how primary keys are stored in tokens.
 * Added compatibility with Django ≥ 3.0.
 
 1.7
 ---
 
-* Fixed invalidation of one-time tokens in ``get_user()``.
+* Fixed invalidation of one-time tokens in :func:`~sesame.utils.get_user`.
 
 1.6
 ---
@@ -59,15 +79,16 @@ Changelog
 1.5
 ---
 
-* Added support for single use tokens with the ``SESAME_ONE_TIME`` setting.
+* Added support for single-use tokens with the :data:`SESAME_ONE_TIME` setting.
 * Added support for not invalidating tokens on password change with the
-  ``SESAME_INVALIDATE_ON_PASSWORD_CHANGE`` setting.
+  :data:`SESAME_INVALIDATE_ON_PASSWORD_CHANGE` setting.
 * Added compatibility with custom user models where the primary key is a
-  ``UUIDField``.
-* Added the ``get_user()`` function to obtain a user instance from a request.
+  :class:`~django.db.models.UUIDField`.
+* Added the :func:`~sesame.utils.get_user` function to obtain a user instance
+  from a request.
 * Improved error message for preexisting tokens when changing the
-  ``SESAME_MAX_AGE`` setting.
-* Fixed authentication on Safari by disabling the redirect which triggers ITP.
+  :data:`SESAME_MAX_AGE` setting.
+* Fixed authentication on Safari by :ref:`disabling redirect <Safari issues>`.
 
 1.4
 ---
@@ -83,13 +104,13 @@ Changelog
 ---
 
 * Added the ability to rename the query string parameter with the
-  ``SESAME_TOKEN_NAME`` setting.
+  :data:`SESAME_TOKEN_NAME` setting.
 * Added compatibility with Django ≥ 1.8.
 
 1.1
 ---
 
-* Added support for expiring tokens with the ``SESAME_MAX_AGE`` setting.
+* Added support for expiring tokens with the :data:`SESAME_MAX_AGE` setting.
 
 1.0
 ---

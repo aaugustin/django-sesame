@@ -29,7 +29,7 @@ def get_user(request_or_sesame, update_last_login=None, scope="", max_age=None):
     """
     Authenticate a user based on a token.
 
-    The first argument may be either a Django ``HTTPRequest`` containing a
+    The first argument may be either a Django ``HttpRequest`` containing a
     token in the URL or the token itself, to support use cases outside the
     lifecycle of a HTTP request.
 
@@ -42,12 +42,12 @@ def get_user(request_or_sesame, update_last_login=None, scope="", max_age=None):
         request = None
         sesame = request_or_sesame
     else:
-        # request is expected to be a django.http.HTTPRequest
+        # request is expected to be a django.http.HttpRequest
         request = request_or_sesame
         try:
             sesame = request_or_sesame.GET.get(settings.TOKEN_NAME)
         except Exception:
-            raise TypeError("get_user() expects a HTTPRequest or a token")
+            raise TypeError("get_user() expects a HttpRequest or a token")
         if sesame is None:
             return None
 

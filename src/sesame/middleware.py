@@ -23,7 +23,7 @@ class AuthenticationMiddleware:
         """
         Log user in if `request` contains a valid login token.
 
-        Return a HTTP redirect response that removes the token from the URL
+        Return an HTTP redirect response that removes the token from the URL
         after a successful login when sessions are enabled, else ``None``.
 
         """
@@ -74,7 +74,7 @@ class AuthenticationMiddleware:
     @staticmethod
     def get_redirect(request):
         """
-        Create a HTTP redirect response that removes the token from the URL.
+        Create an HTTP redirect response that removes the token from the URL.
 
         """
         params = request.GET.copy()

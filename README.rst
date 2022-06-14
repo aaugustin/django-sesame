@@ -367,7 +367,7 @@ Advanced topics
 Safari issues
 -------------
 
-The django-sesame middleware removes the token from the URL with a HTTP 302
+The django-sesame middleware removes the token from the URL with an HTTP 302
 Redirect after authenticating a user successfully. Unfortunately, in some
 scenarios, this triggers Safari's "Protection Against First Party Bounce
 Trackers". In that case, Safari clears cookies and the user is logged out.

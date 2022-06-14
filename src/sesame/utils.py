@@ -31,7 +31,7 @@ def get_user(request_or_sesame, update_last_login=None, scope="", max_age=None):
 
     The first argument may be either a Django ``HttpRequest`` containing a
     token in the URL or the token itself, to support use cases outside the
-    lifecycle of a HTTP request.
+    lifecycle of an HTTP request.
 
     If a valid token is found, return the user. Else, return None.
 

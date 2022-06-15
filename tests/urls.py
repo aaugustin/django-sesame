@@ -13,7 +13,7 @@ urlpatterns = [
     path("authenticate/no_override/", authenticate(override=False)(show_user)),
     path("authenticate/scope/", authenticate(scope="scope")(show_user)),
     re_path(
-        r"authenticate/scope/arg/([a-z])/",
+        r"authenticate/scope/arg/([a-z]+)/",
         authenticate(scope="arg:{}")(show_user),
     ),
     re_path(

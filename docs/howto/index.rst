@@ -8,7 +8,6 @@ User guide
     outside-views
     per-view
     scope
-    faq
 
 Requirements
 ------------

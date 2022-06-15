@@ -8,6 +8,7 @@ django-sesame
     howto/index
     reference
     topics/index
+    faq
     contributing
     changelog
 

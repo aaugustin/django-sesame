@@ -1,6 +1,21 @@
 Changelog
 =========
 
+3.0
+---
+
+.. admonition:: Version 3.0 introduces a new documentation.
+    :class: important
+
+    Notably, a :ref:`tutorial <Tutorial>` and an :ref:`API reference` were
+    added.
+
+Also:
+
+* Added :func:`~sesame.decorators.authenticate` to authenticate users.
+* Added :class:`~sesame.views.LoginView` to log users in.
+* Added compatibility with Django ≥ 4.0.
+
 2.4
 ---
 

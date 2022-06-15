@@ -19,6 +19,6 @@ class TestSettings(TestCase):
             settings.check()
         self.assertEqual(
             str(exc.exception),
-            "Insecure configuration: set SESAME_MAX_AGE to a low value "
+            "insecure configuration: set SESAME_MAX_AGE to a low value "
             "or set SESAME_INVALIDATE_ON_PASSWORD_CHANGE to True",
         )

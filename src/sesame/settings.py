@@ -81,7 +81,7 @@ def check():
     global MAX_AGE, INVALIDATE_ON_PASSWORD_CHANGE
     if MAX_AGE is None and not INVALIDATE_ON_PASSWORD_CHANGE:
         raise ImproperlyConfigured(
-            "Insecure configuration: set SESAME_MAX_AGE to a low value "
+            "insecure configuration: set SESAME_MAX_AGE to a low value "
             "or set SESAME_INVALIDATE_ON_PASSWORD_CHANGE to True"
         )
 

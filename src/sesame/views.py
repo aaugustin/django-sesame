@@ -43,7 +43,7 @@ except ImportError:  # Django < 4.1
                 return resolve_url(self.next_page)
             else:  # pragma: no cover
                 raise ImproperlyConfigured(
-                    "No URL to redirect to. Provide a next_page."
+                    "no URL to redirect to; provide a next_page"
                 )
 
 

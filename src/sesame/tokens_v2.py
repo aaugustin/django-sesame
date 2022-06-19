@@ -226,7 +226,7 @@ def parse_token(token, get_user, scope="", max_age=None):
 # Tokens are arbitrary Base64-encoded bytestrings. Their size depends on
 # SESAME_PACKER, SESAME_MAX_AGE, and SESAME_SIGNATURE_SIZE. Defaults are:
 # - without SESAME_MAX_AGE: 8 + 10 = 18 bytes = 24 Base64 characters.
-# - with SESAME_MAX_AGE: 8 + 4 + 10 = 22 bytes = 32 Base64 characters.
+# - with SESAME_MAX_AGE: 8 + 4 + 10 = 22 bytes = 30 Base64 characters.
 # Minimum "sensible" size is 1 + 0 + 2 = 3 bytes = 4 Base64 characters.
 token_re = re.compile(r"[A-Za-z0-9-_]{4,}")
 

@@ -5,12 +5,22 @@ django-sesame
     :hidden:
 
     tutorial
-    howto/index
+    howto
     reference
     topics/index
     faq
     contributing
     changelog
+
+Requirements
+------------
+
+django-sesame is tested with:
+
+- Django 3.2 (LTS) and 4.0;
+- Python ≥ 3.6.
+
+It requires ``django.contrib.auth``.
 
 Getting started
 ---------------

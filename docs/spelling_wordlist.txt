@@ -12,3 +12,4 @@ mixin
 referer
 suboptimal
 ua
+websockets

@@ -47,7 +47,7 @@ def get_query_string(user, scope=""):
     return "?" + urlencode({settings.TOKEN_NAME: create_token(user, scope)})
 
 
-def get_user(request_or_sesame, update_last_login=None, scope="", max_age=None):
+def get_user(request_or_sesame, scope="", max_age=None, *, update_last_login=None):
     """
     Authenticate a user based on a signed token.
 

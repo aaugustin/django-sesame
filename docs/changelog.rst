@@ -12,6 +12,14 @@ Changelog
     Notably, a :ref:`tutorial <Tutorial>` and an :ref:`API reference` were
     added.
 
+.. admonition:: Enforced ``update_last_login`` as a keyword-only argument in
+        :func:`~sesame.utils.get_user`.
+    :class: warning
+
+    ``update_last_login`` was documented as a keyword argument. However, it
+    could also be the first positional argument. If you were doing this, you
+    will hit an exception.
+
 Also:
 
 * Added :func:`~sesame.decorators.authenticate` to authenticate users.

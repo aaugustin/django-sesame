@@ -11,9 +11,9 @@ __all__ = ["authenticate"]
 
 def authenticate(
     view=None,
-    *,
     scope="",
     max_age=None,
+    *,
     required=True,
     permanent=False,
     override=True,

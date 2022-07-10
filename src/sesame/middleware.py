@@ -62,9 +62,10 @@ class AuthenticationMiddleware:
         # because login(request, user) will do it.
         # If django.contrib.sessions is disabled, keep the default behavior of
         # updating last login only for one-time tokens.
-        update_last_login = False if hasattr(request, "session") else None
-
-        user = get_user(request, update_last_login)
+        user = get_user(
+            request,
+            update_last_login=False if hasattr(request, "session") else None,
+        )
 
         # If django.contrib.sessions is enabled and the token is valid,
         # persist the login in session.

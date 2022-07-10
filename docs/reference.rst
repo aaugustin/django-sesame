@@ -79,21 +79,21 @@ Settings
 
     Change the value of this setting if you need to invalidate all tokens.
 
-    This setting only applies to tokens v2. See :ref:`Tokens security`.
+    This setting only applies to tokens v2. See :ref:`Tokens design`.
 
 .. data:: SESAME_SIGNATURE_SIZE
     :value: 10
 
     Size of the signature in bytes.
 
-    This setting only applies to tokens v2. See :ref:`Tokens security`.
+    This setting only applies to tokens v2. See :ref:`Tokens design`.
 
 .. data:: SESAME_SALT
     :value: "sesame"
 
     Change the value of this setting if you need to invalidate all tokens.
 
-    This setting only applies to tokens v1. See :ref:`Tokens security`.
+    This setting only applies to tokens v1. See :ref:`Tokens design`.
 
 .. SESAME_DIGEST was never documented and tokens v1 are superseded by tokens v2.
 

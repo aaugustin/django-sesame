@@ -60,7 +60,7 @@ Also:
 
     The original format (v1) is still supported for backwards-compatibility.
 
-    See :ref:`Tokens security` for details.
+    See :ref:`Tokens design` for details.
 
 .. admonition:: Changed the default name of the URL parameter to ``sesame``.
     :class: warning

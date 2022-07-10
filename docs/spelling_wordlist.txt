@@ -2,9 +2,7 @@ backend
 backends
 changelog
 django
-durations
 frictionless
-hasher
 hashers
 lifecycle
 middleware

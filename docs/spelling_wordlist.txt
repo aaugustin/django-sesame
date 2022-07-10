@@ -1,6 +1,6 @@
 backend
 backends
-Changelog
+changelog
 django
 durations
 frictionless

@@ -4,6 +4,8 @@ Changelog
 3.0
 ---
 
+*In development*
+
 .. admonition:: Version 3.0 introduces a new documentation.
     :class: important
 
@@ -19,27 +21,37 @@ Also:
 2.4
 ---
 
+*May 5th, 2021*
+
 * Added the ability to pass a token to :func:`~sesame.utils.get_user` instead of
   a request.
 
 2.3
 ---
 
+*February 15th, 2021*
+
 * Supported overriding ``max_age``. This feature is only available for v2 tokens.
 
 2.2
 ---
+
+*January 16th, 2021*
 
 * Fixed crash when a v2 token is truncated.
 
 2.1
 ---
 
+*November 1st, 2020*
+
 * Added :ref:`scoped tokens <Scoped tokens>`. This feature is only available for
   v2 tokens.
 
 2.0
 ---
+
+*June 6th, 2020*
 
 .. admonition:: Version 2.0 introduces a faster and shorter token format (v2).
     :class: important
@@ -73,6 +85,8 @@ Also:
 1.8
 ---
 
+*May 11th, 2020*
+
 * Added compatibility with custom user models with most types of primary keys,
   including :class:`~django.db.models.BigAutoField`,
   :class:`~django.db.models.SmallAutoField`, other integer fields,
@@ -84,15 +98,21 @@ Also:
 1.7
 ---
 
+*June 8th, 2019*
+
 * Fixed invalidation of one-time tokens in :func:`~sesame.utils.get_user`.
 
 1.6
 ---
 
+*May 18th, 2019*
+
 * Fixed detection of Safari on iOS.
 
 1.5
 ---
+
+*May 1st, 2019*
 
 * Added support for single-use tokens with the :data:`SESAME_ONE_TIME` setting.
 * Added support for not invalidating tokens on password change with the
@@ -108,15 +128,21 @@ Also:
 1.4
 ---
 
+*April 29th, 2018*
+
 * Added a redirect to the same URL with the query string parameter removed.
 
 1.3
 ---
 
+*December 2nd, 2017*
+
 * Added compatibility with Django ≥ 2.0.
 
 1.2
 ---
+
+*August 19th, 2016*
 
 * Added the ability to rename the query string parameter with the
   :data:`SESAME_TOKEN_NAME` setting.
@@ -125,9 +151,13 @@ Also:
 1.1
 ---
 
+*September 17th, 2014*
+
 * Added support for expiring tokens with the :data:`SESAME_MAX_AGE` setting.
 
 1.0
 ---
+
+*July 3rd, 2014*
 
 * Initial release.

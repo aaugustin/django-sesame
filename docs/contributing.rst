@@ -30,6 +30,8 @@ Check quality and submit your changes:
 Release
 -------
 
+Check that the changelog is complete and add the date of the release.
+
 Increment version number X.Y in ``docs/conf.py`` and ``pyproject.toml``.
 
 Commit, tag, and push the change:

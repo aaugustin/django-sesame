@@ -4,7 +4,7 @@ Changelog
 3.0
 ---
 
-*In development*
+*July 11th, 2022*
 
 .. admonition:: Version 3.0 introduces a new documentation.
     :class: important

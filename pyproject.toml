@@ -11,7 +11,7 @@ profile = "black"
 
 [tool.poetry]
 name = "django-sesame"
-version = "2.4"
+version = "3.0"
 description = """\
     Frictionless authentication with "Magic Links" \
     for your Django project."""

@@ -42,9 +42,7 @@ except ImportError:  # Django < 4.1
             if self.next_page:
                 return resolve_url(self.next_page)
             else:  # pragma: no cover
-                raise ImproperlyConfigured(
-                    "no URL to redirect to; provide a next_page"
-                )
+                raise ImproperlyConfigured("no URL to redirect to; provide a next_page")
 
 
 __all__ = ["LoginView"]

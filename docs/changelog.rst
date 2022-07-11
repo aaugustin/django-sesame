@@ -76,13 +76,12 @@ Also:
     If you need to preserve existing URLs, you can set the
     :data:`SESAME_TOKEN_NAME` setting ``"url_auth_token"``.
 
-.. admonition:: Changed the argument expected by |authenticate()| to ``sesame``.
+.. admonition:: Changed the argument expected by
+        :func:`~django.contrib.auth.authenticate` to ``sesame``.
     :class: warning
 
     You're affected only if you call ``authenticate(url_auth_token=...)``
     explicitly. If so, change this call to ``authenticate(sesame=...)``.
-
-.. |authenticate()| replace:: :func:`~django.contrib.auth.authenticate`
 
 Also:
 

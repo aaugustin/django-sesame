@@ -70,7 +70,7 @@ Open your project settings and add this line:
 
 .. code-block:: python
 
-    SESAME_MAX_AGE = 600  # 600 seconds = 5 minutes
+    SESAME_MAX_AGE = 600  # 600 seconds = 10 minutes
 
 Configure redirect after login
 ..............................

@@ -64,13 +64,13 @@ Configure short-lived tokens
 
 Before we start coding, we should think about the security of the system. Tokens
 are only intended to allow the user to log in now. Let's limit their validity to
-5 minutes.
+five minutes.
 
 Open your project settings and add this line:
 
 .. code-block:: python
 
-    SESAME_MAX_AGE = 600  # 600 seconds = 10 minutes
+    SESAME_MAX_AGE = 300  # 300 seconds = 5 minutes
 
 Configure redirect after login
 ..............................

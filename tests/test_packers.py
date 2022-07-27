@@ -1,5 +1,6 @@
 import uuid
 
+from django.core.exceptions import ImproperlyConfigured
 from django.test import TestCase, override_settings
 
 from sesame import packers
@@ -130,6 +131,19 @@ class TestPackers(TestCase):
         self.assertEqual(
             str(exc.exception),
             "BooleanField primary keys aren't supported",
+        )
+
+    @override_settings(SESAME_PRIMARY_KEY_FIELD="username")
+    def test_get_packer_with_alternative_primary_key(self):
+        self.assertEqual(type(packers.packer), StrPacker)
+
+    def test_get_packer_with_non_unique_alternative_primary_key(self):
+        with self.assertRaises(ImproperlyConfigured) as exc:
+            with override_settings(SESAME_PRIMARY_KEY_FIELD="email"):
+                pass  # pragma: no cover
+        self.assertEqual(
+            str(exc.exception),
+            "auth.User.email isn't unique",
         )
 
     @override_settings(

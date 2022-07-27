@@ -15,6 +15,7 @@ DEFAULTS = {
     "INVALIDATE_ON_PASSWORD_CHANGE": True,
     # Custom primary keys
     "PACKER": None,
+    "PRIMARY_KEY_FIELD": "pk",
     # Tokens
     "TOKENS": ["sesame.tokens_v2", "sesame.tokens_v1"],
     # Tokens v2
@@ -37,7 +38,7 @@ def load():
     for name, default in DEFAULTS.items():
         setattr(module, name, getattr(settings, "SESAME_" + name, default))
 
-    global KEY, MAX_AGE, PACKER, TOKENS
+    global KEY, MAX_AGE, PACKER, PRIMARY_KEY_FIELD, TOKENS
 
     # Support defining MAX_AGE as a timedelta rather than a number of seconds.
     if isinstance(MAX_AGE, datetime.timedelta):
@@ -60,6 +61,7 @@ def load():
             # Changing MAX_AGE is allowed as long as it is not None.
             "max_age" if MAX_AGE is not None else "",
             PACKER if PACKER is not None else "",
+            PRIMARY_KEY_FIELD,
         ]
     ).encode()
     KEY = hashlib.blake2b(base_key, person=b"sesame.settings").digest()

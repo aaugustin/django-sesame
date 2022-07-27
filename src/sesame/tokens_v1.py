@@ -81,7 +81,7 @@ def create_token(user, scope=""):
     """
     if scope != "":
         raise NotImplementedError("v1 tokens don't support scope")
-    primary_key = packers.packer.pack_pk(user.pk)
+    primary_key = packers.packer.pack_pk(getattr(user, settings.PRIMARY_KEY_FIELD))
     key = get_revocation_key(user)
     return sign(primary_key + key)
 

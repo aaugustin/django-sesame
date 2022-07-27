@@ -1,5 +1,6 @@
 import base64
 import datetime
+import struct
 import unittest.mock
 
 from django.test import TestCase, override_settings
@@ -243,6 +244,31 @@ class TestTokensV2(CaptureLogMixin, CreateUserMixin, TestCase):
         self.assertLogsContain("Ignoring max_age argument")
         self.assertLogsContain("Valid token for user john")
 
+    # Test custom primary key field
+
+    @override_settings(SESAME_PRIMARY_KEY_FIELD="username")
+    def test_alternative_primary_key_is_used(self):
+        token = create_token(self.user)
+        # base64.b64encode(b"\x04" + "john".encode()).decode() == "BGpvaG4="
+        self.assertEqual(token[:6], "BGpvaG")
+        self.assertTrue(detect_token(token))
+
+    def test_alternative_primary_key_change(self):
+        # Create a confusion scenario where changing the primary key field
+        # causes the token to match another user.
+        self.user.username = "joe"
+        self.user.save()
+        self.create_user(
+            pk=struct.unpack("!l", b"\x03joe")[0],
+            username="jane",
+        )
+        with override_settings(SESAME_PRIMARY_KEY_FIELD="username"):
+            token = create_token(self.user)
+        user = parse_token(token, self.get_user)
+        # Signature is invalid.
+        self.assertIsNone(user)
+        self.assertLogsContain("Invalid token for user jane in default scope")
+
     # Test custom primary key packer
 
     @override_settings(
@@ -259,6 +285,20 @@ class TestTokensV2(CaptureLogMixin, CreateUserMixin, TestCase):
         self.assertTrue(detect_token(token))
 
     def test_custom_packer_change(self):
+        # Create a confusion scenario where changing the primary key field
+        # causes the token to match another user.
+        self.create_user(
+            pk=(self.user.pk << 16) + self.user.pk,
+            username="jane",
+        )
+        with override_settings(SESAME_PACKER="tests.test_packers.RepeatPacker"):
+            token = create_token(self.user)
+        user = parse_token(token, self.get_user)
+        # Signature is invalid.
+        self.assertIsNone(user)
+        self.assertLogsContain("Invalid token for user jane in default scope")
+
+    def test_custom_packer_raises_exception(self):
         token = create_token(self.user)
         with override_settings(SESAME_PACKER="tests.test_packers.RepeatPacker"):
             user = parse_token(token, self.get_user)

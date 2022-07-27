@@ -2,6 +2,7 @@ import struct
 import uuid
 
 from django.contrib.auth import get_user_model
+from django.core.exceptions import ImproperlyConfigured
 from django.utils.module_loading import import_string
 
 from . import settings
@@ -172,7 +173,16 @@ PACKERS = {
 
 def get_packer():
     if settings.PACKER is None:
-        pk_type = get_user_model()._meta.pk.get_internal_type()
+        User = get_user_model()
+        if settings.PRIMARY_KEY_FIELD == "pk":
+            pk_field = User._meta.pk
+        else:
+            pk_field = User._meta.get_field(settings.PRIMARY_KEY_FIELD)
+            if not pk_field.unique:
+                raise ImproperlyConfigured(
+                    f"{User._meta.label}.{settings.PRIMARY_KEY_FIELD} isn't unique"
+                )
+        pk_type = pk_field.get_internal_type()
         try:
             Packer = PACKERS[pk_type]
         except KeyError:

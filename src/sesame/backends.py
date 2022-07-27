@@ -1,5 +1,7 @@
 from django.contrib.auth import backends as auth_backends
+from django.contrib.auth import get_user_model
 
+from . import settings
 from .tokens import parse_token
 
 __all__ = ["ModelBackend", "SesameBackendMixin"]
@@ -48,3 +50,23 @@ class ModelBackend(SesameBackendMixin, auth_backends.ModelBackend):
         ]
 
     """
+
+    def get_user(self, user_id):
+        """
+        Fetch user from the database by primary key.
+
+        The field used by django-sesame as a primary key can be configured with
+        the :data:`SESAME_PRIMARY_KEY_FIELD` setting.
+
+        Return :obj:`None` if no active user is found.
+
+        """
+        User = get_user_model()
+        try:
+            user = User._default_manager.get(**{settings.PRIMARY_KEY_FIELD: user_id})
+        except User.DoesNotExist:
+            return None
+        if self.user_can_authenticate(user):
+            return user
+        else:
+            return None

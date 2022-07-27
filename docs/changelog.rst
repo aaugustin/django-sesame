@@ -1,6 +1,14 @@
 Changelog
 =========
 
+3.1
+---
+
+*In development*
+
+* Added the ability to select which field is used as a primary key in tokens
+  with the :data:`SESAME_PRIMARY_KEY_FIELD` setting.
+
 3.0
 ---
 
@@ -99,7 +107,8 @@ Also:
   :class:`~django.db.models.SmallAutoField`, other integer fields,
   :class:`~django.db.models.CharField`, and
   :class:`~django.db.models.BinaryField`.
-* Added the ability to customize how primary keys are stored in tokens.
+* Added the ability to customize how primary keys are stored in tokens with the
+  :data:`SESAME_PACKER` setting.
 * Added compatibility with Django ≥ 3.0.
 
 1.7

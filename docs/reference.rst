@@ -60,6 +60,11 @@ Settings
     Set :data:`SESAME_INVALIDATE_ON_PASSWORD_CHANGE` to :obj:`False` to prevent
     this.
 
+.. data:: SESAME_PRIMARY_KEY_FIELD
+    :value: "pk"
+
+    Name of the field used as a primary key. See :ref:`Custom primary keys`.
+
 .. data:: SESAME_PACKER
     :value: None
 
@@ -142,6 +147,8 @@ django-sesame requires configuring a compatible authentication backend in
 :setting:`AUTHENTICATION_BACKENDS`.
 
 .. autoclass:: sesame.backends.ModelBackend
+
+    .. automethod:: get_user
 
 .. autoclass:: sesame.backends.SesameBackendMixin
 

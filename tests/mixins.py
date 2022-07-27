@@ -26,7 +26,8 @@ class CreateUserMixin(TestCase):
 
     @staticmethod
     def get_user(user_id):
-        return get_user_model().objects.filter(pk=user_id).first()
+        User = get_user_model()
+        return User.objects.filter(pk=user_id).first()
 
 
 class CaptureLogMixin(unittest.TestCase):

@@ -126,7 +126,7 @@ def create_token(user, scope=""):
     Create a v2 signed token for a user.
 
     """
-    primary_key = packers.packer.pack_pk(user.pk)
+    primary_key = packers.packer.pack_pk(getattr(user, settings.PRIMARY_KEY_FIELD))
     timestamp = pack_timestamp()
     revocation_key = get_revocation_key(user)
 
@@ -202,7 +202,11 @@ def parse_token(token, get_user, scope="", max_age=None):
 
     user = get_user(user_pk)
     if user is None:
-        logger.debug("Unknown or inactive user: pk = %r", user_pk)
+        logger.debug(
+            "Unknown or inactive user: %s = %r",
+            settings.PRIMARY_KEY_FIELD,
+            user_pk,
+        )
         return
 
     # Check if signature is valid

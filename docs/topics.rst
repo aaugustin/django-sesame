@@ -12,8 +12,8 @@ django-sesame builds authentication tokens as follows:
   invalidation>`;
 - Add a message authentication code (MAC) to prevent tampering with the token.
 
-Primary keys are in clear text. If this is a concern, you can write a
-:ref:`custom packer <Custom primary keys>` to encrypt them.
+Primary keys are stored in clear text. If this is a concern, you can
+:ref:`customize primary keys <Custom primary keys>`.
 
 The revocation key is derived from:
 
@@ -163,11 +163,27 @@ If you still have non-expired :ref:`tokens v1 <Tokens v1>`, do the same with
 Custom primary keys
 -------------------
 
+Alternative keys
+................
+
+.. versionadded:: 3.1
+
 When generating a token for a user, django-sesame stores the user's primary key
 in the token.
 
-To keep tokens short, it creates a compact binary representations depending on
-the type of the primary key.
+If you'd like to store an alternative key in the token instead of the primary
+key of the user model, set the :data:`SESAME_PRIMARY_KEY_FIELD` setting to the
+name of the field storing the alternative key. This field must be declared with
+``unique=True``.
+
+This may be useful if your user model defines a UUID key in addition to Django's
+standard integer primary key and you always want to rely on the UUID externally.
+
+Custom packers
+..............
+
+To keep tokens short, django-sesame creates a compact binary representations
+depending on the type of the primary key.
 
 If you're using integer or UUID primary keys, you're fine.
 

@@ -111,6 +111,15 @@ invalidates the token.
 Indeed, when there's a suspicion that an account may be compromised, changing
 the password is the first step. Invalidating tokens makes sense in that case.
 
+.. admonition:: Invalidation on password change is less needed when tokens expire
+        quickly.
+    :class: tip
+
+    For example, if you rely on short-lived tokens to validate the email address
+    in a sign up process and you don't know whether validation will occur before
+    or after initializing the password, you need to disable invalidation. That's
+    fine from a security perspective.
+
 Since Django hashes the password with a random salt, the token is invalidated
 even if the new password is identical to the old one.
 
@@ -130,15 +139,6 @@ You can disable this behavior by setting
 
     If a token is compromised, your only options are to deactivate the user or
     to invalidate all tokens for all users.
-
-.. admonition:: Invalidation on password change is less needed when tokens expire
-        quickly.
-    :class: tip
-
-    For example, if you rely on short-lived tokens to validate the email address
-    in a sign up process and you don't know whether validation will occur before
-    or after initializing the password, you need to disable invalidation. That's
-    fine from a security perspective.
 
 Inactive user
 .............

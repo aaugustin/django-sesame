@@ -316,6 +316,13 @@ Single-use tokens
 If you set the :data:`SESAME_ONE_TIME` setting to :obj:`True`, tokens will be
 usable only once.
 
+.. admonition:: Authenticating with a single-use token always updates the user's
+        last login date.
+    :class: warning
+
+    This is how django-sesame :ref:`invalidates single-use tokens <Single-use>`
+    after they're used.
+
 Like expiration, this is a global setting for the project. Changing it
 invalidates all existing tokens.
 

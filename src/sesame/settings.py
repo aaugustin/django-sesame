@@ -20,9 +20,12 @@ DEFAULTS = {
     "TOKENS": ["sesame.tokens_v2", "sesame.tokens_v1"],
     # Tokens v2
     "KEY": "",
+    # We want a short signature in order to keep tokens short. A 10-bytes
+    # signature has about 1.2e24 possible values, which is sufficient here.
     "SIGNATURE_SIZE": 10,
     # Tokens v1
     "SALT": "sesame",
+    # These parameters aren't updated anymore. Tokens v2 are recommended.
     "DIGEST": hashlib.md5,
     "ITERATIONS": 10000,
 }

@@ -111,8 +111,6 @@ def sign(data):
     Create a MAC with keyed hashing.
 
     """
-    # We want a short signature in order to keep tokens short. A 10-bytes
-    # signature has about 1.2e24 possible values, which is sufficient here.
     return hashlib.blake2b(
         data,
         digest_size=settings.SIGNATURE_SIZE,
@@ -179,11 +177,11 @@ def parse_token(token, get_user, scope="", max_age=None):
     # it's best to verify the signature before doing anything with a message.
 
     # An attacker could craft tokens to fetch arbitrary users by primary key,
-    # like they can fetch arbitrary users by username on a login form. I'm not
-    # seeing how this would be exploitable. A timing attack to determine if
-    # there's a user with a given primary key doesn't look like a major risk.
+    # like they can fetch arbitrary users by username on a login form.
+    # Determining whether there's a user with a given primary key via a timing
+    # attack is acceptable within django-sesame's threat model.
 
-    # Check if token is expired. This is the fastest check.
+    # Check if token is expired. Perform this check first, because it's fast.
 
     if max_age is None:
         max_age = settings.MAX_AGE

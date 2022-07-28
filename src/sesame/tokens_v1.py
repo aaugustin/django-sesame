@@ -100,16 +100,16 @@ def parse_token(token, get_user, scope="", max_age=None):
         data = unsign(token)
     except signing.SignatureExpired:
         logger.debug("Expired token: %s", token)
-        return
+        return None
     except signing.BadSignature:
         logger.debug("Bad token: %s", token)
-        return
+        return None
     except Exception:
         logger.exception(
             "Valid signature but unexpected token; if you enabled "
             "or disabled SESAME_MAX_AGE, you must regenerate tokens"
         )
-        return
+        return None
 
     try:
         user_pk, key = packers.packer.unpack_pk(data)
@@ -118,15 +118,15 @@ def parse_token(token, get_user, scope="", max_age=None):
             "Valid signature but unexpected token; if you changed "
             "SESAME_PACKER, you must regenerate tokens"
         )
-        return
+        return None
 
     user = get_user(user_pk)
     if user is None:
         logger.debug("Unknown or inactive user: %s", user_pk)
-        return
+        return None
     if not crypto.constant_time_compare(key, get_revocation_key(user)):
         logger.debug("Invalid token: %s", token)
-        return
+        return None
     logger.debug("Valid token for user %s: %s", user, token)
 
     return user

@@ -156,7 +156,7 @@ def parse_token(token, get_user, scope="", max_age=None):
         data = base64.urlsafe_b64decode(token + b"=" * (-len(token) % 4))
     except Exception:
         logger.debug("Bad token: cannot decode token")
-        return
+        return None
 
     # Extract user primary key, token age, and signature from token.
 
@@ -164,17 +164,17 @@ def parse_token(token, get_user, scope="", max_age=None):
         user_pk, timestamp_and_signature = packers.packer.unpack_pk(data)
     except Exception:
         logger.debug("Bad token: cannot extract primary key")
-        return
+        return None
 
     try:
         age, signature = unpack_timestamp(timestamp_and_signature)
     except Exception:
         logger.debug("Bad token: cannot extract timestamp")
-        return
+        return None
 
     if len(signature) != settings.SIGNATURE_SIZE:
         logger.debug("Bad token: cannot extract signature")
-        return
+        return None
 
     # Since we don't include the revocation key in the token, we need to fetch
     # the user in the database before we can verify the signature. Usually,
@@ -198,7 +198,7 @@ def parse_token(token, get_user, scope="", max_age=None):
         max_age = max_age.total_seconds()
     if age is not None and age >= max_age:
         logger.debug("Expired token: age = %d seconds", age)
-        return
+        return None
 
     # Check if user exists and can log in.
 
@@ -209,7 +209,7 @@ def parse_token(token, get_user, scope="", max_age=None):
             settings.PRIMARY_KEY_FIELD,
             user_pk,
         )
-        return
+        return None
 
     # Check if signature is valid
 

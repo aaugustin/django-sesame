@@ -28,4 +28,4 @@ def parse_token(token, get_user, scope="", max_age=None):
             return tokens.parse_token(token, get_user, scope, max_age)
     else:
         logger.debug("Bad token: doesn't match a supported format")
-        return
+        return None

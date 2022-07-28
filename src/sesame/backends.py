@@ -28,7 +28,7 @@ class SesameBackendMixin:
         # This check shouldn't be necessary, but it can avoid problems like
         # issue #37 and Django's built-in backends include similar checks.
         if sesame is None:
-            return
+            return None
         return parse_token(sesame, self.get_user, scope, max_age)
 
 

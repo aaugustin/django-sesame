@@ -8,6 +8,7 @@ Changelog
 
 * Added the ability to select which field is used as a primary key in tokens
   with the :data:`SESAME_PRIMARY_KEY_FIELD` setting.
+* Supported the ``SECRET_KEY_FALLBACKS`` setting introduced in Django 4.1.
 
 3.0
 ---

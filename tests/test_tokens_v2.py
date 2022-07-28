@@ -3,6 +3,7 @@ import datetime
 import struct
 import unittest.mock
 
+from django.conf import settings
 from django.test import TestCase, override_settings
 from django.utils import timezone
 
@@ -305,6 +306,44 @@ class TestTokensV2(CaptureLogMixin, CreateUserMixin, TestCase):
         self.assertIsNone(user)
         self.assertLogsContain("Bad token: cannot extract primary key")
 
+    # Test key rotation
+
+    def test_key_change_invalidates_tokens(self):
+        """Token signature changes if SESAME_KEY changes."""
+        token = create_token(self.user)
+        with override_settings(SESAME_KEY="new"):
+            user = parse_token(token, self.get_user)
+        self.assertIsNone(user)
+        self.assertLogsContain("Invalid token for user john in default scope")
+
+    def test_secret_key_change_invalidates_tokens(self):
+        """Token signature changes if SECRET_KEY changes."""
+        token = create_token(self.user)
+        with override_settings(SECRET_KEY="new"):
+            user = parse_token(token, self.get_user)
+        self.assertIsNone(user)
+        self.assertLogsContain("Invalid token for user john in default scope")
+
+    def test_secret_key_fallback_keeps_tokens_valid(self):
+        token = create_token(self.user)
+        with override_settings(
+            SECRET_KEY="new",
+            SECRET_KEY_FALLBACKS=[settings.SECRET_KEY],
+        ):
+            user = parse_token(token, self.get_user)
+        self.assertEqual(user, self.user)
+        self.assertLogsContain("Valid token for user john in default scope")
+
+    def test_bad_secret_key_fallback_invalidates_tokens(self):
+        token = create_token(self.user)
+        with override_settings(
+            SECRET_KEY="new",
+            SECRET_KEY_FALLBACKS=["bad"],
+        ):
+            user = parse_token(token, self.get_user)
+        self.assertIsNone(user)
+        self.assertLogsContain("Invalid token for user john in default scope")
+
     # Miscellaneous tests
 
     @staticmethod
@@ -316,14 +355,6 @@ class TestTokensV2(CaptureLogMixin, CreateUserMixin, TestCase):
     def encode_token(data):
         token = base64.urlsafe_b64encode(data).rstrip(b"=")
         return token.decode()
-
-    def test_key_change_invalidates_tokens(self):
-        """Token signature changes if SESAME_KEY changes."""
-        token = create_token(self.user)
-        with override_settings(SESAME_KEY="new"):
-            user = parse_token(token, self.get_user)
-        self.assertIsNone(user)
-        self.assertLogsContain("Invalid token for user john in default scope")
 
     def test_primary_key_and_timestamp_confusion(self):
         """Token signature changes if SESAME_MAX_AGE is enabled or disabled."""

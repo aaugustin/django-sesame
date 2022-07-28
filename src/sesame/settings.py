@@ -33,6 +33,33 @@ DEFAULTS = {
 __all__ = list(DEFAULTS)
 
 
+def derive_key(secret_key, key):
+    """
+    Make a 64-bytes key from Django's ``secret_key`` and django-sesame's ``key``.
+
+    Include settings in the key to invalidate tokens when these settings change.
+    This ensures that tokens generated with one packer cannot be misinterpreted
+    by another packer, for example.
+
+    """
+    global MAX_AGE, PACKER, PRIMARY_KEY_FIELD
+    return hashlib.blake2b(
+        "|".join(
+            [
+                # Usually a str but Django also supports bytes.
+                str(secret_key),
+                # Treat key like secret_key for consistency.
+                str(key),
+                # Changing MAX_AGE is allowed as long as it is not None.
+                "max_age" if MAX_AGE is not None else "",
+                PACKER if PACKER is not None else "",
+                PRIMARY_KEY_FIELD,
+            ]
+        ).encode(),
+        person=b"sesame.settings",
+    ).digest()
+
+
 # load() also works for reloading settings, which is useful for testing.
 
 
@@ -41,7 +68,7 @@ def load():
     for name, default in DEFAULTS.items():
         setattr(module, name, getattr(settings, "SESAME_" + name, default))
 
-    global KEY, MAX_AGE, PACKER, PRIMARY_KEY_FIELD, TOKENS
+    global KEY, MAX_AGE, SIGNING_KEY, TOKENS, VERIFICATION_KEYS
 
     # Support defining MAX_AGE as a timedelta rather than a number of seconds.
     if isinstance(MAX_AGE, datetime.timedelta):
@@ -50,24 +77,12 @@ def load():
     # Import token creation and parsing modules.
     TOKENS = [importlib.import_module(tokens) for tokens in TOKENS]
 
-    # Derive a personalized 64-bytes key from the base SECRET_KEY.
-    # Include settings in the personalized key to invalidate tokens when
-    # these settings change. This ensures that tokens generated with one
-    # packer cannot be misinterpreted by another packer or that changing
-    # MAX_AGE doesn't revive expired tokens, for example.
-    base_key = "|".join(
-        [
-            # Usually SECRET_KEY is a str but Django also supports bytes.
-            str(settings.SECRET_KEY),
-            # For consistency, treat KEY like SECRET_KEY.
-            str(KEY),
-            # Changing MAX_AGE is allowed as long as it is not None.
-            "max_age" if MAX_AGE is not None else "",
-            PACKER if PACKER is not None else "",
-            PRIMARY_KEY_FIELD,
-        ]
-    ).encode()
-    KEY = hashlib.blake2b(base_key, person=b"sesame.settings").digest()
+    # Derive signing and verification keys.
+    SIGNING_KEY = derive_key(settings.SECRET_KEY, KEY)
+    VERIFICATION_KEYS = [SIGNING_KEY] + [
+        derive_key(secret_key, KEY)
+        for secret_key in getattr(settings, "SECRET_KEY_FALLBACKS", [])
+    ]
 
 
 load()

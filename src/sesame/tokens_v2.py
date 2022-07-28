@@ -106,15 +106,15 @@ def get_revocation_key(user):
     return data.encode()
 
 
-def sign(data):
+def sign(data, key, size):
     """
     Create a MAC with keyed hashing.
 
     """
     return hashlib.blake2b(
         data,
-        digest_size=settings.SIGNATURE_SIZE,
-        key=settings.KEY,
+        digest_size=size,
+        key=key,
         person=b"sesame.tokens_v2",
     ).digest()
 
@@ -128,7 +128,11 @@ def create_token(user, scope=""):
     timestamp = pack_timestamp()
     revocation_key = get_revocation_key(user)
 
-    signature = sign(primary_key + timestamp + revocation_key + scope.encode())
+    signature = sign(
+        primary_key + timestamp + revocation_key + scope.encode(),
+        settings.SIGNING_KEY,
+        settings.SIGNATURE_SIZE,
+    )
 
     # If the revocation key changes, the signature becomes invalid, so we
     # don't need to include a hash of the revocation key in the token.
@@ -211,18 +215,20 @@ def parse_token(token, get_user, scope="", max_age=None):
 
     primary_key_and_timestamp = data[: -settings.SIGNATURE_SIZE]
     revocation_key = get_revocation_key(user)
-    expected_signature = sign(
-        primary_key_and_timestamp + revocation_key + scope.encode()
-    )
-
-    if not hmac.compare_digest(signature, expected_signature):
-        log_scope = "in default scope" if scope == "" else f"in scope {scope}"
-        logger.debug("Invalid token for user %s %s", user, log_scope)
-        return
+    for verification_key in settings.VERIFICATION_KEYS:
+        expected_signature = sign(
+            primary_key_and_timestamp + revocation_key + scope.encode(),
+            verification_key,
+            settings.SIGNATURE_SIZE,
+        )
+        if hmac.compare_digest(signature, expected_signature):
+            log_scope = "in default scope" if scope == "" else f"in scope {scope}"
+            logger.debug("Valid token for user %s %s", user, log_scope)
+            return user
 
     log_scope = "in default scope" if scope == "" else f"in scope {scope}"
-    logger.debug("Valid token for user %s %s", user, log_scope)
-    return user
+    logger.debug("Invalid token for user %s %s", user, log_scope)
+    return None
 
 
 # Tokens are arbitrary Base64-encoded bytestrings. Their size depends on

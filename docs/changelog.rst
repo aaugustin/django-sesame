@@ -4,7 +4,7 @@ Changelog
 3.1
 ---
 
-*In development*
+*July 28th, 2022*
 
 * Added the ability to select which field is used as a primary key in tokens
   with the :data:`SESAME_PRIMARY_KEY_FIELD` setting.

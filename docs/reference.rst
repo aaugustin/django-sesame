@@ -60,6 +60,12 @@ Settings
     Set :data:`SESAME_INVALIDATE_ON_PASSWORD_CHANGE` to :obj:`False` to prevent
     this.
 
+.. data:: SESAME_INVALIDATE_ON_EMAIL_CHANGE
+    :value: False
+
+    Set :data:`SESAME_INVALIDATE_ON_PASSWORD_CHANGE` to :obj:`True` to
+    invalidate tokens when a user changes their email.
+
 .. data:: SESAME_PRIMARY_KEY_FIELD
     :value: "pk"
 

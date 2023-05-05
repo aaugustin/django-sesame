@@ -4,7 +4,8 @@ import importlib
 import sys
 
 from django.conf import settings
-from django.core.exceptions import ImproperlyConfigured
+from django.contrib.auth import get_user_model
+from django.core.exceptions import FieldDoesNotExist, ImproperlyConfigured
 
 DEFAULTS = {
     # Generating URLs
@@ -13,6 +14,7 @@ DEFAULTS = {
     "MAX_AGE": None,
     "ONE_TIME": False,
     "INVALIDATE_ON_PASSWORD_CHANGE": True,
+    "INVALIDATE_ON_EMAIL_CHANGE": False,
     # Custom primary keys
     "PACKER": None,
     "PRIMARY_KEY_FIELD": "pk",
@@ -103,6 +105,16 @@ def check():
         raise ImproperlyConfigured(
             "insecure configuration: set SESAME_MAX_AGE to a low value "
             "or set SESAME_INVALIDATE_ON_PASSWORD_CHANGE to True"
+        )
+
+    global INVALIDATE_ON_EMAIL_CHANGE
+    User = get_user_model()
+    try:
+        User._meta.get_field(User.get_email_field_name())
+    except FieldDoesNotExist:
+        raise ImproperlyConfigured(
+            "invalid configuration: set User.EMAIL_FIELD correctly "
+            "or set SESAME_INVALIDATE_ON_EMAIL_CHANGE to False"
         )
 
 

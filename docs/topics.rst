@@ -19,6 +19,8 @@ The revocation key is derived from:
 
 - The password of the user, unless :data:`SESAME_INVALIDATE_ON_PASSWORD_CHANGE`
   is disabled;
+- The email of the user, if :data:`SESAME_INVALIDATE_ON_EMAIL_CHANGE` is
+  enabled;
 - The last login date of the user, if :data:`SESAME_ONE_TIME` is enabled.
 
 django-sesame provides two token formats:
@@ -139,6 +141,15 @@ You can disable this behavior by setting
 
     If a token is compromised, your only options are to deactivate the user or
     to invalidate all tokens for all users.
+
+Email change
+............
+
+You can invalidate tokens when a user changes their email by setting
+:data:`SESAME_INVALIDATE_ON_EMAIL_CHANGE` to :obj:`True`. Then, changing the
+email invalidates the token.
+
+Enabling this behavior may improve resilience to compromised email accounts.
 
 Inactive user
 .............

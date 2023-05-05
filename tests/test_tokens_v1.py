@@ -140,6 +140,25 @@ class TestTokensV1(CaptureLogMixin, CreateUserMixin, TestCase):
         self.assertEqual(user, self.user)
         self.assertLogsContain("Valid token for user john")
 
+    # Test token invalidation on email change
+
+    def test_valid_token_after_email_change(self):
+        token = create_token(self.user)
+        self.user.email = "email@example.com"
+        self.user.save()
+        user = parse_token(token, self.get_user)
+        self.assertEqual(user, self.user)
+        self.assertLogsContain("Valid token for user john")
+
+    @override_settings(SESAME_INVALIDATE_ON_EMAIL_CHANGE=True)
+    def test_invalid_token_after_email_change(self):
+        token = create_token(self.user)
+        self.user.email = "email@example.com"
+        self.user.save()
+        user = parse_token(token, self.get_user)
+        self.assertIsNone(user)
+        self.assertLogsContain("Invalid token")
+
     # Test scoped tokens - unsupported
 
     def test_create_scoped_token(self):

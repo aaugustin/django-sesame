@@ -14,10 +14,13 @@ logger = logging.getLogger("sesame")
 
 def get_revocation_key(user):
     """
-    When the value returned by this method changes, this revocates tokens.
+    When the value returned by this method changes, this revokes tokens.
 
     It is derived from the hashed password so that changing the password
     revokes tokens.
+
+    It may be derived from the email so that changing the email revokes tokens
+    too.
 
     For one-time tokens, it also contains the last login datetime so that
     logging in revokes existing tokens.
@@ -26,6 +29,8 @@ def get_revocation_key(user):
     data = ""
     if settings.INVALIDATE_ON_PASSWORD_CHANGE:
         data += user.password
+    if settings.INVALIDATE_ON_EMAIL_CHANGE:
+        data += getattr(user, user.get_email_field_name())
     if settings.ONE_TIME:
         data += str(user.last_login)
     # The password is expected to be a secure hash but we hash it again

@@ -1,6 +1,12 @@
 Changelog
 =========
 
+3.2
+---
+
+* Added support for invalidating tokens on email change with the
+  :data:`SESAME_INVALIDATE_ON_EMAIL_CHANGE` setting.
+
 3.1
 ---
 

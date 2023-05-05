@@ -57,10 +57,13 @@ HASH_SIZES = {
 
 def get_revocation_key(user):
     """
-    When the value returned by this method changes, this revocates tokens.
+    When the value returned by this method changes, this revokes tokens.
 
     It is derived from the hashed password so that changing the password
     revokes tokens.
+
+    It may be derived from the email so that changing the email revokes tokens
+    too.
 
     For one-time tokens, it also contains the last login datetime so that
     logging in revokes existing tokens.
@@ -99,6 +102,9 @@ def get_revocation_key(user):
             data += user.password
         else:
             data += user.password[-hash_size:]
+
+    if settings.INVALIDATE_ON_EMAIL_CHANGE:
+        data += getattr(user, user.get_email_field_name())
 
     if settings.ONE_TIME and user.last_login is not None:
         data += user.last_login.isoformat()

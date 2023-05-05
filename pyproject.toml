@@ -50,6 +50,7 @@ sphinx = "*"
 sphinx-autobuild = "*"
 sphinx-copybutton = "*"
 sphinxcontrib-spelling = { version = "*", optional = true }
+toml = "*"
 
 [tool.poetry.extras]
 ua = ["ua-parser"]

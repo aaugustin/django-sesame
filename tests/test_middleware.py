@@ -37,7 +37,6 @@ CHROME_IOS_USER_AGENT = (
     ],
 )
 class TestMiddleware(CreateUserMixin, TestCase):
-
     should_redirect_after_auth = True
 
     def assertUserLoggedIn(self, response, redirect_url):
@@ -150,7 +149,6 @@ class TestMiddleware(CreateUserMixin, TestCase):
     ]
 )
 class TestWithoutAuthMiddleware(TestMiddleware):
-
     # When django.contrib.auth isn't enabled, every URL must contain an
     # authentication token, so it mustn't be removed with a redirect.
     should_redirect_after_auth = False
@@ -164,7 +162,6 @@ class TestWithoutAuthMiddleware(TestMiddleware):
     ]
 )
 class TestBeforeAuthMiddleware(TestMiddleware):
-
     # When the sesame middleware is (incorrectly) before the
     # django.contrib.auth middleware, sesame doesn't know that
     # django.contrib.auth is enabled, so it's the same as when

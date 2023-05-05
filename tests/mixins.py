@@ -31,7 +31,6 @@ class CreateUserMixin(TestCase):
 
 
 class CaptureLogMixin(unittest.TestCase):
-
     logger_name = "sesame"
 
     def setUp(self):

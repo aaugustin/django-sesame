@@ -56,7 +56,6 @@ class RepeatPacker(LongPacker):
 
 
 class TestPackers(TestCase):
-
     random_uuid = uuid.uuid4()
     cases = [
         (ShortPacker, -32768, b"\x80\x00"),

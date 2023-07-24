@@ -159,3 +159,6 @@ django-sesame requires configuring a compatible authentication backend in
 .. autoclass:: sesame.backends.SesameBackendMixin
 
     .. automethod:: authenticate
+
+Testing
+-------

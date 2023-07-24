@@ -3,6 +3,7 @@ import uuid
 from django.core.exceptions import ImproperlyConfigured
 from django.test import TestCase, override_settings
 
+import sesame.test  # noqa
 from sesame import packers
 from sesame.packers import (
     BasePacker,
@@ -16,8 +17,6 @@ from sesame.packers import (
     UnsignedShortPacker,
     UUIDPacker,
 )
-
-from .signals import reset_sesame_settings  # noqa
 
 
 class Packer(BasePacker):

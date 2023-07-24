@@ -397,3 +397,16 @@ This view can be implemented more concisely, albeit more magically, as follows:
     :class: warning
 
     It only accepts tokens generated with the default scope.
+
+Overriding settings
+-------------------
+
+If you're overriding django-sesame settings for testing with
+:obj:`~django.test.override_settings`, then you need::
+
+.. code-block:: python
+
+    import sesame.test  # noqa
+
+This registers a listener for the :obj:`django.test.signals.setting_changed`
+signal and reconfigures django-sesame when settings change.

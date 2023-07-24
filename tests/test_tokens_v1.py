@@ -4,11 +4,11 @@ from django.core import signing
 from django.test import TestCase, override_settings
 from django.utils import timezone
 
+import sesame.test  # noqa
 from sesame import packers
 from sesame.tokens_v1 import create_token, detect_token, parse_token
 
 from .mixins import CaptureLogMixin, CreateUserMixin
-from .signals import reset_sesame_settings  # noqa
 
 
 class TestTokensV1(CaptureLogMixin, CreateUserMixin, TestCase):

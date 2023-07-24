@@ -7,6 +7,7 @@ from django.conf import settings
 from django.test import TestCase, override_settings
 from django.utils import timezone
 
+import sesame.test  # noqa
 from sesame import packers
 from sesame.tokens_v2 import (
     TIMESTAMP_OFFSET,
@@ -17,7 +18,6 @@ from sesame.tokens_v2 import (
 )
 
 from .mixins import CaptureLogMixin, CreateUserMixin
-from .signals import reset_sesame_settings  # noqa
 
 
 class TestTokensV2(CaptureLogMixin, CreateUserMixin, TestCase):

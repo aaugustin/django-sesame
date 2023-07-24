@@ -6,6 +6,7 @@ Changelog
 
 * Added support for invalidating tokens on email change with the
   :data:`SESAME_INVALIDATE_ON_EMAIL_CHANGE` setting.
+* Added :mod:`sesame.test` to support overriding settings for testing.
 
 3.1
 ---

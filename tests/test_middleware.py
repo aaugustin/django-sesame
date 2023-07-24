@@ -5,10 +5,10 @@ from django.contrib.auth.models import AnonymousUser
 from django.test import TestCase
 from django.test.utils import override_settings
 
+import sesame.test  # noqa
 from sesame.utils import get_parameters, get_query_string
 
 from .mixins import CreateUserMixin
-from .signals import reset_sesame_settings  # noqa
 
 try:
     import ua_parser

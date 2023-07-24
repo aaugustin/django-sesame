@@ -3,7 +3,6 @@ from django.test import RequestFactory, TestCase, override_settings
 from sesame.utils import get_parameters, get_query_string, get_token, get_user
 
 from .mixins import CaptureLogMixin, CreateUserMixin
-from .signals import reset_sesame_settings  # noqa
 
 
 class TestUtils(CaptureLogMixin, CreateUserMixin, TestCase):

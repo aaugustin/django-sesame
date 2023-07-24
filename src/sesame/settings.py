@@ -6,6 +6,8 @@ import sys
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.exceptions import FieldDoesNotExist, ImproperlyConfigured
+from django.core.signals import setting_changed
+from django.dispatch import receiver
 
 DEFAULTS = {
     # Generating URLs
@@ -119,3 +121,20 @@ def check():
 
 
 check()
+
+
+@receiver(setting_changed)
+def reload(*, setting, **kwargs):
+    if setting.startswith("SECRET_KEY") or setting.startswith("SESAME_"):
+        load()
+
+    if setting in ["AUTH_USER_MODEL", "SESAME_PACKER", "SESAME_PRIMARY_KEY_FIELD"]:
+        from . import packers
+
+        packers.packer = packers.get_packer()
+
+    if setting in ["SESAME_SALT", "SESAME_MAX_AGE"]:
+        from . import tokens_v1
+
+        tokens_v1.signer = tokens_v1.get_signer()
+        tokens_v1.token_re = tokens_v1.get_token_re()

@@ -4,7 +4,6 @@ from sesame import tokens_v1, tokens_v2
 from sesame.tokens import create_token, parse_token
 
 from .mixins import CaptureLogMixin, CreateUserMixin
-from .signals import reset_sesame_settings  # noqa
 
 
 class TestUtils(CaptureLogMixin, CreateUserMixin, TestCase):

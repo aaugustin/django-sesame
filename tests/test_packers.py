@@ -17,8 +17,6 @@ from sesame.packers import (
     UUIDPacker,
 )
 
-from .signals import reset_sesame_settings  # noqa
-
 
 class Packer(BasePacker):
     """

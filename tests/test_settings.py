@@ -5,8 +5,6 @@ from django.test import TestCase, override_settings
 
 from sesame import settings
 
-from .signals import reset_sesame_settings  # noqa
-
 
 class TestSettings(TestCase):
     @override_settings(SESAME_MAX_AGE=datetime.timedelta(minutes=5))

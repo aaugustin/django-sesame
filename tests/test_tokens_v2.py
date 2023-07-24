@@ -17,7 +17,6 @@ from sesame.tokens_v2 import (
 )
 
 from .mixins import CaptureLogMixin, CreateUserMixin
-from .signals import reset_sesame_settings  # noqa
 
 
 class TestTokensV2(CaptureLogMixin, CreateUserMixin, TestCase):

@@ -6,6 +6,7 @@ Changelog
 
 * Added support for invalidating tokens on email change with the
   :data:`SESAME_INVALIDATE_ON_EMAIL_CHANGE` setting.
+* Supported overriding settings for testing.
 
 3.1
 ---

@@ -38,7 +38,7 @@ packages = [
 
 [tool.poetry.dependencies]
 django = ">=3.2"
-python = ">=3.6.2"
+python = ">=3.8"
 ua-parser = { version = ">=0.15", optional = true }
 
 [tool.poetry.dev-dependencies]

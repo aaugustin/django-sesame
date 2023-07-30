@@ -4,6 +4,8 @@ Changelog
 3.2
 ---
 
+*July 30th, 2023*
+
 * Added support for invalidating tokens on email change with the
   :data:`SESAME_INVALIDATE_ON_EMAIL_CHANGE` setting.
 * Supported overriding settings for testing.

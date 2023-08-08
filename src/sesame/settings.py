@@ -110,14 +110,15 @@ def check():
         )
 
     global INVALIDATE_ON_EMAIL_CHANGE
-    User = get_user_model()
-    try:
-        User._meta.get_field(User.get_email_field_name())
-    except FieldDoesNotExist:
-        raise ImproperlyConfigured(
-            "invalid configuration: set User.EMAIL_FIELD correctly "
-            "or set SESAME_INVALIDATE_ON_EMAIL_CHANGE to False"
-        )
+    if INVALIDATE_ON_EMAIL_CHANGE:
+        User = get_user_model()
+        try:
+            User._meta.get_field(User.get_email_field_name())
+        except FieldDoesNotExist:
+            raise ImproperlyConfigured(
+                "invalid configuration: set User.EMAIL_FIELD correctly "
+                "or set SESAME_INVALIDATE_ON_EMAIL_CHANGE to False"
+            )
 
 
 check()

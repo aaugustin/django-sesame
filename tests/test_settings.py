@@ -25,7 +25,7 @@ class TestSettings(TestCase):
         )
 
     @override_settings(
-        SESAME_INVALIDATE_ON_EMAIL_CHANGE=False,
+        SESAME_INVALIDATE_ON_EMAIL_CHANGE=True,
         AUTH_USER_MODEL="tests.StrUser",
     )
     def test_invalid_configuration(self):

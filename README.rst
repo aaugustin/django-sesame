@@ -28,7 +28,7 @@ Requirements
 
 django-sesame is tested with:
 
-- Django 3.2 (LTS), 4.0, 4.1, and 4.2 (LTS);
+- Django 3.2 (LTS), 4.0, 4.1, 4.2 (LTS), and 5.0;
 - Python ≥ 3.8.
 
 It requires ``django.contrib.auth``.

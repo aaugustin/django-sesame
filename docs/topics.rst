@@ -36,8 +36,6 @@ This means "generate tokens v2, accept tokens v2 and v1".
 Tokens v2
 .........
 
-.. versionadded:: 2.0
-
 Tokens v2 contain a primary key, an optional timestamp, and a signature.
 
 The signature covers the primary key, the optional timestamp, and the

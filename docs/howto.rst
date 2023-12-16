@@ -40,10 +40,6 @@ leaves it up to you.
     You can change it with the :data:`SESAME_TOKEN_NAME` setting. Avoid
     conflicts with other parameters in your application.
 
-    .. versionchanged:: 2.0
-
-        the URL parameter used to be named ``url_auth_token``.
-
 At a lower level, you can obtain a :class:`dict` of URL parameters with
 :func:`sesame.utils.get_parameters`:
 
@@ -76,10 +72,6 @@ Indeed, you can use django-sesame tokens in other contexts than URLs served by a
 Django app, for example to `authenticate WebSocket connections`__.
 
 __ https://websockets.readthedocs.io/en/stable/howto/django.html#generate-tokens
-
-.. versionadded:: 2.0
-
-    :func:`~sesame.utils.get_token` was added.
 
 Authenticate tokens
 -------------------
@@ -236,10 +228,6 @@ You may want to authenticate users outside of a Django view, where there's no
 In other words, you may use :func:`~sesame.utils.get_user` as the inverse of
 :func:`~sesame.utils.get_token`.
 
-.. versionchanged:: 2.4
-
-    the ability to pass a token to :func:`~sesame.utils.get_user` was added.
-
 Low-level
 .........
 
@@ -251,10 +239,6 @@ The low-level :func:`~django.contrib.auth.authenticate` function provided by
     from django.contrib.auth import authenticate
 
     user = authenticate(sesame=token)
-
-.. versionchanged:: 2.0
-
-    the argument used to be named ``url_auth_token``.
 
 Then, you can log the user in with :func:`~django.contrib.auth.login`.
 
@@ -279,10 +263,6 @@ Set the :data:`SESAME_MAX_AGE` setting to enable expiring tokens and to
 configure their lifetime. It may be expressed as a :class:`~datetime.timedelta`
 or a duration in seconds.
 
-.. versionchanged:: 2.0
-
-    support for :class:`~datetime.timedelta` was added.
-
 If you have several use cases requiring different lifetimes, you can override
 :data:`SESAME_MAX_AGE` when you authenticate a token.
 
@@ -294,10 +274,6 @@ If you have several use cases requiring different lifetimes, you can override
     from sesame.utils import get_user
 
     user = get_user(token, max_age=180)  # 180 seconds = 3 minutes
-
-.. versionchanged:: 2.3
-
-    the possibility to override ``max_age`` was added.
 
 You cannot override :data:`SESAME_MAX_AGE` when you generate a token because
 tokens store only the time when they were created, not their expected lifetime.
@@ -337,8 +313,6 @@ better experience if the link still worked.
 
 Scoped tokens
 -------------
-
-.. versionadded:: 2.1
 
 If your application uses tokens for multiple purposes, you should prevent a
 token created for one purpose from being reused for another purpose.

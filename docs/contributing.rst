@@ -13,7 +13,7 @@ Prepare a development environment:
 Make changes:
 
 * Make changes to the code, tests, or docs.
-* Run ``make style`` and fix any flake8 violations.
+* Run ``make style`` and fix errors.
 * Run ``make test`` or ``make coverage`` to run the set suite — it's fast!
 
 Iterate until you're happy.

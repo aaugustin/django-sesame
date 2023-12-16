@@ -6,9 +6,6 @@ build-backend = "poetry.core.masonry.api"
 branch = true
 source = ["sesame", "tests"]
 
-[tool.isort]
-profile = "black"
-
 [tool.poetry]
 name = "django-sesame"
 version = "3.2.1"
@@ -45,14 +42,22 @@ ua-parser = { version = ">=0.15", optional = true }
 [tool.poetry.dev-dependencies]
 black = "*"
 coverage = "*"
-flake8 = "*"
 furo = "*"
-isort = "*"
 sphinx = "*"
 sphinx-autobuild = "*"
 sphinx-copybutton = "*"
 sphinxcontrib-spelling = { version = "*", optional = true }
+ruff = "*"
 toml = "*"
 
 [tool.poetry.extras]
 ua = ["ua-parser"]
+
+[tool.ruff]
+select = [
+    "E",  # pycodestyle
+    "F",  # Pyflakes
+    "W",  # pycodestyle
+    "I",  # isort
+]
+src = ["src"]

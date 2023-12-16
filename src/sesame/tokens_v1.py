@@ -1,7 +1,6 @@
 import logging
 import re
 
-import django
 from django.core import signing
 from django.utils import crypto
 
@@ -46,13 +45,11 @@ def get_revocation_key(user):
 
 
 def get_signer():
-    kwargs = {"salt": settings.SALT}
-    if django.VERSION[:2] >= (3, 1):  # pragma: no cover
-        kwargs["algorithm"] = "sha1"
     if settings.MAX_AGE is None:
-        return signing.Signer(**kwargs)
+        Signer = signing.Signer
     else:
-        return signing.TimestampSigner(**kwargs)
+        Signer = signing.TimestampSigner
+    return Signer(salt=settings.SALT, algorithm="sha1")
 
 
 signer = get_signer()

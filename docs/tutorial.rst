@@ -215,6 +215,7 @@ focus on the happy path; we'll handle errors later.
     from django.shortcuts import render
     from django.urls import reverse
     from django.views.generic import FormView
+    from sesame.utils import get_query_string
 
     from .forms import EmailLoginForm
 
@@ -229,7 +230,7 @@ focus on the happy path; we'll handle errors later.
             user = User.objects.get(email=email)
 
             link = reverse("login")
-            link += sesame.utils.get_query_string(user)
+            link += get_query_string(user)
             print("magic link:", link)
 
             return render(self.request, "email_login_success.html")
@@ -250,7 +251,7 @@ won't work in an email. Let's fix that:
 
             link = reverse("login")
             link = self.request.build_absolute_uri(link)  # add this
-            link += sesame.utils.get_query_string(user)
+            link += get_query_string(user)
             print("magic link:", link)
 
 Try again. You should see:

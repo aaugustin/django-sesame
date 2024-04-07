@@ -2,6 +2,7 @@ from django.contrib.auth import get_user_model
 from django.shortcuts import render
 from django.urls import reverse
 from django.views.generic import FormView
+from sesame.utils import get_query_string
 
 import sesame.utils
 
@@ -23,7 +24,7 @@ class EmailLoginView(FormView):
         """Create a login link for this user."""
         link = reverse("login")
         link = self.request.build_absolute_uri(link)
-        link += sesame.utils.get_query_string(user)
+        link += get_query_string(user)
         return link
 
     def send_email(self, user, link):

@@ -53,11 +53,13 @@ toml = "*"
 [tool.poetry.extras]
 ua = ["ua-parser"]
 
-[tool.ruff]
+[tool.ruff.lint]
 select = [
     "E",  # pycodestyle
     "F",  # Pyflakes
     "W",  # pycodestyle
     "I",  # isort
 ]
+
+[tool.ruff]
 src = ["src"]

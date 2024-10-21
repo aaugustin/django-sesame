@@ -1,6 +1,6 @@
 style:
-	black src tests
-	ruff --fix src tests
+	ruff format src tests
+	ruff check --fix src tests
 
 test:
 	python -m django test --settings=tests.settings

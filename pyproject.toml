@@ -38,7 +38,6 @@ python = ">=3.9"
 ua-parser = { version = ">=0.15", optional = true }
 
 [tool.poetry.dev-dependencies]
-black = "*"
 coverage = "*"
 furo = "*"
 sphinx = "*"
@@ -51,11 +50,10 @@ toml = "*"
 [tool.poetry.extras]
 ua = ["ua-parser"]
 
-[tool.ruff]
+[tool.ruff.lint]
 select = [
     "E",  # pycodestyle
     "F",  # Pyflakes
     "W",  # pycodestyle
     "I",  # isort
 ]
-src = ["src"]

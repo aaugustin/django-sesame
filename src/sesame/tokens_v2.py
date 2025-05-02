@@ -197,8 +197,7 @@ def parse_token(token, get_user, scope="", max_age=None):
         max_age = settings.MAX_AGE
     elif settings.MAX_AGE is None:
         logger.warning(
-            "Ignoring max_age argument; "
-            "it isn't supported when SESAME_MAX_AGE = None"
+            "Ignoring max_age argument; it isn't supported when SESAME_MAX_AGE = None"
         )
     elif isinstance(max_age, datetime.timedelta):
         max_age = max_age.total_seconds()

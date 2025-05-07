@@ -120,7 +120,7 @@ class BytesPacker(BasePacker):
     def pack_pk(user_pk):
         length = len(user_pk)
         if length > 255:
-            raise ValueError("primary key is too large (%d bytes)" % length)
+            raise ValueError(f"primary key is too large ({length} bytes)")
         return bytes([length]) + user_pk
 
     @staticmethod
@@ -140,7 +140,7 @@ class StrPacker(BytesPacker):
         user_pk = user_pk.encode()
         length = len(user_pk)
         if length > 255:
-            raise ValueError("primary key is too large (%d UTF-8 bytes)" % length)
+            raise ValueError(f"primary key is too large ({length} UTF-8 bytes)")
         return bytes([length]) + user_pk
 
     @staticmethod

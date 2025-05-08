@@ -27,7 +27,8 @@ def authenticate(
 
     :obj:`authenticate` may be applied to a view directly::
 
-        @authenticate def view(request):
+        @authenticate
+        def view(request):
             ...
 
     or with arguments::
